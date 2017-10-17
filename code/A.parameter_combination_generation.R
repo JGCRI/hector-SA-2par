@@ -3,27 +3,30 @@ library( 'randtoolbox' )
 
 setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
+setSeed(6)
+
 beta_range <- c( 0, 1 )
 q10_range <- c( 0.2, 5 )
 
 # quasi-random -- 	Sobol sequence
-pair_mat <- sobol( 1000, 2 ) # 2-D 1000 pairs in total 
-pair_df <- data.frame( pair_mat )
-names( pair_df ) <- c( 'beta', 'q10' )
+combination_mat <- sobol( 2000, 3 ) # 2-D 1000 pairs in total 
+combination_df <- data.frame( combination_mat )
+names( combination_df ) <- c( 'beta', 'q10', 's' )
 
 # shift the q10 from 0 ~ 1 to 0.2 ~ 5 
-pair_df$q10 <- 	pair_df$q10 * 4.8 + 0.2 
-pair_df <- round( pair_df, 5 )
+combination_df$q10 <- combination_df$q10 * 4.8 + 0.2
+# shift the s from 0 ~ 1 to 2.1 ~ 4.6 
+combination_df$s <- combination_df$s * 2.5 + 2.1
+combination_df <- round( combination_df, 5 )
 
 # add run index and write out 
-comb_df <- pair_df 
-comb_df$run_index <- sprintf( '%04d', 1 : nrow( comb_df ) ) 
-comb_df <- comb_df[ , c( 'run_index', 'beta', 'q10' ) ]
+combination_df$run_index <- sprintf( '%04d', 1 : nrow( combination_df ) ) 
+combination_df <- combination_df[ , c( 'run_index', 'beta', 'q10', 's' ) ]
 
-write.csv( comb_df, './int-out/A.par2_combinations.csv', row.names = F )
+write.csv( combination_df, './int-out/A.par3_combinations.csv', row.names = F )
 
 # diagnostic 
-plot( comb_df$beta, comb_df$q10 )
+plot( combination_df$beta, combination_df$q10, 'p' )
 length( unique( comb_df$beta ) ) 
 length( unique( comb_df$q10 ) )
 
