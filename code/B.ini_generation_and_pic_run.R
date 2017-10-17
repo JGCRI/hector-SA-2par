@@ -24,7 +24,7 @@ ini_template <- readLines( ini_con )
 close( ini_con ) 
 
 # parameter combination csv 
-pc_df <- read.csv( './int-out/A.par2_combinations.csv', stringsAsFactors = F )
+pc_df <- read.csv( './int-out/A.par3_combinations.csv', stringsAsFactors = F )
 
 run_index_total_digits <- nchar( as.character( max( pc_df$run_index ) ) )  
 
@@ -40,6 +40,7 @@ out_res_list <- lapply( 1 : nrow( pc_df ), function( i ) {
   # generate a ini file 
   beta <- pc_df[ i, 'beta' ]
   q10 <- pc_df[ i, 'q10' ]
+  s <- pc_df[i, 's']
   run_index <- sprintf( paste0('%0', run_index_total_digits, 'd' ), pc_df[ i, 'run_index' ] )
   
   run_name <- paste0( 'hectorSA-', run_index )
@@ -51,6 +52,7 @@ out_res_list <- lapply( 1 : nrow( pc_df ), function( i ) {
   temp_ini[ 4 ] <- paste0( "run_name=", run_name )
   temp_ini[ 82 ] <- paste0( 'beta=', beta, '     \t; 0.36=about +20% @2xCO2' ) 
   temp_ini[ 83 ] <- paste0( 'q10_rh=', q10, '\t\t; respiration response Q10, unitless' )
+  temp_ini[ 172 ] <- paste0( 'S=', s, ' \t\t\t\t; equilibrium climate sensitivity for 2xCO2, degC' )
   writeLines( temp_ini, ini_file )
   close( ini_file )
   
