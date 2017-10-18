@@ -5,6 +5,9 @@ library( 'Mcomp' )
 setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
 # ---
+mav <- function( x, n ) { filter( x, rep( 1 / n, n ), sides = 2 ) }
+
+# ---
 # 1. read in processed observation
 observation <- read.csv( './int-out/D.temperature_obervation_ma.csv', stringsAsFactors = F )
 observation_years <- sort( unique( observation$year ) ) 
@@ -24,7 +27,7 @@ tgav_ma_res_list <- lapply( 1 : nrow( tgav_crop ), function( i ) {
   #print( i )
   temp_line <- tgav_crop[ i, ]
   run_name <- temp_line$run_name 
-  run_ts <- unlist( temp_line[ , paste0( 'X', ob_year_list ) ] )
+  run_ts <- unlist( temp_line[ , paste0( 'X', observation_years ) ] )
   run_ts_ma <- mav( run_ts, 15 ) 
   out_df <- data.frame( t( c( run_name, run_ts_ma ) ) )
   colnames( out_df ) <- c( 'run_name', paste0( 'X', observation_years ) )
