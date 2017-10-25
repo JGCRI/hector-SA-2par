@@ -41,4 +41,11 @@ tgav_selected$fall_in_rate <- fall_in_threshold
 
 write.csv( tgav_selected, './int-out/D.hector_tgav_filtered.csv', row.names = F )
 
+# ---
+# 4. Filter flga table
+parameter_combinations <- read.csv( './int-out/A.par3_combinations.csv', stringsAsFactors = F )
+parameter_combinations$run_name <- paste0( 'hectorSA-', sprintf( '%04d', parameter_combinations$run_index ) )
+parameter_combinations$tempature_flag <- 0 
+parameter_combinations$tempature_flag <- ifelse( parameter_combinations$run_name %in% selected_run_names, 1, 0 )
+write.csv( parameter_combinations, './int-out/filter_flag.csv', row.names = F )
 
