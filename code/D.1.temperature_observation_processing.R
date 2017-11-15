@@ -1,6 +1,7 @@
 library( 'tidyr' )
 library( 'readxl' )
 library( 'smooth' )
+library( 'forecast')
 library( 'Mcomp' )
 setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
@@ -17,7 +18,7 @@ colnames( filter_df ) <- c( 'year', 'min', 'max' )
 # 3. Apply moving average on filter_df 
 filter_exp_df <- filter_df 
 
-mav <- function( x, n ) { filter( x, rep( 1 / n, n ), sides = 2 ) }
+mav <- function( x, n ) { stats::filter( x, rep( 1 / n, n ), sides = 2 ) }
 
 filter_exp_df$min_mav <- mav( filter_exp_df$min, 15 )
 filter_exp_df$max_mav <- mav( filter_exp_df$max, 15 )

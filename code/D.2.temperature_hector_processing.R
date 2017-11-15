@@ -1,11 +1,11 @@
 library( 'tidyr' )
-library( 'readxl' )
 library( 'smooth' )
+library( 'forecast' )
 library( 'Mcomp' )
 setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
 # ---
-mav <- function( x, n ) { filter( x, rep( 1 / n, n ), sides = 2 ) }
+mav <- function( x, n ) { stats::filter( x, rep( 1 / n, n ), sides = 2 ) }
 
 # ---
 # 1. read in processed observation

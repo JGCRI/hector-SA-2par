@@ -1,11 +1,10 @@
 library( 'tidyr' )
-library( 'readxl' )
 library( 'smooth' )
 library( 'Mcomp' )
 setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
 # ---
-mav <- function( x, n ) { filter( x, rep( 1 / n, n ), sides = 2 ) }
+mav <- function( x, n ) { stats::filter( x, rep( 1 / n, n ), sides = 2 ) }
 
 # ---
 # 1. read in processed observation
@@ -15,16 +14,14 @@ observation_years <- sort( unique( observation$year ) )
 # --- 
 # 2. read in hector land and ocean flux 
 hector_res <- read.csv( './int-out/C.hector_run_cleanup.csv', stringsAsFactors = F )
-tgav_filter_results <- read.csv( './int-out/D.hector_tgav_filtered.csv', stringsAsFactors = F )
 
 hector_land_ocean_flux <- hector_res[ hector_res$variable %in% c( 'atm_land_flux', 'atm_ocean_flux' ), ]
 flux_crop <- hector_land_ocean_flux[ , c( 'run_name', 'variable', 'units', paste0( 'X', observation_years ) ) ]
-flux_crop <- flux_crop[ flux_crop$run_name %in% tgav_filter_results$run_name, ]
 
 # ---
 # 3. experiment on tgav_crop -- moving average for each hector run 
 flux_ma_res_list <- lapply( 1 : nrow( flux_crop ), function( i ) { 
-  #print( i )
+  print( i )
   temp_line <- flux_crop[ i, ]
   var <- temp_line$variable
   run_name <- temp_line$run_name 

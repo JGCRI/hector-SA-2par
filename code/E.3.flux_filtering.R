@@ -1,5 +1,4 @@
 library( 'tidyr' )
-library( 'readxl' )
 setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
 # ---
