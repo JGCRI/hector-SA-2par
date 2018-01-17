@@ -4,6 +4,9 @@
 # -----------------------------------------------------------------------------
 # 0. set up some basics
 library( 'tidyr' )
+
+# -----------------------------------------------------------------------------
+# 0.5 Settings you will definitely need to overwrite in your code
 pic_hectorSA_path <- '/people/feng999/CMS/hector-SA-2par'
 setwd( pic_hectorSA_path )
 #setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
@@ -24,10 +27,9 @@ ini_template <- readLines( ini_con )
 close( ini_con ) 
 
 # parameter combination csv 
-pc_df <- read.csv( './int-out/A.par3_combinations.csv', stringsAsFactors = F )
+pc_df <- read.csv( './int-out/A.par4_combinations.csv', stringsAsFactors = F )
 
 run_index_total_digits <- nchar( as.character( max( pc_df$run_index ) ) )  
-
 
 # ----------------------------------------------------------------------------
 # 3. run hector and deal with hector outputs 
@@ -41,6 +43,7 @@ out_res_list <- lapply( 1 : nrow( pc_df ), function( i ) {
   beta <- pc_df[ i, 'beta' ]
   q10 <- pc_df[ i, 'q10' ]
   s <- pc_df[i, 's']
+  diff <- pc_df[ i, 'diff' ]
   run_index <- sprintf( paste0('%0', run_index_total_digits, 'd' ), pc_df[ i, 'run_index' ] )
   
   run_name <- paste0( 'hectorSA-', run_index )
@@ -53,6 +56,7 @@ out_res_list <- lapply( 1 : nrow( pc_df ), function( i ) {
   temp_ini[ 82 ] <- paste0( 'beta=', beta, '     \t; 0.36=about +20% @2xCO2' ) 
   temp_ini[ 83 ] <- paste0( 'q10_rh=', q10, '\t\t; respiration response Q10, unitless' )
   temp_ini[ 172 ] <- paste0( 'S=', s, ' \t\t\t\t; equilibrium climate sensitivity for 2xCO2, degC' )
+  temp_ini[ 173 ] <- paste0( 'diff=', diff, '\t\t\t; ocean heat diffusivity, cm2/s' )
   writeLines( temp_ini, ini_file )
   close( ini_file )
   
