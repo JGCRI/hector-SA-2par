@@ -1,7 +1,8 @@
 library( 'tidyr' )
 library( 'readxl' )
-library( 'smooth' )
-library( 'Mcomp' )
+
+# ----------------------------------------------------------------
+# Settings you will definitely need to overwrite in your code
 setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
 # ---
@@ -18,9 +19,13 @@ ob_df$growth_max <- ob_df$atmospheric_growth + 0.2
 # 3. Apply moving average on filter_df
 filter_exp_df <- ob_df
 
-mav <- function( x, n ) { stats::filter( x, rep( 1 / n, n ), sides = 2 ) }
-
-filter_exp_df$growth_min <- mav( filter_exp_df$growth_min, 7 )
-filter_exp_df$growth_max <- mav( filter_exp_df$growth_max, 7 )
+filter_exp_df$growth_min <- runmean( filter_exp_df$growth_min, 7,
+                                     alg = c( 'C' ),
+                                     endrule = c( 'mean' ),
+                                     align = c( 'center' ) )
+filter_exp_df$growth_max <- runmean( filter_exp_df$growth_max, 7, 
+                                     alg = c( 'C' ), 
+                                     endrule = c( 'mean' ), 
+                                     align = c( 'center' ) ) 
 
 write.csv( filter_exp_df, './int-out/F.CDIAC_growth_ma.csv', row.names = F )

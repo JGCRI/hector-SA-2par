@@ -1,7 +1,9 @@
 library( 'tidyr' )
 library( 'readxl' )
-library( 'smooth' )
-library( 'Mcomp' )
+library( 'caTools' )
+
+# ----------------------------------------------------------------
+# Settings you will definitely need to overwrite in your code
 setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
 # ---
@@ -20,12 +22,24 @@ ob_df$land_sink_max <- ob_df$land_sink + 0.8
 # 3. Apply moving average on filter_df
 filter_exp_df <- ob_df
 
-mav <- function( x, n ) { filter( x, rep( 1 / n, n ), sides = 2 ) }
+filter_exp_df$ocean_sink_min <- runmean( filter_exp_df$ocean_sink_min, 7,
+                                         alg = c( 'C' ), 
+                                         endrule = c( 'mean' ), 
+                                         align = c( 'center' ) )
 
-filter_exp_df$ocean_sink_min <- mav( filter_exp_df$ocean_sink_min, 7 )
-filter_exp_df$ocean_sink_max <- mav( filter_exp_df$ocean_sink_max, 7 )
+filter_exp_df$ocean_sink_max <- runmean( filter_exp_df$ocean_sink_max, 7,
+                                         alg = c( 'C' ), 
+                                         endrule = c( 'mean' ), 
+                                         align = c( 'center' ) )
 
-filter_exp_df$land_sink_min <- mav( filter_exp_df$land_sink_min, 7 )
-filter_exp_df$land_sink_max <- mav( filter_exp_df$land_sink_max, 7 )
+filter_exp_df$land_sink_min <- runmean( filter_exp_df$land_sink_min, 7,
+                                        alg = c( 'C' ), 
+                                        endrule = c( 'mean' ), 
+                                        align = c( 'center' ) )
+
+filter_exp_df$land_sink_max <- runmean( filter_exp_df$land_sink_max, 7, 
+                                        alg = c( 'C' ), 
+                                        endrule = c( 'mean' ), 
+                                        align = c( 'center' ) )
 
 write.csv( filter_exp_df, './int-out/E.CDIAC_obervation_ma.csv', row.names = F )

@@ -1,10 +1,8 @@
 library( 'tidyr' )
-library( 'smooth' )
-library( 'Mcomp' )
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
-# ---
-mav <- function( x, n ) { stats::filter( x, rep( 1 / n, n ), sides = 2 ) }
+# ----------------------------------------------------------------
+# Settings you will definitely need to overwrite in your code
+setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
 # ---
 # 1. read in processed observation
@@ -30,7 +28,10 @@ growth_ma_res_list <- lapply( 1 : nrow( growth_crop ), function( i ) {
   var <- temp_line$variable
   run_name <- temp_line$run_name 
   run_ts <- unlist( temp_line[ , paste0( 'X', observation_years ) ] )
-  run_ts_ma <- mav( run_ts, 7 ) 
+  run_ts_ma <- runmean( run_ts, 7,
+                        alg = c( 'C' ),
+                        endrule = c( 'mean' ), 
+                        align = c( 'center' ) ) 
   out_df <- data.frame( t( c( run_name, var, run_ts_ma ) ) )
   colnames( out_df ) <- c( 'run_name', 'variable', paste0( 'X', observation_years ) )
   return( out_df )

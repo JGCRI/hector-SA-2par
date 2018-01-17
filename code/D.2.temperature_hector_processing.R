@@ -1,11 +1,9 @@
 library( 'tidyr' )
-library( 'smooth' )
-library( 'forecast' )
-library( 'Mcomp' )
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
+library( 'caTools' )
 
-# ---
-mav <- function( x, n ) { stats::filter( x, rep( 1 / n, n ), sides = 2 ) }
+# ----------------------------------------------------------------
+# Settings you will definitely need to overwrite in your code
+setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
 # ---
 # 1. read in processed observation
@@ -24,11 +22,15 @@ tgav_crop$ref_mean <- NULL
 # ---
 # 3. experiment on tgav_crop -- moving average for each hector run 
 tgav_ma_res_list <- lapply( 1 : nrow( tgav_crop ), function( i ) { 
-  #print( i )
+  # print( i )
   temp_line <- tgav_crop[ i, ]
   run_name <- temp_line$run_name 
   run_ts <- unlist( temp_line[ , paste0( 'X', observation_years ) ] )
-  run_ts_ma <- mav( run_ts, 15 ) 
+  run_ts_ma <- runmean( run_ts, 
+                        15, 
+                        alg = c( 'C' ), 
+                        endrule = c( 'mean' ), 
+                        align = c( 'center' ) )
   out_df <- data.frame( t( c( run_name, run_ts_ma ) ) )
   colnames( out_df ) <- c( 'run_name', paste0( 'X', observation_years ) )
   return( out_df )

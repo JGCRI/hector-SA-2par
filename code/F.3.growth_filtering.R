@@ -1,4 +1,7 @@
 library( 'tidyr' )
+
+# ----------------------------------------------------------------
+# Settings you will definitely need to overwrite in your code
 setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
 
 # ---
@@ -40,12 +43,4 @@ filter_flag$growth_flag <- 0
 filter_flag$growth_flag <- ifelse( filter_flag$run_name %in% growth_selected_run_names, 1, 0 )
 write.csv( filter_flag, './int-out/filter_flag.csv', row.names = F )
 
-# # ---
-# # 4. preview in Tgav
-# hector_res <- read.csv( './int-out/C.hector_run_cleanup.csv', stringsAsFactors = F )
-# hector_tgav <- hector_res[ hector_res$variable == 'Tgav', ]
-# tgav_selected <- hector_tgav[ hector_tgav$run_name %in% filter_flag[ filter_flag$tempature_flag == 1, "run_name" ], ]
-# 
-# tgav_w_flag <- merge( tgav_selected, filter_flag, by = 'run_name', all.x = T )
-# 
-# write.csv( tgav_w_flag, 'c:/Users/feng999/Desktop/temp/land_flux_filtering.csv', row.names = F )
+
