@@ -22,7 +22,7 @@ var_list <- var_list$variable
 # 2. read in some basics
 
 # ini template 
-ini_con <- file( './input/templateini_rcp85_doeclim.ini' ) 
+ini_con <- file( './input/template_hector_rcp85.ini' ) 
 ini_template <- readLines( ini_con )
 close( ini_con ) 
 
@@ -53,10 +53,10 @@ out_res_list <- lapply( 1 : nrow( pc_df ), function( i ) {
   ini_file <- file( ini_file_path_name )
   temp_ini <- ini_template 
   temp_ini[ 4 ] <- paste0( "run_name=", run_name )
-  temp_ini[ 82 ] <- paste0( 'beta=', beta, '     \t; 0.36=about +20% @2xCO2' ) 
-  temp_ini[ 83 ] <- paste0( 'q10_rh=', q10, '\t\t; respiration response Q10, unitless' )
-  temp_ini[ 172 ] <- paste0( 'S=', s, ' \t\t\t\t; equilibrium climate sensitivity for 2xCO2, degC' )
-  temp_ini[ 173 ] <- paste0( 'diff=', diff, '\t\t\t; ocean heat diffusivity, cm2/s' )
+  temp_ini[ 76 ] <- paste0( 'beta=', beta, '     \t; 0.36=about +20% @2xCO2' ) 
+  temp_ini[ 77 ] <- paste0( 'q10_rh=', q10, '\t\t; respiration response Q10, unitless' )
+  temp_ini[ 158 ] <- paste0( 'S=', s, ' \t\t\t\t; equilibrium climate sensitivity for 2xCO2, degC' )
+  temp_ini[ 159 ] <- paste0( 'diff=', diff, '\t\t\t; ocean heat diffusivity, cm2/s' )
   writeLines( temp_ini, ini_file )
   close( ini_file )
   
