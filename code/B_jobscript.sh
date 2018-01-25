@@ -17,7 +17,7 @@ echo "Current time : $now"
 export BOOSTROOT=/pic/projects/GCAM/GCAM-libraries/include
 export BOOSTLIB=/pic/projects/GCAM/GCAM-libraries/lib/boost
 
-Rscript /people/feng999/CMS/hector-SA-2par/code/B.ini_generation_and_pic_run.R --nosave --no-restore
+Rscript /people/feng999/CMS/hector-SA-npar/code/B.ini_generation_and_pic_run.R --nosave --no-restore
 
 now=$(date)
 echo "Current time : $now"

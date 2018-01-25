@@ -4,7 +4,7 @@ library( 'randtoolbox' )
 
 # ----------------------------------------------------------------
 # Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
+setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
 
 # ----------------------------------------------------------------
 # set seed for random generator 
