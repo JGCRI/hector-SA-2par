@@ -7,9 +7,9 @@ library( 'tidyr' )
 
 # -----------------------------------------------------------------------------
 # 0.5 Settings you will definitely need to overwrite in your code
-pic_hectorSA_path <- '/people/feng999/CMS/hector-SA-2par'
+pic_hectorSA_path <- '/people/feng999/CMS/hector-SA-npar'
 setwd( pic_hectorSA_path )
-#setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
+#setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
 pic_hector_path <- '/people/feng999/CMS/hector'
 
 # -----------------------------------------------------------------------------

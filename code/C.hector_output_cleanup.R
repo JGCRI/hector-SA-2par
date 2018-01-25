@@ -4,7 +4,7 @@ library( 'readr' )
 
 # --------------------------------------------------
 # Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-2par' )
+setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
 
 raw_output <- read.csv( './int-out/B.hector_run_results.txt', header = F, stringsAsFactors = F )
 
