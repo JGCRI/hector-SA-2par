@@ -5,12 +5,13 @@
 # 0. set up some basics
 library( 'tidyr' )
 
+# Decide which rcp scenario to run
+rcpXX <- "rcp26"
 # -----------------------------------------------------------------------------
 # 0.5 Settings you will definitely need to overwrite in your code
-pic_hectorSA_path <- '/people/feng999/CMS/hector-SA-npar'
+pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'
 setwd( pic_hectorSA_path )
-#setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
-pic_hector_path <- '/people/feng999/CMS/hector'
+pic_hector_path <- '/pic/projects/GCAM/Dorheim/CMS/hector'
 
 # -----------------------------------------------------------------------------
 # 1. set up some parameters
@@ -22,7 +23,7 @@ var_list <- var_list$variable
 # 2. read in some basics
 
 # ini template 
-ini_con <- file( './input/template_hector_rcp85.ini' ) 
+ini_con <- file( paste0( './input/template_hector_', rcpXX, '.ini' ) ) 
 ini_template <- readLines( ini_con )
 close( ini_con ) 
 
@@ -34,7 +35,7 @@ run_index_total_digits <- nchar( as.character( max( pc_df$run_index ) ) )
 # ----------------------------------------------------------------------------
 # 3. run hector and deal with hector outputs 
 result_file_name <- paste0( 'B.hector_run_results.txt' )
-result_file_path_name <- paste0( pic_hectorSA_path, '/int-out/', result_file_name )
+result_file_path_name <- paste0( pic_hectorSA_path, '/int-out/', rcpXX, '/', result_file_name )
 result_file_con <- file( result_file_path_name, 'w' )
 
 out_res_list <- lapply( 1 : nrow( pc_df ), function( i ) { 
