@@ -1,13 +1,16 @@
 library( 'tidyr' )
 
 # ----------------------------------------------------------------
-# Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
+# The working directory should be the project directory. 
+if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+
+# Define the rcp to process
+rcpXX <- 'rcp85'
 
 # ---
 # 1. read in observations and hector Tgav 
-observations <- read.csv( './int-out/F.CDIAC_growth_ma.csv', stringsAsFactors = F ) 
-hector_growth <- read.csv( './int-out/F.growth_hector_ma.csv', stringsAsFactors = F )
+observations <- read.csv( './int-out/observations/F.CDIAC_growth_ma.csv', stringsAsFactors = F ) 
+hector_growth <- read.csv( file.path('./int-out', rcpXX, 'F.growth_hector_ma.csv'), stringsAsFactors = F )
 
 # ---
 # 2. fall in test
@@ -38,9 +41,9 @@ growth_selected_run_names <- freq_table[ freq_table$Freq %in% max_oc, 'total_run
 
 # ---
 # 3. update filter_flag 
-filter_flag <- read.csv( './int-out/filter_flag.csv', stringsAsFactors = F )
+filter_flag <- read.csv( file.path('./int-out', rcpXX, 'filter_flag.csv'), stringsAsFactors = F )
 filter_flag$growth_flag <- 0  
 filter_flag$growth_flag <- ifelse( filter_flag$run_name %in% growth_selected_run_names, 1, 0 )
-write.csv( filter_flag, './int-out/filter_flag.csv', row.names = F )
+write.csv( filter_flag, file.path('./int-out', rcpXX, 'filter_flag.csv'), row.names = F )
 
 

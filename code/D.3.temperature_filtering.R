@@ -1,13 +1,16 @@
 library( 'tidyr' )
 
 # ----------------------------------------------------------------
-# Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
+# The working directory should be the project directory. 
+if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+
+# Define the rcp to process
+rcpXX <- 'rcp85'
 
 # ---
 # 1. read in observations and hector Tgav 
-observations <- read.csv( './int-out/D.temperature_obervation_ma.csv', stringsAsFactors = F ) 
-hector_tgav <- read.csv( './int-out/D.temperature_hector_ma.csv', stringsAsFactors = F )
+observations <- read.csv( './int-out/observations/D.temperature_obervation_ma.csv', stringsAsFactors = F ) 
+hector_tgav <- read.csv( file.path('./int-out', rcpXX, 'D.temperature_hector_ma.csv'), stringsAsFactors = F )
 
 # ---
 # 2. fall in test 
@@ -41,12 +44,12 @@ temp_df <- temp_df[ , c( 'run_name', paste0( 'X', 1850 : 2017 ) ) ]
 tgav_selected <- rbind( tgav_selected, temp_df )
 tgav_selected$fall_in_rate <- fall_in_threshold
 
-write.csv( tgav_selected, './int-out/D.hector_tgav_filtered.csv', row.names = F )
+write.csv( tgav_selected, file.path('./int-out', rcpXX, 'D.hector_tgav_filtered.csv'), row.names = F )
 
 # ---
-# 4. update filter flga table
-filter_flag <- read.csv( './int-out/filter_flag.csv', stringsAsFactors = F )
+# 4. update filter flag table
+filter_flag <- read.csv( file.path('./int-out', rcpXX, 'filter_flag.csv'), stringsAsFactors = F )
 filter_flag$tempature_flag <- 0 
 filter_flag$tempature_flag <- ifelse( filter_flag$run_name %in% selected_run_names, 1, 0 )
-write.csv( filter_flag, './int-out/filter_flag.csv', row.names = F )
+write.csv( filter_flag, file.path('./int-out', rcpXX, 'filter_flag.csv'), row.names = F )
 

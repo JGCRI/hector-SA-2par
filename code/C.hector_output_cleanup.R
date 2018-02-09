@@ -2,11 +2,14 @@
 library( 'tidyr' )
 library( 'readr' )
 
-# --------------------------------------------------
-# Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
+# Define the rcp to process
+rcpXX <- 'rcp26'
 
-raw_output <- read.csv( './int-out/B.hector_run_results.txt', header = F, stringsAsFactors = F )
+# --------------------------------------------------
+# The working directory should be the project directory. 
+if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+
+raw_output <- read.csv( file.path('./int-out', rcpXX, 'B.hector_run_results.txt'), header = F, stringsAsFactors = F )
 
 names( raw_output ) <- c( 'year', 'run_name', 'spinup', 'component', 'variable', 'value', 'units' )
 
@@ -20,13 +23,13 @@ vars <- sort( unique( cleanup_df$variable ) )
 
 cleanup_wide <- spread( cleanup_df, year, value )
 
-write.csv( cleanup_wide, './int-out/C.hector_run_cleanup.csv', row.names = F )
+write.csv( cleanup_wide, file.path('./int-out', rcpXX, 'C.hector_run_cleanup.csv'), row.names = F )
 
 
 # ---
 # Filter flga table
-filter_flag <- read.csv( './int-out/A.par4_combinations.csv', stringsAsFactors = F )
+filter_flag <- read.csv( file.path('./int-out/A.par4_combinations.csv'), stringsAsFactors = F )
 filter_flag$run_name <- paste0( 'hectorSA-', sprintf( '%04d', filter_flag$run_index ) )
-write.csv( filter_flag, './int-out/filter_flag.csv', row.names = F )
+write.csv( filter_flag, file.path('./int-out', rcpXX, 'filter_flag.csv'), row.names = F )
 
 

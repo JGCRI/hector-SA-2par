@@ -2,17 +2,20 @@ library( 'tidyr' )
 library( 'caTools' )
 
 # ----------------------------------------------------------------
-# Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
+# The working directory should be the project directory. 
+if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+
+# Define the rcp to process
+rcpXX <- "rcp85"
 
 # ---
 # 1. read in processed observation
-observation <- read.csv( './int-out/E.CDIAC_obervation_ma.csv', stringsAsFactors = F )
+observation <- read.csv( './int-out/observations/E.CDIAC_obervation_ma.csv', stringsAsFactors = F )
 observation_years <- sort( unique( observation$year ) ) 
 
 # --- 
 # 2. read in hector land and ocean flux 
-hector_res <- read.csv( './int-out/C.hector_run_cleanup.csv', stringsAsFactors = F )
+hector_res <- read.csv( file.path('./int-out', rcpXX, 'C.hector_run_cleanup.csv'), stringsAsFactors = F )
 
 hector_land_ocean_flux <- hector_res[ hector_res$variable %in% c( 'atm_land_flux', 'atm_ocean_flux' ), ]
 flux_crop <- hector_land_ocean_flux[ , c( 'run_name', 'variable', 'units', paste0( 'X', observation_years ) ) ]
@@ -35,6 +38,6 @@ flux_ma_res_list <- lapply( 1 : nrow( flux_crop ), function( i ) {
 } )
 flux_crop_ma <- do.call( 'rbind', flux_ma_res_list )
 
-write.csv( flux_crop_ma, './int-out/E.flux_hector_ma.csv', row.names = F )
+write.csv( flux_crop_ma, file.path('./int-out', rcpXX, 'E.flux_hector_ma.csv'), row.names = F )
 
 

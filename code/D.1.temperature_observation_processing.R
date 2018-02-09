@@ -3,8 +3,8 @@ library( 'readxl' )
 library( 'caTools' )
 
 # ----------------------------------------------------------------
-# Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
+# The working directory should be the project directory. 
+if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
 
 # ---
 # 1. read in observations and reformat
@@ -37,4 +37,4 @@ filter_exp_df$max <- filter_exp_df$max_mav
 filter_exp_df$min_mav <- NULL
 filter_exp_df$max_mav <- NULL
 
-write.csv( filter_exp_df, './int-out/D.temperature_obervation_ma.csv', row.names = F )
+write.csv( filter_exp_df, './int-out/observations/D.temperature_obervation_ma.csv', row.names = F )

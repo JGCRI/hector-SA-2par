@@ -1,13 +1,16 @@
 library( 'tidyr' )
 
 # ----------------------------------------------------------------
-# Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
+# The working directory should be the project directory. 
+if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+
+# Define the rcp to process
+rcpXX <- 'rcp85'
 
 # ---
 # 1. read in observations and hector Tgav 
-observations <- read.csv( './int-out/E.CDIAC_obervation_ma.csv', stringsAsFactors = F ) 
-hector_flux <- read.csv( './int-out/E.flux_hector_ma.csv', stringsAsFactors = F )
+observations <- read.csv( './int-out/observations/E.CDIAC_obervation_ma.csv', stringsAsFactors = F ) 
+hector_flux <- read.csv( file.path('./int-out', rcpXX, 'E.flux_hector_ma.csv'), stringsAsFactors = F )
 
 # ---
 # 2. fall in test
@@ -69,9 +72,9 @@ land_selected_run_names <- freq_table[ freq_table$Freq %in% max_oc, 'total_run_n
 
 # ---
 # 3. update filter_flag 
-filter_flag <- read.csv( './int-out/filter_flag.csv', stringsAsFactors = F )
+filter_flag <- read.csv( file.path('./int-out', rcpXX, 'filter_flag.csv'), stringsAsFactors = F )
 filter_flag$landflux_flag <- 0  
 filter_flag$landflux_flag <- ifelse( filter_flag$run_name %in% land_selected_run_names, 1, 0 )
-write.csv( filter_flag, './int-out/filter_flag.csv', row.names = F )
+write.csv( filter_flag, file.path('./int-out', rcpXX, 'filter_flag.csv'), row.names = F )
 
 
