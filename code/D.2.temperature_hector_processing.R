@@ -2,17 +2,20 @@ library( 'tidyr' )
 library( 'caTools' )
 
 # ----------------------------------------------------------------
-# Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
+# The working directory should be the project directory. 
+if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+
+# Define the rcp to process
+rcpXX <- 'rcp85' 
 
 # ---
 # 1. read in processed observation
-observation <- read.csv( './int-out/D.temperature_obervation_ma.csv', stringsAsFactors = F )
+observation <- read.csv( './int-out/observations/D.temperature_obervation_ma.csv', stringsAsFactors = F )
 observation_years <- sort( unique( observation$year ) ) 
 
 # --- 
 # 2. read in hector Tgav and calculate standarized Tgav
-hector_res <- read.csv( './int-out/C.hector_run_cleanup.csv', stringsAsFactors = F )
+hector_res <- read.csv( file.path('./int-out', rcpXX, 'C.hector_run_cleanup.csv'), stringsAsFactors = F )
 hector_tgav <- hector_res[ hector_res$variable == 'Tgav', ]
 tgav_crop <- hector_tgav[ , c( 'run_name', 'variable', 'units', paste0( 'X', observation_years ) ) ]
 tgav_crop$ref_mean <- apply( tgav_crop[ , c( paste0( 'X', 1951 : 1990 ) ) ], 1, mean )
@@ -37,6 +40,6 @@ tgav_ma_res_list <- lapply( 1 : nrow( tgav_crop ), function( i ) {
 } )
 tgav_crop_ma <- do.call( 'rbind', tgav_ma_res_list )
 
-write.csv( tgav_crop_ma, './int-out/D.temperature_hector_ma.csv', row.names = F )
+write.csv( tgav_crop_ma, file.path('./int-out', rcpXX, 'D.temperature_hector_ma.csv'), row.names = F )
 
 

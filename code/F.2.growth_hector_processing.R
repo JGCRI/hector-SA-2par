@@ -1,17 +1,20 @@
 library( 'tidyr' )
 
 # ----------------------------------------------------------------
-# Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
+# The working directory should be the project directory. 
+if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+
+# Define the rcp to process
+rcpXX <- 'rcp85'
 
 # ---
 # 1. read in processed observation
-observation <- read.csv( './int-out/F.CDIAC_growth_ma.csv', stringsAsFactors = F )
+observation <- read.csv( './int-out/observations/F.CDIAC_growth_ma.csv', stringsAsFactors = F )
 observation_years <- sort( unique( observation$year ) ) 
 
 # --- 
 # 2. read in hector atmos_c and compute the growth 
-hector_res <- read.csv( './int-out/C.hector_run_cleanup.csv', stringsAsFactors = F )
+hector_res <- read.csv( file.path( './int-out', rcpXX, 'C.hector_run_cleanup.csv' ), stringsAsFactors = F )
 
 hector_atmosc <- hector_res[ hector_res$variable == 'atmos_c', ]
 x_years <- grep( 'X', names( hector_atmosc ), value = T )
@@ -38,6 +41,6 @@ growth_ma_res_list <- lapply( 1 : nrow( growth_crop ), function( i ) {
 } )
 growth_crop_ma <- do.call( 'rbind', growth_ma_res_list )
 
-write.csv( growth_crop_ma, './int-out/F.growth_hector_ma.csv', row.names = F )
+write.csv( growth_crop_ma, file.path('./int-out', rcpXX, 'F.growth_hector_ma.csv'), row.names = F )
 
 

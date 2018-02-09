@@ -3,8 +3,9 @@ library( 'readxl' )
 library( 'caTools' )
 
 # ----------------------------------------------------------------
-# Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
+# The working directory should be the project directory. 
+if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+
 
 # ---
 # 1. read in observations and reformat
@@ -42,4 +43,4 @@ filter_exp_df$land_sink_max <- runmean( filter_exp_df$land_sink_max, 7,
                                         endrule = c( 'mean' ), 
                                         align = c( 'center' ) )
 
-write.csv( filter_exp_df, './int-out/E.CDIAC_obervation_ma.csv', row.names = F )
+write.csv( filter_exp_df, './int-out/observations/E.CDIAC_obervation_ma.csv', row.names = F )
