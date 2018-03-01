@@ -1,0 +1,48 @@
+---
+title: "Moving Average Years"
+author: "K. Dorheim"
+date: "March 1, 2018"
+output: pdf_document
+---
+
+```{r, echo = F}
+
+BASE <- "C:/Users/dorh012/Documents/GitHub/CMS/hector-SA-npar/methods_check"
+
+co2_figs  <- get(load(file.path(BASE, "moving_average_years", "co2_figures.rda")))
+flux_figs <- get(load(file.path(BASE, "moving_average_years", "landFlux_figures.rda")))
+
+```
+
+
+
+## CO2 
+
+Comparison of the CO2 observation windows created by a 7 yr vs 15 year moving average. The observation windows really only differ at the beginning and end of the time series.
+
+```{r, echo = F}
+co2_figs$obs_ma
+```
+
+
+Table of counts for the number of runs that pass the observation windows created from the 7 and 15 year moving average. The windowing time does not really matter for the CO2 filtering method.
+
+```{r, echo = F}
+co2_figs$passing_count
+```
+
+\newpage
+
+## Land Flux
+
+Comparison of the land flux observation windows created by a 7 yr vs 15 year moving average. The 15 year moving average is not as extreme as the 7 year windowing method.
+
+```{r, echo = F}
+flux_figs$obs_ma
+```
+
+Table of counts for the number of runs that pass the observation windows created from the 7 and 15 year moving average. An extra 654 hector runs pass the the Land flux filtering method with the 15 year window (this is almost a 45% increase).
+
+```{r, echo = F}
+flux_figs$passing_count
+```
