@@ -6,7 +6,7 @@ library( 'caTools' )
 if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
 
 # Define the rcp to process
-rcpXX <- 'rcp85' 
+rcpXX <- 'rcp26' 
 
 # ---
 # 1. read in processed observation

@@ -1,12 +1,16 @@
 library( 'tidyr' )
 library( 'caTools' )
 
-# ----------------------------------------------------------------
+# 0. Set Up ----------------------------------------------------------------
 # The working directory should be the project directory. 
 if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
 
 # Define the rcp to process
-rcpXX <- "rcp85"
+rcpXX <- "rcp26"
+
+# Define the length of years to use in the moving average window
+windowYrs <- 15 
+
 
 # ---
 # 1. read in processed observation
@@ -28,7 +32,7 @@ flux_ma_res_list <- lapply( 1 : nrow( flux_crop ), function( i ) {
   var <- temp_line$variable
   run_name <- temp_line$run_name 
   run_ts <- unlist( temp_line[ , paste0( 'X', observation_years ) ] )
-  run_ts_ma <- runmean( run_ts, 7,
+  run_ts_ma <- runmean( run_ts, windowYrs,
                         alg = c( 'C' ), 
                         endrule = c( 'mean' ), 
                         align = c( 'center' ) )  
