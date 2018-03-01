@@ -5,13 +5,14 @@
 
 # 0. Set up ----------------------------------------------------------------
 # The working directory should be the project directory. 
-if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+BASE <- getwd()
+if(basename(BASE) != 'hector-SA-npar'){stop('working directory should be the project directory')}
 
 # Required libs
 library(dplyr)
 
 # Define the rcp to process
-rcpXX <- "rcp85"
+rcpXX <- "rcp26"
 
 
 # Import Data  
@@ -50,19 +51,19 @@ select_param_set <- function(data, flag_names, vari, param_names){
   
   # Parse out parameter set for min temp. 
   min_tgav <- to_select_from[which.min(to_select_from$`2100`),]
-  min_tgav[["variable"]] <- paste0("min ", vari)
+  min_tgav[["keep"]] <- paste0("min ", vari)
   
   # Parse out parameter set for max temp.
   max_tgav <- to_select_from[which.max(to_select_from$`2100`),]
-  max_tgav[["variable"]] <- paste0("max ", vari)
+  max_tgav[["keep"]] <- paste0("max ", vari)
   
   # Parse out the parameter set for min temp. 
   median_tgav <- median(to_select_from$`2100`)
   mid_tgav <- to_select_from[which.min(abs(to_select_from$`2100` - median_tgav)),]
-  mid_tgav[["variable"]] <- paste0("mid ", vari)
+  mid_tgav[["keep"]] <- paste0("mid ", vari)
   
   bind_rows(min_tgav, max_tgav, mid_tgav) %>% 
-    select(param_names, variable) %>% 
+    select(param_names, keep) %>% 
     mutate(filter_flag = paste(flag_names, collapse = " & ")) 
   
 }
@@ -90,11 +91,21 @@ hector_results_wide %>%
 set1 <- select_param_set(hector_2100_flag, "tempature_flag", "Tgav", param_names)
 
 # The set of parameters that passes through the temp and the carbon flux. 
-set2 <- select_param_set(hector_2100_flag, c("tempature_flag", "growth_flag"), "Tgav", param_names) 
+set2 <- select_param_set(hector_2100_flag, "tempature_flag", "atm_ocean_flux", param_names) 
 
 # Combine into the parameter set to use in level H to create the Hector gcam ini files 
 # used in gcam. 
 param_set <- bind_rows(set1, set2)
 
+# Subset Hector results so that it only includes the results from the runs that are from the paramter 
+# sets data frame. 
+hector_results_wide %>% 
+  left_join(param_set, by = "run_name") %>% 
+  filter(!is.na(keep)) %>% 
+  tidyr::gather(year, value, matches("^(1|2)[0-9]{3}$")) -> 
+  filtered_hector_results
+
 # Save 
 write.csv(param_set, file = file.path(".", "int-out", rcpXX, "G.filtered_parameter_sets.csv"), row.names = F)
+write.csv(filtered_hector_results, file = file.path(".", "int-out", rcpXX, "G.filtered_hector_results.csv"), row.names = F)
+

@@ -7,6 +7,7 @@ library( 'tidyr' )
 
 # Decide which rcp scenario to run
 rcpXX <- "rcp26"
+
 # -----------------------------------------------------------------------------
 # 0.5 Settings you will definitely need to overwrite in your code
 pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'

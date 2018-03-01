@@ -2,10 +2,12 @@ library( 'tidyr' )
 library( 'readxl' )
 library( 'caTools' )
 
-# ----------------------------------------------------------------
+# 0. Set Up ----------------------------------------------------------------
 # The working directory should be the project directory. 
 if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
 
+# Define the length of years to use in the moving average window
+windowYrs <- 15 
 
 # ---
 # 1. read in observations and reformat
@@ -23,22 +25,22 @@ ob_df$land_sink_max <- ob_df$land_sink + 0.8
 # 3. Apply moving average on filter_df
 filter_exp_df <- ob_df
 
-filter_exp_df$ocean_sink_min <- runmean( filter_exp_df$ocean_sink_min, 7,
+filter_exp_df$ocean_sink_min <- runmean( filter_exp_df$ocean_sink_min, windowYrs,
                                          alg = c( 'C' ), 
                                          endrule = c( 'mean' ), 
                                          align = c( 'center' ) )
 
-filter_exp_df$ocean_sink_max <- runmean( filter_exp_df$ocean_sink_max, 7,
+filter_exp_df$ocean_sink_max <- runmean( filter_exp_df$ocean_sink_max, windowYrs,
                                          alg = c( 'C' ), 
                                          endrule = c( 'mean' ), 
                                          align = c( 'center' ) )
 
-filter_exp_df$land_sink_min <- runmean( filter_exp_df$land_sink_min, 7,
+filter_exp_df$land_sink_min <- runmean( filter_exp_df$land_sink_min, windowYrs,
                                         alg = c( 'C' ), 
                                         endrule = c( 'mean' ), 
                                         align = c( 'center' ) )
 
-filter_exp_df$land_sink_max <- runmean( filter_exp_df$land_sink_max, 7, 
+filter_exp_df$land_sink_max <- runmean( filter_exp_df$land_sink_max, windowYrs, 
                                         alg = c( 'C' ), 
                                         endrule = c( 'mean' ), 
                                         align = c( 'center' ) )

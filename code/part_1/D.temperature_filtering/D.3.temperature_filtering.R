@@ -5,12 +5,13 @@ library( 'tidyr' )
 if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
 
 # Define the rcp to process
-rcpXX <- 'rcp85'
+rcpXX <- 'rcp26'
 
 # ---
 # 1. read in observations and hector Tgav 
 observations <- read.csv( './int-out/observations/D.temperature_obervation_ma.csv', stringsAsFactors = F ) 
 hector_tgav <- read.csv( file.path('./int-out', rcpXX, 'D.temperature_hector_ma.csv'), stringsAsFactors = F )
+
 
 # ---
 # 2. fall in test 
