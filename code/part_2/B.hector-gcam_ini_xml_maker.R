@@ -18,13 +18,10 @@ library(tibble)
 #
 # Decide a name for a sub directory that will be used to store the ini files and 
 # xml pointers. 
-sub_name   <- "test_2"  
+sub_name   <- "min_mid_max"  
 
-
-# Decide what hector paramters to use in the hector-gcam ini files. These paramters should come 
-# from part 2 A that selects the paramter combinations to read into hector-gcam.
-param_sets <- readr::read_csv(file.path(pic_hectorSA_path, "int-out", rcpXX, "G.filtered_parameter_sets.csv"))
-
+# the rcp 
+rcpXX <- "rcp26"
 
 # 0.B Default set up 
 # Define directories
@@ -32,6 +29,13 @@ pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'; setwd( pic
 pic_gcam_path     <- '/pic/projects/GCAM/Dorheim/CMS/gcam-core'                                  # where CMS gcam-core lives
 gcam_ini_path     <- file.path(pic_gcam_path, "input/climate", sub_name)                         # The dir to write the new hector-gcam ini files to 
 xml_pointer_path  <- file.path(pic_gcam_path, "exe/batch", sub_name)                             # The dir to write the poitner xml files to 
+
+
+
+# Decide what hector paramters to use in the hector-gcam ini files. These paramters should come 
+# from part 2 A that selects the paramter combinations to read into hector-gcam.
+param_sets <- readr::read_csv(file.path(pic_hectorSA_path, "int-out", rcpXX, "2A.selected_parameter_sets.csv"))
+
 
 
 # Clean up or create the ini directory.
