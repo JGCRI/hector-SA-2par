@@ -1,11 +1,19 @@
 library( 'tidyr' )
 
-# ----------------------------------------------------------------
-# The working directory should be the project directory. 
-if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+# This section is commented out so that the script can be sourced from the 
+# run_all script. If you would like to run this script by it's self make sure that 
+# the rest of the code in the set up section is not commented out. 
+# # 0. Set Up ----------------------------------------------------------------
+# # The working directory should be the project directory. 
+# if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+# 
+# # Define the rcp to process
+# rcpXX <- 'rcp26'
+# 
+# # The percent of Hecotr run years that must fall within the observation range in order
+# # for the run to pass the filter.
+# fall_in_threshold <- .50
 
-# Define the rcp to process
-rcpXX <- 'rcp26'
 
 # ---
 # 1. read in observations and hector Tgav 
@@ -29,7 +37,7 @@ filter_year_res_list <- lapply( filter_year_list, function( year ) {
   return( selected_run_names )
 } )
 
-fall_in_threshold <- .50
+
 fall_in_count <- floor( length( filter_year_list ) * fall_in_threshold ) 
 
 total_run_names <- unlist( filter_year_res_list )
@@ -38,6 +46,10 @@ freq_table <- as.data.frame( sort( table( total_run_names ), decreasing = T ), s
 max_oc <- unique( freq_table$Freq )[ which( unique( freq_table$Freq ) > fall_in_count ) ] 
 
 growth_selected_run_names <- freq_table[ freq_table$Freq %in% max_oc, 'total_run_names' ]
+
+growth_selected <- hector_growth[hector_growth$run_name %in% growth_selected_run_names , ]
+write.csv( growth_selected, file.path('./int-out', rcpXX, 'F.hector_growth_filtered.csv'), row.names = F )
+
 
 # ---
 # 3. update filter_flag 

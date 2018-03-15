@@ -2,10 +2,16 @@ library( 'tidyr' )
 library( 'readxl' )
 library( 'caTools' )
 
+# This section is commented out so that the script can be sourced from the 
+# run_all script. If you would like to run this script by it's self make sure that 
+# the rest of the code in the set up section is not commented out. 
+# # 0. Set Up ----------------------------------------------------------------
+# # The working directory should be the project directory. 
+# if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+# 
+# # Length of years to use in the moving average
+# windowYrs <- 15 
 
-# ----------------------------------------------------------------
-# The working directory should be the project directory. 
-if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
 
 # ---
 # 1. read in observations and reformat
@@ -21,11 +27,11 @@ ob_df$growth_max <- ob_df$atmospheric_growth + 0.2
 # 3. Apply moving average on filter_df
 filter_exp_df <- ob_df
 
-filter_exp_df$growth_min <- runmean( filter_exp_df$growth_min, 7,
+filter_exp_df$growth_min <- runmean( filter_exp_df$growth_min, windowYrs,
                                      alg = c( 'C' ),
                                      endrule = c( 'mean' ),
                                      align = c( 'center' ) )
-filter_exp_df$growth_max <- runmean( filter_exp_df$growth_max, 7, 
+filter_exp_df$growth_max <- runmean( filter_exp_df$growth_max, windowYrs, 
                                      alg = c( 'C' ), 
                                      endrule = c( 'mean' ), 
                                      align = c( 'center' ) ) 

@@ -1,11 +1,18 @@
 library( 'tidyr' )
 
-# ----------------------------------------------------------------
-# The working directory should be the project directory. 
-if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
-
-# Define the rcp to process
-rcpXX <- 'rcp26'
+# This section is commented out so that the script can be sourced from the 
+# run_all script. If you would like to run this script by it's self make sure that 
+# the rest of the code in the set up section is not commented out.
+# # 0. Set Up ----------------------------------------------------------------
+# # The working directory should be the project directory. 
+# if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+# 
+# # Define the rcp to process
+# rcpXX <- 'rcp26'
+# 
+# # The percent of hector years that must fall within the observation range in order for the 
+# # run to count as passing. 
+# fall_in_threshold <- .70
 
 # ---
 # 1. read in observations and hector Tgav 
@@ -32,7 +39,7 @@ filter_year_res_list <- lapply( filter_year_list, function( year ) {
   return( selected_run_names )
 } )
 
-fall_in_threshold <- .70
+
 fall_in_count <- floor( length( filter_year_list ) * fall_in_threshold ) 
 
 total_run_names <- unlist( filter_year_res_list )
@@ -41,6 +48,12 @@ freq_table <- as.data.frame( sort( table( total_run_names ), decreasing = T ), s
 max_oc <- unique( freq_table$Freq )[ which( unique( freq_table$Freq ) > fall_in_count ) ] 
 
 land_selected_run_names <- freq_table[ freq_table$Freq %in% max_oc, 'total_run_names' ]
+
+
+landFlux_selected <- hector_flux_land[hector_flux_land$run_name %in% land_selected_run_names , ]
+write.csv( landFlux_selected, file.path('./int-out', rcpXX, 'E.hector_landFlux_filtered.csv'), row.names = F )
+
+
 
 # # 2.2 ocean flux 
 # filter_year_list <- sort( unique( observations$year ) ) 

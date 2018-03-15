@@ -1,13 +1,19 @@
 library( 'tidyr' )
 library( 'caTools' )
 
+# This section is commented out so that the script can be sourced from the 
+# run_all script. If you would like to run this script by it's self make sure that 
+# the rest of the code in the set up section is not commented out. 
+# # 0. Set Up ----------------------------------------------------------------
+# # The working directory should be the project directory. 
+# if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+# 
+# # Define the rcp to process
+# rcpXX <- 'rcp26'
+# 
+# # Length of years to use in the moving average
+#  windowYrs <- 15 
 
-# ----------------------------------------------------------------
-# The working directory should be the project directory. 
-if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
-
-# Define the rcp to process
-rcpXX <- 'rcp26'
 
 # ---
 # 1. read in processed observation
@@ -33,7 +39,7 @@ growth_ma_res_list <- lapply( 1 : nrow( growth_crop ), function( i ) {
   var <- temp_line$variable
   run_name <- temp_line$run_name 
   run_ts <- unlist( temp_line[ , paste0( 'X', observation_years ) ] )
-  run_ts_ma <- runmean( run_ts, 7,
+  run_ts_ma <- runmean( run_ts, windowYrs,
                         alg = c( 'C' ),
                         endrule = c( 'mean' ), 
                         align = c( 'center' ) ) 

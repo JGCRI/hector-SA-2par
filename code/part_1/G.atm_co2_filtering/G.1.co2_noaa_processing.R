@@ -3,20 +3,24 @@
 
 # Notes I am going to need to spell check and also determine what size of window I want to use.
 
-# 0. Set Up ----------------------------------------------------------------
 
 # Load the libs
 library(tidyr)
 library(caTools)
 library(dplyr)
 
-# The working directory should be the project directory. 
-BASE <- getwd()
-if(!(basename(BASE) == 'hector-SA-npar')){stop('working directory should be the project directory')}
-
-
-# Define the length of years to use in the moving average window
-windowYrs <- 15 
+# This section is commented out so that the script can be sourced from the 
+# run_all script. If you would like to run this script by it's self make sure that 
+# the rest of the code in the set up section is not commented out. 
+# # 0. Set Up ----------------------------------------------------------------
+# 
+# # The working directory should be the project directory. 
+# BASE <- getwd()
+# if(!(basename(BASE) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+# 
+# 
+# # Define the length of years to use in the moving average window
+# windowYrs <- 15 
 
 # Read in the NOAA observations. -- I think that when you comment this code you will need to add 
 # some information about the source and what we are pulling out... Make sure that you know what 
