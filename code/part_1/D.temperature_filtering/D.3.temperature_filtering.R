@@ -1,11 +1,18 @@
 library( 'tidyr' )
 
-# ----------------------------------------------------------------
-# The working directory should be the project directory. 
-if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
-
-# Define the rcp to process
-rcpXX <- 'rcp26'
+# This section is commented out so that the script can be sourced from the 
+# run_all script. If you would like to run this script by it's self make sure that 
+# the rest of the code in the set up section is not commented out. 
+# # 0. Set Up ----------------------------------------------------------------
+# # The working directory should be the project directory.
+# if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
+# 
+# # Define the rcp to process
+# rcpXX <- 'rcp26'
+# 
+# # The percent of Hecotr run years that must fall within the observation range in order
+# # for the run to pass the fitler. 
+# fall_in_threshold <- .70
 
 # ---
 # 1. read in observations and hector Tgav 
@@ -23,7 +30,7 @@ filter_year_res_list <- lapply( filter_year_list, function( year ) {
   return( selected_run_names )
 } )
 
-fall_in_threshold <- .70
+
 fall_in_count <- floor( length( filter_year_list ) * fall_in_threshold ) 
 
 total_run_names <- unlist( filter_year_res_list )
