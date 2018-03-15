@@ -8,7 +8,7 @@
 BASE <- getwd()
 if(basename(BASE) != 'hector-SA-npar'){stop('working directory should be the project directory')}
 
-# Required libs
+# Library
 library(dplyr)
 
 # Define the rcp to process
@@ -87,15 +87,15 @@ hector_results_wide %>%
 
 # 2. Select the parameters sets ------------------------------------------------------------
 
-# The set of parameters that passes through the temp filtering.
+# The set of parameters that passes through the different filter combinations.
 set1 <- select_param_set(hector_2100_flag, "tempature_flag", "Tgav", param_names)
+set2 <- select_param_set(hector_2100_flag, c("tempature_flag", "landflux_flag"), "Tgav", param_names) 
+set3 <- select_param_set(hector_2100_flag, c("tempature_flag", "growth_flag", "landflux_flag"), "Tgav", param_names) 
 
-# The set of parameters that passes through the temp and the carbon flux. 
-set2 <- select_param_set(hector_2100_flag, "tempature_flag", "atm_ocean_flux", param_names) 
 
 # Combine into the parameter set to use in level H to create the Hector gcam ini files 
 # used in gcam. 
-param_set <- bind_rows(set1, set2)
+param_set <- bind_rows(set1, set2, set3)
 
 # Subset Hector results so that it only includes the results from the runs that are from the paramter 
 # sets data frame. 
@@ -106,6 +106,6 @@ hector_results_wide %>%
   filtered_hector_results
 
 # Save 
-write.csv(param_set, file = file.path(".", "int-out", rcpXX, "G.filtered_parameter_sets.csv"), row.names = F)
-write.csv(filtered_hector_results, file = file.path(".", "int-out", rcpXX, "G.filtered_hector_results.csv"), row.names = F)
+write.csv(param_set, file = file.path(".", "int-out", rcpXX, "2A.selected_parameter_sets.csv"), row.names = F)
+write.csv(filtered_hector_results, file = file.path(".", "int-out", rcpXX, "2A.selected_hector_results.csv"), row.names = F)
 
