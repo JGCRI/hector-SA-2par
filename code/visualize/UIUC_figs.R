@@ -89,25 +89,19 @@ remove_layer <- function(complete, num){
 power_point_animation_figs <- function(complete_figure){
   
   complete_figure  + 
-    labs(y = NULL, 
-         x = NULL, 
-         title = NULL) + 
+    labs(title = NULL) + 
     theme(panel.grid = NULL) + 
     guides(color = FALSE ) -> 
     layers_4
   
   remove_layer(layers_4, 4) + 
-    labs(y = NULL, 
-         x = NULL, 
-         title = NULL) + 
+    labs(title = NULL) + 
     theme(panel.grid = NULL) + 
     guides(color = FALSE ) -> 
     layers_3
   
   remove_layer(layers_3, 3) + 
-    labs(y = NULL, 
-         x = NULL, 
-         title = NULL) + 
+    labs(title = NULL) + 
     theme(panel.grid = NULL) -> 
     layers_2
   
@@ -115,10 +109,7 @@ power_point_animation_figs <- function(complete_figure){
     guides(color = FALSE )  -> 
     layers_1
   
-  
   list(layer_1 = layers_1, layer_2 = layers_2, layer_3 = layers_3, layer_4 = layers_4)
-  
-  
   
 }
 
@@ -193,7 +184,7 @@ ggplot(data = filtered_hector_temp$None) +
   scale_color_manual(values = filter_colors$color) + 
   FIGURE_THEME + 
   labs(title = "Hector Tgav", 
-       y = unique(filtered_hector_temp$None$units)) +
+       y = paste0(unique(filtered_hector_temp$None$variable), " ", unique(filtered_hector_temp$None$units))) +
   theme(legend.title=element_blank()) -> 
   complete_figure_temp
 
@@ -243,7 +234,7 @@ ggplot(data = filtered_hector_ca_growth$None) +
   scale_color_manual(values = filter_colors$color) + 
   FIGURE_THEME + 
   labs(title = "Hector CO2 Growth", 
-       y = unique(filtered_hector_ca_growth$None$units)) + 
+       y = paste0(unique(filtered_hector_ca_growth$None$variable)," ", unique(filtered_hector_ca_growth$None$units))) + 
   theme(legend.title=element_blank()) -> 
   complete_figure
 
@@ -282,7 +273,7 @@ ggplot(data = filtered_hector_landFlux$None) +
   scale_color_manual(values = filter_colors$color) + 
   FIGURE_THEME + 
   labs(title = "Hector CO2 Growth", 
-       y = unique(filtered_hector_landFlux$None$units)) + 
+       y = paste0(unique(filtered_hector_landFlux$None$variable), " ", unique(filtered_hector_landFlux$None$units))) + 
   theme(legend.title=element_blank()) -> 
   complete_figure
 
@@ -426,19 +417,22 @@ gcam_results_plot <- function(input_data, title = NULL, caption = NULL, subtitle
   # Save information for the label 
   units <- unique(input_data$units)
   
-  # Create the year 2100 value indicator
-  input_data %>% 
-    filter(year == 2100) %>% 
-    select(year, value, filter, keep) %>% 
-    mutate(year = 2101) %>% 
-    mutate(year = if_else(filter == "Temp" & keep == "max", 2103, year)) -> 
-    yr2100_id
+  # # Create the year 2100 value indicator
+  # input_data %>% 
+  #   filter(year == 2100) %>% 
+  #   select(year, value, filter, keep) %>% 
+  #   mutate(year = 2101) %>% 
+  #   mutate(year = if_else(filter == "Temp" & keep == "max", 2103, year)) -> 
+  #   yr2100_id
+  
+  input_data <- filter(input_data, year >= 2000)
   
   # Plot the gcam data
   ggplot(data = input_data) + 
     geom_line(aes(year, value, color = filter, group = run_name), size = 1) + 
     # Add the 2100 temperature value id 
-    geom_point(data = yr2100_id, aes(year, value, color = filter, shape = keep), size = 1.5) -> 
+    # geom_point(data = yr2100_id, aes(year, value, color = filter, shape = keep), size = 1.5) -> 
+    geom_point(data = input_data, aes(year, value, color = filter, shape = keep), size = 1.5) -> 
     plot_layer
   
   # Determine what colors to use on the plot
@@ -471,7 +465,7 @@ readr::read_csv(file.path(BASE, 'int-out', rcpXX, '2A.selected_parameter_sets.cs
 
 
 # Import the database.proj 
-path    <- file.path(BASE, "int-out", "rcp26", "gcam_db", "proj_merge.proj")
+path    <- file.path(BASE, "int-out", "rcp26", "gcam_db", "proj_merge2.proj")
 db_proj <- get(load(path))
 
 # Vector of quries to plot
@@ -546,84 +540,15 @@ complete_figure_temp +
 
 
 
-
-
-## # Figure 9: Parameter Table ------------------------------------------------------
-
-# I think that I might be able to do the
-# kable function and then save it using this function
-# idk might be worth looking into since kables are V easy https://www.rdocumentation.org/packages/kableExtra/versions/0.7.0/topics/kable_as_image
-
-
-# Okay this is harder than I thought going to move on to the next set of figures
-# because this is too hard rn, wasted a lot of time
-selected_runs_formatted %>%
-  select(keep, filter, param_combo) %>%
-  spread(filter, param_combo) ->
-  table_values
-
-
-selected_runs_df %>%
-  select(keep, filter, color) %>%
-  spread(filter, color) %>%
-  select(-keep) %>%
-  unlist ->
-  table_colors
-
-t1 <- ttheme_default(core=list(
-  fg_params=list(fontface=c(rep("plain", 4), "bold.italic")),
-  bg_params = list(fill=c("grey", "grey", "grey",table_colors),
-                   alpha = rep(c(1,0.5), each=5))
-))
+# For the table 
+selected_runs_formatted %>%  
+  select(keep, filter, param_combo) %>% 
+  spread(filter, param_combo) -> 
+  table
 
 
 
 
-ggplot() + theme_bw()
-grobs <- tableGrob(d = table_values, rows = NULL)
-
-
-
-
-
-library(knitr)
-library(kableExtra)
-
-x <- kable(table_values)
-
-kable_as_image(x, filename = file.path(BASE, "test"), file_format = "png",
-               latex_header_includes = NULL, keep_pdf = FALSE, density = 300)
-
-test <-  xtable(table_values)
-
-print.xtable(test)
-print.xtable(test, type="latex", file=file.path(BASE,"filename.pdf"))
-grid.arrange(x)
-library(xtable)
-
-
-grid.draw(grobs)
-
-grid.table(x)
-
-x <- kable(table_values)
-
-print(x)
-
-formattable(x)
-
-
-
-formattable(table_values, style("background-color" = "blue", "border-radius" = "4px"))
-
-datatable(table_values, rownames = FALSE, selection = FALSE, autoHideNavigation = FALSE) %>% formatStyle(columns = names(table_values),
-  backgroundColor = styleEqual(c("Temp"), c('green'))
-)
-
-
-
-kable_as_image(kable_input, filename = NULL, file_format = "png",
-               latex_header_includes = NULL, keep_pdf = FALSE, density = 300)
 ## Figures 9 - 13: GCAM Global mean temperature ------------------------------------------------------
 # GCAM figures - under 2p6 overshoot, the year 2100 temp indicators will have to be off set. 
 
