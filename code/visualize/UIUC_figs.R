@@ -470,8 +470,9 @@ db_proj <- get(load(path))
 
 # Vector of quries to plot
 query_list  <- c("Global mean temperature", "Climate forcing", "CO2 prices", 
-                 "CO2 emissions by region", "CO2 concentrations")
-query_names <- c("Tgav", "forcing", "prices", "CO2_emissions", "CO2_con")
+                 "CO2 emissions by region", "CO2 concentrations", 
+                 "Primary Energy Consumption (Direct Equivalent)")
+query_names <- c("Tgav", "forcing", "prices", "CO2_emissions", "CO2_con", "Primary_Energy_Consumption")
 
 
 # Extract the queries of interest from the data base, format so that 
@@ -549,7 +550,7 @@ selected_runs_formatted %>%
 
 
 
-## Figures 9 - 13: GCAM Global mean temperature ------------------------------------------------------
+## Figures 9 - 14: GCAM Global mean temperature ------------------------------------------------------
 # GCAM figures - under 2p6 overshoot, the year 2100 temp indicators will have to be off set. 
 
 
@@ -572,6 +573,33 @@ data$CO2_emissions %>%
 script_output[["gcam_CO2emissions"]] <- gcam_results_plot(global_CO2_emissions, title = "Gloabl CO2 Emissions",  subtitle = use_subtitle)
 
 
+# Total primary energy consumption in the US. Had to aggergate the total amount. 
+data$Primary_Energy_Consumption %>% 
+  filter(region == "USA") %>% 
+  group_by(run_name, year, beta, q10, s, diff, filter, units, keep) %>% 
+  summarise(value = sum(value)) %>% 
+  ungroup -> 
+  USA_energy_consumption 
+
+script_output[["gcam_primaryEnergy"]] <- gcam_results_plot(USA_energy_consumption, title = "Total Primary Energy Consumption in USA",  subtitle = use_subtitle)
+
+
+# Figure 15: Difference between fuel type -------------------------------------------------
+data$Primary_Energy_Consumption %>% 
+  filter(region == "USA" & filter == "Temp, Land Flux, Growth") %>% 
+  filter(keep %in% c("min", "max")) %>% 
+  select(year, value, filter, keep, fuel) %>%  
+  spread(keep, value) %>%  
+  mutate(dif = max - min) -> 
+  difference_fuel
+
+
+difference_fuel %>% 
+  filter(year >= 2000) %>% 
+  ggplot(aes(year, dif, color = fuel)) + 
+  geom_line(size = 1.5)  +
+  labs(y = "EJ", 
+       title = "Difference in Primary Energy Consumption in the USA\n from 2100 max and min Tgav Temp, Land Flux, Growth filtering")
 
 
 
@@ -595,6 +623,7 @@ ggsave(script_output$gcam_forcing, file = file.path(png_dir, "hector_gcam_forcin
 ggsave(script_output$gcam_prices, file = file.path(png_dir, "hector_gcam_prices.png"))
 ggsave(script_output$gcam_CO2con, file = file.path(png_dir, "hector_gcam_CO2_concentration.png"))
 ggsave(script_output$gcam_CO2emissions, file = file.path(png_dir, "hector_gcam_CO2_emissions.png"))
+ggsave(script_output$gcam_primaryEnergy, file = file.path(png_dir, "hector_gcam_USA_primaryEnergy.png"))
 
 
 # Now save the nested figures
