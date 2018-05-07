@@ -648,7 +648,6 @@ query_list  <- c("Global mean temperature", "Climate forcing", "CO2 prices",
 query_names <- c("Tgav", "forcing", "prices", "CO2_emissions", "CO2_con", "Primary_Energy_Consumption",
                  "Prices_for_markets", "GHG_emissions")
 
-
 # Extract the queries of interest from the data base, format so that 
 # the run name will match up with the standard hectorSA-## run name and 
 # add info from the selected params data frame
@@ -745,6 +744,7 @@ selected_runs_formatted %>%
 
 
 
+
 ## Fig9 - 16: GCAM Results Figs  ------------------------------------------------------
 # GCAM figures - under 2p6 overshoot, the year 2100 temp indicators will have to be off set. 
 
@@ -765,8 +765,8 @@ data$CO2_emissions %>%
   ungroup -> 
   global_CO2_emissions
 
-fig_list$"Fig13.GCAM_co2_emissions" <- gcam_results_plot(global_CO2_emissions, title = "Gloabl CO2 Emissions",  subtitle = use_subtitle)
 
+fig_list$"Fig13.GCAM_co2_emissions" <- gcam_results_plot(global_CO2_emissions, title = "Gloabl CO2 Emissions",  subtitle = use_subtitle)
 
 # Total primary energy consumption in the US. Had to aggergate the total amount. 
 data$Primary_Energy_Consumption %>% 
@@ -946,7 +946,6 @@ global_CO2_emissions %>%
 # Save all of the figures as .rda objects
 fig_path <- file.path(BASE, "diag-out","UIUC_figures")
 dir.create(fig_path, showWarnings = FALSE)
-git s
 
 if(save_rda) {
   
