@@ -1,33 +1,59 @@
 # Purpose: Figures for https://github.com/JGCRI/hector-SA-npar/issues/7#event-1509615854 
 
+# Note this script can take a while to run / plot. To decrease plotting speed only plot a small 
+
+
+# Part 1 The Hector Results Figures: Plots the results of the stand alone hector runs.
+# Part 2 Run and Paramter Figures: Plots looking at the parameter sets / runs that pass through the obs filtering.
+# Part 3 The GCAM Results Figures: Plots looking at the GCAM results from the Hector params selected as inputs. 
+                                # The current method picks extreem values 
+# Part 4 Get the numbers for CH
+
+
 # Set Up --------------------------------------------------------------------------------
 
 # Load the libs
 library(ggplot2); library(dplyr)
 library(tidyr);   library(purrr)
 library(caTools); library(rgcam)
-library(gridExtra)
+library(gridExtra); 
 
 
 # Directory and script set up 
 BASE          <- getwd() # the base dir
 rcpXX         <- 'rcp26' # the rcp sub directory to pull the data from  
-script_output <- list()  # list to save the script figures in 
 
 
 # Visual constants to make sure that all figures have a constant 
 # background and color scheme. 
-FIGURE_THEME <- theme_bw()  # Make the figures have a constant ggplot theme
-cbPalette    <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") # The color pallate to use  
+
+FIGURE_THEME <- theme_bw() + theme(text = element_text(size=16)) 
 
 
-# Part 1 the Hector Results Figures -----
+# Use cbPalette in all of the figures to make sure that the color pallate is consistent. 
+cbPalette    <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") 
+ 
+# Create an empty list to store all the figures in and select how the outpus should be saved.
+fig_list <- list()
+save_rda <- TRUE
+save_png <- FALSE
+
+
+###############################################################################################################
+# Part 1 the Hector Results Figures ---------------------------------------------------------------------------
+# The plots in this section look at the results from the stand alone Hector runs. These plots can take a 
+# while to plot and save because of the large numebr of runs.
 ## Import and Format Hector Data ------------------------------------------------------------------------------
 
 # Import the cleaned up hector results, format into long format. Do not calcualte the moving 
 # average now because it will take too long. 
 hector_all <- readr::read_csv(file.path(BASE, 'int-out', rcpXX, "C.hector_run_cleanup.csv")) 
 
+# If you are intested in visualizing the several times I would suggest subsetting the number 
+# of hector runs you are working with in order to decrease the plotting time. 
+# hector_all <- hector_all[300,]
+
+# Format into long format
 hector_all %>% 
   gather(year, value, -run_name, -variable, -units) %>%  
   mutate(year = as.integer(year)) ->
@@ -113,13 +139,25 @@ power_point_animation_figs <- function(complete_figure){
   
 }
 
+# The get_Hector_ma function gets the moving average for a specific Hector Variable  
+get_Hector_ma <- function(data, variable, windowYrs = 15){  
+
+  data %>%  
+    filter(variable == variable) %>%  
+    split(., .$run_name) %>%  
+    map(function(x){ x$value <- caTools::runmean(x$value, windowYrs, 
+                                        alg = c( 'C' ),   
+                                        endrule = c( 'mean' ),   
+                                        align = c( 'center')); x } ) %>%    
+    bind_rows %>%   
+    arrange(run_name, year)  
+}
 
 
 
+## Fig1.Hector_temp: all temp and temp vs obs ---------------------------------------------------------------------------------
 
-## Figure 1: all temp ---------------------------------------------------------------------------------
-
-# All 50,00 Hector runs - mean and spread for temperature 
+# All 5000 Hector runs - mean and spread for temperature 
 
 # Subset the Hector temperature and then calculate the moving average
 hector_temp <- filter(hector, variable == "Tgav") 
@@ -156,10 +194,71 @@ plot_aesthetics +
   labs(title = "Temp from all 50,00 Hector runs", 
        subtitle = "Ribbon = Hector Run Mean + sd",
        y = "deg C") -> 
-  script_output[["all_temp"]]
+  fig_list$"Fig1.Hector_temp"
 
 
-## Figure 2: temp filtering layers -------------------------------------------------------------------------------
+
+# Now create the Hector vs obs moving average plot. 
+
+passing_runs <- filter(flags, tempature_flag == "1")  
+
+hector_temp[hector_temp$run_name %in% passing_runs$run_name, ] %>%   
+  get_Hector_ma(., variable == "Tgav") ->   
+  passing_temp  
+
+# Remove the reference period temp   
+passing_temp %>%    
+  filter(year %in% 1951 : 1990) %>%    
+  group_by(run_name) %>%   
+  summarise(ref_value = mean(value)) %>%   
+  ungroup ->   
+  ref_temps  
+
+passing_temp %>%   
+  left_join(ref_temps) %>%   
+  mutate(value = value - ref_value) %>%  
+  select(names(passing_temp)) ->   
+  passing_temp_refRemoved  
+
+# Store a vector of the hector years. This vecotr will be used to increase the number   
+# of years in the observation window so that the we can plot the full Hector run results.   
+hector_years <- unique(passing_temp_refRemoved$year)  
+
+# Import and complete the temp observation  
+incomplete_obs <- readr::read_csv(file.path(BASE, 'int-out', 'observations', 'D.temperature_obervation_ma.csv'))   
+
+incomplete_obs <- read.csv( './int-out/observations/D.temperature_obervation_ma.csv', stringsAsFactors = F )   
+
+tibble(year = hector_years, remove = 1) %>%   
+  left_join(incomplete_obs, by = "year") %>%  
+  select(year, min, max) ->   
+  obs  
+
+# Start making the plots    
+ggplot(passing_temp_refRemoved) +   
+  geom_line(aes(year, value, group = run_name, color = "Hector")) +  
+  geom_ribbon(data = obs, aes(year, ymin = min, ymax = max, color = "Observations", fill = "Observations"),   
+              alpha  = 0.7) ->  
+  plot_layer  
+
+# Format the color and background  
+plot_layer +   
+  scale_color_manual(values = c("grey", cbPalette[3])) +   
+  scale_fill_manual(values = cbPalette[3]) +   
+  guides(fill = FALSE, colour = FALSE) +   
+  FIGURE_THEME ->   
+  plot_aesthetics   
+
+# Add the lables   
+plot_aesthetics +   
+  labs(title = "Hector Temp vs Temp Observation Window",   
+      caption = "15 year moving average",  
+      y = "deg C") ->   
+  fig_list$"Fig1B.Hector_temp_obs"
+
+
+
+## Fig2.Hector_temp_layers: animated layers of the Hector temp -------------------------------------------------------------------------------
 
 # Plot of Hector temperature colored by the observation filter combinations they pass through. 
 
@@ -191,11 +290,11 @@ ggplot(data = filtered_hector_temp$None) +
 # Use the power_point_animation_figs function to separate the complete figure by layer to get the 
 # different plots CH would like to make the animimated graphic. 
 
-script_output[["temp_layers"]] <- power_point_animation_figs(complete_figure_temp)
+fig_list$"Fig2.Hector_temp_layers" <- power_point_animation_figs(complete_figure_temp)
 
 
  
-## Figure 3: atom_co2 growth vs filtered runs -------------------------------------------------------------------------------
+## Fig3.Hector_atmGrowth_layers: animated layers of the Hector atm CO2 growth  ----------------------------------
 
 # This chunk does the same thing as the figure 2 section of code. The hector results for CO2 growth that pass through 
 # the different filter combinations plotted in a manner so that they look like they are being stacked on top 
@@ -238,11 +337,11 @@ ggplot(data = filtered_hector_ca_growth$None) +
   theme(legend.title=element_blank()) -> 
   complete_figure
 
-script_output[["caGrowth_layers"]] <- power_point_animation_figs(complete_figure)
+fig_list$"Fig3.Hector_atmGrowth_layers" <- power_point_animation_figs(complete_figure)
 
 
  
-## Figure 4: land_flux vs filter ------------------------------------------------------------------------------
+## Fig4.Hector_atmGrowth_layers: animated layers of the Hector landflux ------------------------------------------------------------------------------
 
 # This chunk does the same thing as the figure 2 section of code. The hector results for land flux pass through 
 # the different filter combinations plotted in a manner so that they look like they are being stacked on top 
@@ -277,12 +376,13 @@ ggplot(data = filtered_hector_landFlux$None) +
   theme(legend.title=element_blank()) -> 
   complete_figure
 
-script_output[["landFlux_layers"]] <- power_point_animation_figs(complete_figure)
+Fig4.Hector_atmGrowth_layers <- power_point_animation_figs(complete_figure)
 
 
-## Figure 5: Run Count  -------------------------------------------------------------
-
-# bar chart of hector runs with filtered parameters
+###############################################################################################################
+# Part 2 Run and Paramter Figures -----------------------------------------------------------------------------
+## Fig5.run_count -------------------------------------------------------------------------------------------
+# Bar chart of hector runs with filtered parameters
 
 # Count the number of runs that pass through each filter method. 
 filtered_flags %>% 
@@ -304,10 +404,10 @@ count_df %>%
   scale_fill_manual(values = filter_colors$color) +
   guides(fill = FALSE) + 
   FIGURE_THEME -> 
-  script_output[["passing_hector_runs"]]
+  fig_list$"Fig5.run_count"
 
 
-## Figure 6: Param vs 2100 -------------------------------------------------------
+## Fig6.2100_param -----------------------------------------------------------------------------------
 
 # Plot the parameter value vs the 2100 Hector results value for Tgav and Ca with 
 # confidence ellipses based on the observation distributions. 
@@ -327,7 +427,7 @@ to_plot_list <- split(hector_2100_values,
   
 # Make the scatter plot of the 2100 value vs paramter value for Tgav and Ca. Use map to apply the 
 # plotting funtion. 
-script_output[["parameter_2100value"]] <- purrr::map(.x = to_plot_list, function(.x, caption = NULL){
+fig_list$"Fig6.2100_param" <- purrr::map(.x = to_plot_list, function(.x, caption = NULL){
   
   # Store paramter name, variable name, and varaible units as vectors to 
   # use latter on to label the plot. 
@@ -360,7 +460,7 @@ script_output[["parameter_2100value"]] <- purrr::map(.x = to_plot_list, function
   })
   
   
-## Figure 7: Param Space --------------------------------------------------------------------
+## Fig7.parameter_space -------------------------------------------------------------------------------------
 
 # Split the parameter data frame by paramter so that we can make an indiviual plot of 
 # how the filter changes the paramter space for each paramter. 
@@ -368,7 +468,7 @@ script_output[["parameter_2100value"]] <- purrr::map(.x = to_plot_list, function
 list_params_data <- split(filtered_flags, filtered_flags$parameter)
 
 # Paramter space jitter scatter plots. 
-script_output[["param_space"]] <- map(list_params_data, function(data = .){
+fig_list$"Fig7.parameter_space" <- map(list_params_data, function(data = .){
   
   # Store the paramter name for latter
   param_name <- unique(data$parameter)
@@ -406,33 +506,97 @@ script_output[["param_space"]] <- map(list_params_data, function(data = .){
 
 
 
-# Part 2 the GCAM Results Figures -----
-## Functions ---------------------------------------------------------------------
+##############################################################################################################
+# Part 3 the GCAM Results Figures ----------------------------------------------------------------------------
+# Plot the GCAM results from the runs using the selected carbon cycle parameter results. We currently select 
+# paramter sets based on extreeme year 2100 temperatuer values for each filtered group. This methodology 
+# may change latter. 
+## Functions -------------------------------------------------------------------------------------------------
+
+# gcam_lalyer_plot: is a funciton that used internally in the gcam_results_plot 
+# to isolate the layers of the to allow for layering in a power point presentation. 
+gcam_lalyer_plot <- function(completePlot){
+  
+  # Remove the legends so that the plot dimensions remain constant.
+  completePlot + 
+    guides(color = FALSE, shape = FALSE) -> 
+    no_legened_completePlot
+  
+  # Remove the tmep, flux, growth filtered layer
+  partial_fig_2 <- remove_layer(no_legened_completePlot, 6)
+ # partial_fig_2 <- remove_layer(partial_fig_2, 8)
+  fig_2         <- remove_layer(partial_fig_2, 5)
+  
+  # Remove the temp, flux filter layer 
+  partial_fig_1 <- remove_layer(fig_2, 4)
+#  partial_fig_1 <- remove_layer(partial_fig_1, 5)
+  fig_1         <- remove_layer(partial_fig_1, 3)
+  
+  
+  list(layer_1 = fig_1, layer_2 = fig_2, layer_3 = no_legened_completePlot)
+  
+  
+}
+
+
 
 # gcam_results_plot: is a function that will create a line plot of the gcam results 
-# colored by fitler method with year 2100 values id shapes. 
+# colored by filter applied and a geom shape that reflects the 2100 Hector temp. This 
+# function returns a list of plots, a complete plot with a legend and then the layered
+# version to be used in the power point animation. 
 
 gcam_results_plot <- function(input_data, title = NULL, caption = NULL, subtitle = NULL){
   
   # Save information for the label 
   units <- unique(input_data$units)
   
-  # # Create the year 2100 value indicator
-  # input_data %>% 
+  # Use years greater than 2000 and also split by the filter applied and 
+  # build the plot layer by layer. This is to make is possible to split the 
+  # plot into something that can be layered on itself. 
+  input_data %>%  
+    filter(year >= 2000) %>% 
+    filter(policy == "2p6") %>% 
+    split(., .$filter) -> 
+    input_data_list 
+    
+  
+  # # Now we are going to have to create the data frame for the "no policy run"
+  # # ids. For now the run names are going to be hard coded into the data frame, 
+  # # we may want to change this in the future. 
+  # tibble(run_name = c("hectorSA-2730", "hectorSA-0378")) %>% 
+  #   mutate(policy_keep = "no policy run") %>% 
+  #   full_join(input_data, by = "run_name") %>% 
   #   filter(year == 2100) %>% 
-  #   select(year, value, filter, keep) %>% 
-  #   mutate(year = 2101) %>% 
-  #   mutate(year = if_else(filter == "Temp" & keep == "max", 2103, year)) -> 
-  #   yr2100_id
+  #   filter(policy == "2deg") %>% 
+  #   select(policy_keep, value, year, filter, keep) %>% 
+  #   # Use ifelse here instead of if_else becasue if_else requires 
+  #   # that a tibble column only contains one type of values. 
+  #   mutate(value = ifelse(is.na(policy_keep), NA, value)) %>% 
+  #   mutate(year = 2105, 
+  #          policy = 'no policy run') %>%
+  #   select(policy, value, year, filter, keep) %>%  
+  #   split(., .$filter) -> 
+  #   no_policy_id
   
-  input_data <- filter(input_data, year >= 2000)
   
+
   # Plot the gcam data
-  ggplot(data = input_data) + 
-    geom_line(aes(year, value, color = filter, group = run_name), size = 1) + 
-    # Add the 2100 temperature value id 
-    # geom_point(data = yr2100_id, aes(year, value, color = filter, shape = keep), size = 1.5) -> 
-    geom_point(data = input_data, aes(year, value, color = filter, shape = keep), size = 1.5) -> 
+  # 
+  # Temp filtered layer
+  ggplot(data = input_data_list$Temp) + 
+    geom_line(aes(year, value, color = "Temp", group = run_name), size = 1) + 
+    geom_point(data = input_data_list$Temp, aes(year, value, color = "Temp", shape = keep), size = 1.5) + 
+  #  geom_point(data = no_policy_id$Temp, aes(year, value, shape = policy)) + 
+    
+    # Add the temp and land flux filtered data
+    geom_line(data = input_data_list$`Temp, Land Flux`, aes(year, value, color = "Temp, Land Flux", group = run_name), size = 1) + 
+    geom_point(data = input_data_list$`Temp, Land Flux`, aes(year, value, color =  "Temp, Land Flux", shape = keep), size = 1.5) + 
+  #  geom_point(data = no_policy_id$`Temp, Land Flux`, aes(year, value, shape = policy)) + 
+    
+    # Add the temp, land flux, and CO2 growth fitlered data to the plot. 
+    geom_line(data = input_data_list$`Temp, Land Flux, Growth`, aes(year, value, color = "Temp, Land Flux, Growth", group = run_name), size = 1) + 
+    geom_point(data = input_data_list$`Temp, Land Flux, Growth`, aes(year, value, color =  "Temp, Land Flux, Growth", shape = keep), size = 1.5) ->
+   # geom_point(data = no_policy_id$`Temp, Land Flux, Growth`, aes(year, value, shape = policy)) -> 
     plot_layer
   
   # Determine what colors to use on the plot
@@ -446,10 +610,18 @@ gcam_results_plot <- function(input_data, title = NULL, caption = NULL, subtitle
          caption = caption,
          subtitle = subtitle,
          y = units) + 
-    theme(legend.title = element_blank())
+    theme(legend.title = element_blank()) -> 
+    complete_plot
   
+  # Split complete plot up into layers that will be used in the power. 
+  plot_layers <- gcam_lalyer_plot(complete_plot)
+  
+  
+  list(complete_plot = complete_plot, layers = plot_layers)
   
 }  
+
+
 
 
 ## Import and format data ---------------------------------------------------------
@@ -465,13 +637,16 @@ readr::read_csv(file.path(BASE, 'int-out', rcpXX, '2A.selected_parameter_sets.cs
 
 
 # Import the database.proj 
-path    <- file.path(BASE, "int-out", "rcp26", "gcam_db", "proj_merge2.proj")
+path    <- file.path(BASE, "int-out", "rcp26", "proj_merge_RFtarget.proj")
 db_proj <- get(load(path))
 
 # Vector of quries to plot
 query_list  <- c("Global mean temperature", "Climate forcing", "CO2 prices", 
-                 "CO2 emissions by region", "CO2 concentrations")
-query_names <- c("Tgav", "forcing", "prices", "CO2_emissions", "CO2_con")
+                 "CO2 emissions by region", "CO2 concentrations", 
+                 "Primary Energy Consumption (Direct Equivalent)", 
+                 "Prices for all markets", "GHG emissions by region")
+query_names <- c("Tgav", "forcing", "prices", "CO2_emissions", "CO2_con", "Primary_Energy_Consumption",
+                 "Prices_for_markets", "GHG_emissions")
 
 
 # Extract the queries of interest from the data base, format so that 
@@ -484,11 +659,12 @@ query_data <- map(query_list, function(query = .){
     separate(scenario, c("run_name", "policy")) %>%  
     mutate(run_name = paste0("hectorSA-", run_name)) %>% 
     # Remove the refrence and basline runs 
-    filter(run_name != "hectorSA-refr" , policy == "2p6") %>% 
+    filter(run_name != "hectorSA-refr" ) %>% #, policy == "2p6") %>% 
     # Add the filter information
     full_join(selected_params, by = "run_name") %>%
-    rename(units = Units) %>% 
-    filter_at(c("run_name", "filter", "keep"), all_vars(!is.na(.)))
+    rename(units = Units)  %>% 
+    filter_at(c("run_name", "filter", "keep"), all_vars(!is.na(.))) %>% 
+    filter(keep %in% c("min", "max"))
   
   })
 
@@ -497,7 +673,7 @@ data <- setNames(query_data, query_names)
 
 
 
-## Figure 8: Transition Figures ------------------------------------------------------
+## Fig8.GCAM_param_selection: Transition Figures ------------------------------------------------------
 
 # The transion to hector GCAM results includes a table of the paramter values and 
 # the temperature plot with points reflecting the selected runs.
@@ -506,6 +682,7 @@ data <- setNames(query_data, query_names)
 # Format the selected params data frame so that there is an entry of the paramter 
 # values separated by a ",".
 selected_params %>% 
+  filter(keep %in% c("min", "max")) %>% 
   mutate_at(c("beta", "q10", "s", "diff"), function(.)(. = signif(., digits = 3))) %>% 
   select(run_name, keep, filter, beta, q10, s, diff) %>% 
   group_by(run_name, keep, filter) %>% 
@@ -513,6 +690,7 @@ selected_params %>%
   ungroup %>%  
   left_join(filter_colors, "filter") -> 
   selected_runs_formatted
+
 
 
 # Now add point information to the selected runs. Where year = 2105 and
@@ -524,10 +702,26 @@ hector %>%
   filter(variable == "Tgav") %>% 
   left_join(selected_runs_formatted, by = "run_name") %>% 
   na.omit %>% 
-  select(year, value, keep, filter) %>%  
+  filter(keep %in% c("min", "max")) %>% 
+  select(run_name, year, value, keep, filter) %>%  
   mutate(year = 2105) %>%  
-  mutate(year = if_else(filter == "Temp", 2110, year)) ->
+  mutate(year = if_else(filter == "Temp", 2108, year)) ->
   selected_runs_points
+
+# # Now we are going to have to create the data frame for the "no policy run"
+# # ids. For now the run names are going to be hard coded into the data frame, 
+# # we may want to change this in the future. 
+# tibble(run_name = c("hectorSA-2730", "hectorSA-0378")) %>% 
+#   mutate(policy_keep = "no policy run") %>% 
+#   full_join(selected_runs_points, by = "run_name") %>% 
+#   select(policy_keep, value, year, filter, keep) %>% 
+#   # Use ifelse here instead of if_else becasue if_else requires 
+#   # that a tibble column only contains one type of values. 
+#   mutate(value = ifelse(is.na(policy_keep), NA, value)) %>% 
+#   mutate(year = 2112, 
+#          policy = 'no policy run')  -> 
+#   no_policy_id
+
 
 
 # Add selected run points or markers to hector temparure figure. Other ideas that 
@@ -535,8 +729,10 @@ hector %>%
 # soild black line just so that it stands out. 
 complete_figure_temp + 
   geom_point(data = selected_runs_points,  aes(year, value, color = filter, shape = keep), 
-             size = 2) -> 
-  script_output[['hector_gcam_selection']]
+             size = 2) ->
+ # geom_point(data = no_policy_id,  aes(year, value, shape = policy), 
+  #           size = 2) -> 
+  Fig8.GCAM_param_selection
 
 
 
@@ -549,106 +745,231 @@ selected_runs_formatted %>%
 
 
 
-## Figures 9 - 13: GCAM Global mean temperature ------------------------------------------------------
+## Fig9 - 16: GCAM Results Figs  ------------------------------------------------------
 # GCAM figures - under 2p6 overshoot, the year 2100 temp indicators will have to be off set. 
 
 
 use_subtitle <- "policy rcp 2.6"
 
-script_output[["gcam_temp"]]    <- gcam_results_plot(data$Tgav, title = "Global Temperature", subtitle = use_subtitle)
-script_output[["gcam_forcing"]] <- gcam_results_plot(data$forcing, title = "Climate Forcing", subtitle = use_subtitle)
-script_output[["gcam_prices"]]  <- gcam_results_plot(data$prices, title = "Carbon Price", subtitle = use_subtitle)
-script_output[["gcam_CO2con"]]  <- gcam_results_plot(data$CO2_con, title = "CO2 Concentration", subtitle = use_subtitle)
+fig_list$"Fig9.GCAM_temp"       <- gcam_results_plot(data$Tgav, title = "Global Temperature", subtitle = use_subtitle)
+fig_list$"Fig10.GCAM_forcing"   <- gcam_results_plot(data$forcing, title = "Climate Forcing", subtitle = use_subtitle)
+fig_list$"Fig11.GCAM_co2_price" <- gcam_results_plot(data$prices, title = "Carbon Price", subtitle = use_subtitle)
+fig_list$"Fig12.GCAM_co2_conc"  <- gcam_results_plot(data$CO2_con, title = "CO2 Concentration", subtitle = use_subtitle)
 
 
 # GCAM reports CO2 emissions by region, we will need to aggregate up to Global emissions before 
 # making the gcam results.
 data$CO2_emissions %>% 
-  group_by(run_name, year, keep, filter, units) %>% 
+  group_by(run_name, year, keep, filter, units, policy) %>% 
   summarise(value = sum(value)) %>%  
   ungroup -> 
   global_CO2_emissions
 
-script_output[["gcam_CO2emissions"]] <- gcam_results_plot(global_CO2_emissions, title = "Gloabl CO2 Emissions",  subtitle = use_subtitle)
+fig_list$"Fig13.GCAM_co2_emissions" <- gcam_results_plot(global_CO2_emissions, title = "Gloabl CO2 Emissions",  subtitle = use_subtitle)
 
 
+# Total primary energy consumption in the US. Had to aggergate the total amount. 
+data$Primary_Energy_Consumption %>% 
+  filter(region == "USA") %>% 
+  group_by(run_name, year, beta, q10, s, diff, filter, units, keep, policy) %>% 
+  summarise(value = sum(value)) %>% 
+  ungroup -> 
+  USA_energy_consumption 
+
+fig_list$"Fig14.GCAM_energy_consumption" <- gcam_results_plot(USA_energy_consumption, title = "Total Primary Energy Consumption in USA",  subtitle = use_subtitle)
 
 
+data$GHG_emissions %>%  
+  filter(ghg %in% c("CH4", "N2O")) %>%  
+  group_by(year, filter, keep, ghg, units, policy, run_name) %>%  
+  summarise(value = sum(value)) %>%  
+  ungroup  -> 
+  global_CH4_N2O
+
+fig_list$"Fig15.GCAM_CH4_emissions" <- gcam_results_plot(filter(global_CH4_N2O, ghg == "CH4"), title = "Global CH4 Emissions")
+fig_list$"Fig16.GCAM_N2O_emissions" <- gcam_results_plot(filter(global_CH4_N2O, ghg == "N2O"), title = "Global N2O Emissions")
 
 
-# Save ------------------------------------------------------------------------------------
-
-# Save the script output as Rdata object
-save(script_output, file = file.path(BASE, "diag-out", paste0("figs_", rcpXX, "_UIUC.rda")))
+## Fig17.GCAM_energy_consumption: Difference between fuel type -------------------------------------------------
 
 
-# Save as pngs 
-png_dir <- file.path(BASE, "diag-out", "UIUC_pngs")
-dir.create(png_dir)
+ tibble( fuel =  unique(data$Primary_Energy_Consumption$fuel)) %>% 
+  mutate(fuel_class = if_else(grepl("[B|b]iomass", fuel), "bioenergy", "NA")) %>% 
+  mutate(fuel_class = if_else(fuel %in% c("Coal", "Oil", "Natural Gas"), "fossil fuel", fuel_class)) %>% 
+  mutate(fuel_class = if_else(fuel %in% c("Geothermal", "Hydro", "Nuclear", "Solar", "Wind"), "renewable", fuel_class)) %>% 
+  na.omit -> 
+  fuel_mapping
 
-# Save all of the flat lists first
-ggsave(script_output$all_temp, file = file.path(png_dir, "Hector_temp.png"))
-ggsave(script_output$passing_hector_runs, file = file.path(png_dir, "passing_run_count.png"))
-ggsave(script_output$hector_gcam_selection,file = file.path(png_dir, "hector_gcam_selection.png"))
-ggsave(script_output$gcam_temp, file = file.path(png_dir, "hector_gcam_temp.png"))
-ggsave(script_output$gcam_forcing, file = file.path(png_dir, "hector_gcam_forcing.png"))
-ggsave(script_output$gcam_prices, file = file.path(png_dir, "hector_gcam_prices.png"))
-ggsave(script_output$gcam_CO2con, file = file.path(png_dir, "hector_gcam_CO2_concentration.png"))
-ggsave(script_output$gcam_CO2emissions, file = file.path(png_dir, "hector_gcam_CO2_emissions.png"))
+data$Primary_Energy_Consumption %>% 
+  filter(region == "USA", year >= 2000)  %>% 
+  spread(policy, value) %>% 
+  mutate(value = `2p6` - nop) %>% 
+  select(units, fuel, year, filter, value, keep, region) %>% 
+  left_join(fuel_mapping, by = "fuel") %>% 
+  group_by(year, filter, fuel_class, keep, region) %>% 
+  summarise(value = sum(value)) %>% 
+  ungroup -> 
+  agg_primary_energy_consumption
 
-
-# Now save the nested figures
-
-# The paramter space figures
-for(i in 1:length(script_output$param_space)){
+agg_primary_energy_consumption %>% 
+# filter(filter == "Temp, Land Flux, Growth") %>%
+  filter(filter == "Temp") %>%
+  rename(fuel = fuel_class) %>% 
+  ggplot(aes(year, value, color = fuel, group = interaction(keep, fuel, filter))) + 
+  geom_line() + 
+  geom_point(aes(year, value, shape = keep, color = fuel, group = interaction(keep, fuel, filter))) + 
+  facet_wrap("filter") + 
+  FIGURE_THEME + 
+  theme(legend.title=element_blank()) -> 
+  fig_list$"Fig17.GCAM_energy_consumption"
   
-  fig_n <- names(script_output$param_space)[i]
-  ggsave(script_output$param_space[[i]], file = file.path(png_dir,paste0("paramSpace_", fig_n,".png")))
+
+
+# data$Primary_Energy_Consumption %>% 
+#   filter(region == "USA" & filter == "Temp, Land Flux, Growth") %>% 
+#   filter(keep %in% c("min", "max")) %>% 
+#   select(year, value, filter, keep, fuel) %>%  
+#   spread(keep, value) %>%  
+#   mutate(dif = max - min) -> 
+#   difference_fuel
+# 
+# 
+# difference_fuel %>% 
+#   filter(year >= 2000) %>% 
+#   ggplot(aes(year, dif, color = fuel)) + 
+#   geom_line(size = 1.5)  +
+#   labs(y = "EJ", 
+#        title = "Difference in Primary Energy Consumption in the USA\n from 2100 max and min Tgav Temp, Land Flux, Growth filtering") + 
+#   FIGURE_THEME -> 
+#   script_output[["gcam_diff_fuel"]]
+
+
+## Fig16: Prices for markets --------------------------------------------------------------
+# 
+# readr::read_csv(file.path(BASE, "input", "GCAM_region_names.csv"), comment = "#") %>% 
+#   pull(region) -> 
+#   gcam_region
+# 
+# 
+# market_data <- data$Prices_for_markets
+# 
+# for(contry in 1:length(gcam_region)){
+# 
+#   one_country <- gcam_region[contry]  
+#   market_data <- mutate(market_data, market = gsub(pattern = one_country, replacement  = "", x = market))
+#   
+# }
+# 
+# 
+# names(market_data)
+# market_data$market %>% unique %>% 
+#   tibble::tibble(market = .) %>% 
+#   write.csv(., file = file.path(BASE, "market_list.csv"))
+# 
+# market_data %>% 
+#   filter(grepl("energy", market))
+# 
+# 
+
+# Figure 17: 
+##############################################################################################################
+# Part 4 Get the numbers for CH --------------------------------------------------------------
+
+# Year 2100 values 
+#
+# CH asked for year 2100 values on the gcam hector plots. And she also asked for the timing 
+# of the peaks in the CO2 emissions plot. This information is supposed to be used 
+# for as talking points. 
+
+yr2100_names <- c("filter", "year", "value", "keep", "filter", "variable", "units")
+
+data$Tgav %>% 
+  filter(year == 2100) %>%  
+  mutate(variable = "Tgav") %>% 
+  select(yr2100_names) ->
+  temp2100_values
+
+data$forcing %>% 
+  filter(year == 2100) %>%  
+  mutate(variable = "forcing") %>% 
+  select(yr2100_names) ->
+  forcing2100_values
+
+data$CO2_con %>% 
+  filter(year == 2100) %>%  
+  mutate(variable = "CO2_con") %>% 
+  select(yr2100_names) ->
+  CO2con2100_values
+
+data$prices %>% 
+  filter(year == 2100) %>%  
+  mutate(variable = "prices") %>% 
+  select(yr2100_names) ->
+  prices2100_values
+
+
+global_CO2_emissions %>% 
+  filter(year == 2100) %>%  
+  mutate(variable = "CO2_emissions") %>% 
+  select(yr2100_names) ->
+  CO2emissions2100_values
+
+USA_energy_consumption %>% 
+  filter(year == 2100) %>%  
+  mutate(variable = "primary_energy") %>% 
+  select(yr2100_names) ->
+  primaryEnergy2100_values
+
+
+bind_rows(temp2100_values, forcing2100_values, CO2con2100_values, prices2100_values,
+          CO2emissions2100_values, primaryEnergy2100_values) %>%  
+  select(year, variable, keep, filter, value, units) %>% 
+  arrange(year, variable, keep, filter) -> 
+  yr2100_df
+
+
+# Timing and value of the peak 
+global_CO2_emissions %>% 
+  group_by(filter, keep) %>% 
+  filter(value == max(value)) %>%  
+  mutate(variable = "global CO2 emissions") %>% 
+  select(filter, keep, year, value, variable, units) %>% 
+  arrange(filter, keep) -> 
+  co2Emissions_peak
+
+
+
+
+##############################################################################################################
+# Save -------------------------------------------------------------------------------------------------------
+
+# Save all of the figures as .rda objects
+fig_path <- file.path(BASE, "diag-out","UIUC_figures")
+dir.create(fig_path, showWarnings = FALSE)
+git s
+
+if(save_rda) {
   
+  for(index in 1:length(fig_list)){
+    
+    name   <- paste0(names(fig_list)[index], ".rda")
+    object <- fig_list[index]
+    
+    save(object, file = file.path(fig_path, name))
+    
+  }
 }
 
-# The paramter value vs varaible 2100 value
-for(i in 1:length(script_output$parameter_2100value)){
+
+
+if(save_png){
   
-  fig_n <- names(script_output$parameter_2100value)[i]
-  ggsave(script_output$parameter_2100value[[i]], file = file.path(png_dir,paste0("param_2100value_", fig_n,".png")))
+  
+  message("Have not set up the save png code yet")
   
 }
-
-
-# The temperature layers
-for(i in 1:length(script_output$temp_layers)){
-  
-  fig_n <- names(script_output$temp_layers)[i]
-  ggsave(script_output$temp_layers[[i]], file = file.path(png_dir,paste0("temp_", fig_n,".png")))
-  
-}
-
-# The atm CO2 growth layers
-for(i in 1:length(script_output$caGrowth_layers)){
-  
-  fig_n <- names(script_output$caGrowth_layers)[i]
-  ggsave(script_output$caGrowth_layers[[i]], file = file.path(png_dir,paste0("co2Growth_", fig_n,".png")))
-  
-}
-
-# The land flux layers
-for(i in 1:length(script_output$landFlux_layers)){
-  
-  fig_n <- names(script_output$landFlux_layers)[i]
-  ggsave(script_output$landFlux_layers[[i]], file = file.path(png_dir,paste0("landFlux_", fig_n,".png")))
-  
-}
-
 
 
 # End 
-
-
-
-
-
-
-
 
 
