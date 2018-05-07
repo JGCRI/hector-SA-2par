@@ -8,6 +8,7 @@
 library( 'tidyr' )
 library( 'caTools' )
 library(dplyr)
+library(purrr)
 
 
 # This section is commented out so that the script can be sourced from the 
