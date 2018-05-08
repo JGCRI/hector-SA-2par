@@ -53,29 +53,29 @@ fall_in_threshold <- .50
 
 # D
 # Temperature Filtering
-#source(file.path(BASE, "code", "part_1", "D.temperature_filtering", "D.1.temperature_observation_processing.R"))
-#source(file.path(BASE, "code", "part_1", "D.temperature_filtering", "D.2.temperature_hector_processing.R"))
+source(file.path(BASE, "code", "part_1", "D.temperature_filtering", "D.1.temperature_observation_processing.R"))
+source(file.path(BASE, "code", "part_1", "D.temperature_filtering", "D.2.temperature_hector_processing.R"))
 source(file.path(BASE, "code", "part_1", "D.temperature_filtering", "D.3.temperature_filtering.R"))
 
 
 # E
 # CO2 Flux Filtering 
-#source(file.path(BASE, "code", "part_1", "E.flux_filtering", "E.1.cdiac_observation_processing.R"))
-#source(file.path(BASE, "code", "part_1", "E.flux_filtering", "E.2.flux_hector_processing.R"))
+source(file.path(BASE, "code", "part_1", "E.flux_filtering", "E.1.cdiac_observation_processing.R"))
+source(file.path(BASE, "code", "part_1", "E.flux_filtering", "E.2.flux_hector_processing.R"))
 source(file.path(BASE, "code", "part_1", "E.flux_filtering", "E.3.flux_filtering.R"))
 
 
 # F 
 # CO2 Growth 
-#source(file.path(BASE, "code", "part_1", "F.co2_growth_filtering", "F.1.cdiac_growth_processing.R"))
-#source(file.path(BASE, "code", "part_1", "F.co2_growth_filtering", "F.2.growth_hector_processing.R"))
+source(file.path(BASE, "code", "part_1", "F.co2_growth_filtering", "F.1.cdiac_growth_processing.R"))
+source(file.path(BASE, "code", "part_1", "F.co2_growth_filtering", "F.2.growth_hector_processing.R"))
 source(file.path(BASE, "code", "part_1", "F.co2_growth_filtering", "F.3.growth_filtering.R"))
 
 
 # G 
 # CO2 atm 
-#source(file.path(BASE, "code", "part_1", "G.atm_co2_filtering", "G.1.co2_noaa_processing.R"))
-#source(file.path(BASE, "code", "part_1", "G.atm_co2_filtering", "G.2.co2_hector_processing.R"))
+source(file.path(BASE, "code", "part_1", "G.atm_co2_filtering", "G.1.co2_noaa_processing.R"))
+source(file.path(BASE, "code", "part_1", "G.atm_co2_filtering", "G.2.co2_hector_processing.R"))
 source(file.path(BASE, "code", "part_1", "G.atm_co2_filtering", "G.3.co2_filtering.R" ))
 
 
