@@ -8,7 +8,7 @@ output: word_document
 
 # Import the figures
 BASE <- "C:/Users/dorh012/Documents/hector-SA-npar"
-path <- list.files(file.path(BASE, "lab_notebooks", "percent_threshold", "figs"), full.names = T) 
+path <- list.files(file.path(BASE, "docs", "lab_notebooks", "percent_threshold", "rcp26"), "figs.rda", full.names = T) 
 
 fig_list <- get(load(path))
 
@@ -18,7 +18,7 @@ fig_list <- get(load(path))
 
 
 ```{r, echo = F, fig.height=8, fig.width=8}
-fig_list$single_filter
+fig_list$run_count_1
 
 # * Applied a single filter to the rcp 26 results but used various percent threshold cut offs (40 to 100 % by 10)
 # * The percent criteia is written as a porportion in the legend 
@@ -48,12 +48,35 @@ fig_list$paramter_space
 ```
 
 
+```{r, echo = F, message = F, warning = F}
+#Purpose: this document is supposed to investigate the percent threshold and CO2 filtering process. 
+
+
+path <- list.files(file.path(BASE, "docs", "lab_notebooks", "percent_threshold", "rcp26_lawdomeCO2"), "figs.rda", full.names = T) 
+
+fig_list <- get(load(path))
+
+```
+
 
 ```{r, echo = F, fig.height=8, fig.width=8}
-fig_list$filter_combos
+fig_list$run_count_1
+```
 
-# * There are a few paramter combinations that pass through both the atm CO2 and atm growth filters
-# * There are more paramter combinatoins that pass thorugh both the atm CO2 and temp filters 
-# * Only 4 pass through atm CO2 and ladn flux, this makes sense considering the paramter space figure above where we noticed there was 
-#   little to no overlap in the parameter space
+```{r, echo = F, fig.height=10, fig.width=10}
+fig_list$paramter_space
+```
+
+
+```{r, echo = F, message = F, warning = F}
+#Purpose: this document is supposed to investigate the percent threshold and CO2 filtering process. 
+
+path <- list.files(file.path(BASE, "docs", "lab_notebooks", "constrained_CO2"), "figs.rda", full.names = T) 
+fig_list <- get(load(path))
+
+```
+
+
+```{r, echo = F, fig.height=8, fig.width=8}
+fig_list$run_count
 ```
