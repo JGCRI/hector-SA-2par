@@ -1,0 +1,74 @@
+---
+title: "Dn Metric Practice"
+output: word_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+## Langenbrunner's Dn Metric 
+
+The Draft 2006 technical paper uses a slightly different one then than what the Blanco and Hunkle Sea Ice Model. 
+
+In the Draft paper the normalized difference is weighted by $\frac{1}{n-param}$ whereas in Blanco and Hunkle Sea Ice the normalized difference is weighted by $\frac{1}{n}$ . I think that this is pretty trivial and that we can go with the Blanco and Hunkle Sea Ice method. 
+
+
+The big idea is that ${D}_{n}$ is a $\gamma$ distributed metric that takes into account both model and observational variablitly when judging the error between the model and observational data. 
+
+
+##### Part 1
+$${D}_{n} = \frac{1}{n}\sum_{i = 1}^{n}\frac{({O}_{i} - {M}_{i}) ^ 2}{{s}_{i}^2}$$
+
+**Equation 1:** This calculates ${D}_{n}$ the distance metric between an observation data point and a model data point nomalized by ${s}_{i}^2$ some sort of variability index. In the Sea Ice Model paper this was set equal to the sd of the the observational data we will probably want to do the same. 
+
+
+#### Part 2
+
+One of the advantages to using this method is that ${D}_{n}$ has a $\gamma$ distribution so we can judge the model output "matches" observations on some significance level. 
+
+
+We can figure out what the distribtuion of ${D}_{n}$ or $\gamma({D}_{n}, {a}, {b})$ with $a = \frac{n}{2}$ and $b = \frac{n}{2}^2 \sum_{i = 1}^{n}\frac{\sigma^2_{(O-M)}}{s_{i}^2} $
+
+
+##### Things we will need to decide on 
+
+- ${s}_{i}$ : in the sea ice paper they chose this value to represent the observational variablity and set it equal to the sd
+- $\sigma_{{O-M}}$ : in the sea ice paper was set to account for spatial variability and they mention that it could be set up to allow for temporal variability. Otherwise we could assume that there is no model variability but this would make the "matching" criteria harder. 
+- $\alpha$ : the significance level for the testing
+
+
+
+## Exploring Dn
+
+The number of Hector runs that significantly match the obs data based on the Dn and Dc statistics. I am a little unhappy that land flux is equal to 0, I think that this has to do with decsions related to the Dc stat.
+
+![](C:/Users/dorh012/Documents/hector-SA-npar/methods_check/Dn/run_count.png)
+
+
+
+
+A look at all the hector runs, the hector runs that match an obs, the top 10 Dn scores and the obs data.
+
+
+![](C:/Users/dorh012/Documents/hector-SA-npar/methods_check/Dn/Tgav_Hector_obs.png)
+
+![](C:/Users/dorh012/Documents/hector-SA-npar/methods_check/Dn/CO2_Hector_obs.png)
+
+
+
+![](C:/Users/dorh012/Documents/hector-SA-npar/methods_check/Dn/LandFlux_Hector_obs.png)
+
+
+
+Top ten Dn runs. 
+
+
+![](C:/Users/dorh012/Documents/hector-SA-npar/methods_check/Dn/top_10_ranking.png)
+
+
+
+A look at the different possible gamma distribtuions. The matches were determined by the red line.
+
+![](C:/Users/dorh012/Documents/hector-SA-npar/methods_check/Dn/Gammas.png)
+
+
