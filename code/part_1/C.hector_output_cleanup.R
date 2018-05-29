@@ -8,7 +8,7 @@ library( 'map' )
 rcpXX <- 'rcp26'
 
 # Select the variables to save as individual files. 
-keep_variables <- c('atm_land_flux', 'Ca', 'Tgav')
+keep_variables <- c('atm_land_flux', 'Ca', 'Tgav', 'npp')
 
 # --------------------------------------------------
 # The working directory should be the project directory. 
@@ -42,7 +42,8 @@ write.csv( filter_flag, file.path('./int-out', rcpXX, 'filter_flag.csv'), row.na
 # Format into the long format 
 cleanup_wide %>% 
   filter(variable %in% keep_variables) %>% 
-  gather(year, value, -run_name, -variable, -units) -> 
+  gather(year, value, -run_name, -variable, -units) %>% 
+  mutate(year = as.integer(gsub('X', '', year))) -> 
   long_format 
   
 # Separate into data sets by variable name
