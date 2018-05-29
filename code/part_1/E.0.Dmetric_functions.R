@@ -38,7 +38,7 @@ Dn_func <- function(data){
 # time series and the observational error values. This function will calculate b and a for the gama
 # distribution from the input data.
 
-Dc_func <- function(data, alpha){
+Dc_func <- function(data, alpha, use_rolling_sd = TRUE){
   
   # Check for required columns
   req_columns <- c('obs', 's2n')
@@ -50,8 +50,17 @@ Dc_func <- function(data, alpha){
   a <- n / 2 
   
   # Define the scale parameter
-  rolling_sd <- rollapply(data$obs, width = 5, FUN = function(x){ 2 * sd(x) }, na.pad = T)
-  sigma_sqrd <- mean( rolling_sd , na.rm = T ) ^ 2
+  if(use_rolling_sd){
+    
+    rolling_sd <- rollapply(data$obs, width = 5, FUN = function(x){ 2 * sd(x) }, na.pad = T)
+    sigma_sqrd <- mean( rolling_sd , na.rm = T ) ^ 2
+    
+  } else {
+    
+    sigma_sqrd <-  (2 * sd(data$obs)) ^ 2
+    
+  }
+
   b          <- (1/n^2) * sum(sigma_sqrd / data$s2n)
   
   # Find Dc based on the alpha percentile

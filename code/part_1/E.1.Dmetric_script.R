@@ -132,12 +132,48 @@ LandFlux_Dn_values %>%
 
 
 
-# 4. Save Outputs ------------------------------------------------------------------------
+# 4. NPP Only ---------------------------------------------------------------------------
+
+# Import the temperature data. 
+NPP_Dn_input <- read.csv(file.path(BASE, 'int-out', sub_dir, 'D.NPP_Dmetric_input_table.csv'), 
+                              stringsAsFactors = FALSE ) 
+
+# Calculate the Dn value for each Hector run 
+NPP_Dn_input %>%
+  split(.$run_name) %>% 
+  map_dfr(function(data = .x){ Dn_func(data) }) -> 
+  NPP_Dn_values
+
+
+# Subset the Dn input so that it only includes entries for one Hector run, so that 
+# is only contains one set of observational values. 
+NPP_Dn_input %>% 
+  filter(run_name == 'hectorSA-0001') %>% 
+  select(year, obs, s2n) %>% 
+  Dc_func(alpha = 0.05, use_rolling_sd = FALSE) %>% 
+  mutate(variable = 'NPP') ->
+  NPP_Dc
+
+
+# Add the Dc data to the Dn data frame. 
+NPP_Dn_values$index <- 1 
+NPP_Dc$index        <- 1
+
+NPP_Dn_values %>% 
+  left_join(NPP_Dc, by = 'index') %>% 
+  select(-index) -> 
+  NPP_Dmetric_results
+
+
+
+
+
+# 5. Save Outputs ------------------------------------------------------------------------
 
 #write.csv(Tgav_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.Tgav_Dmetric_results'), row.names = FALSE)
 #write.csv(atmCO2_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.atmCO2_Dmetric_results'), row.names = FALSE)
 #write.csv(LandFlux_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.LandFlux_Dmetric_results'), row.names = FALSE)
 
 
-Dmetric_results <- bind_rows(Tgav_Dmetric_results, atmCO2_Dmetric_results, LandFlux_Dmetric_results)
+Dmetric_results <- bind_rows(Tgav_Dmetric_results, atmCO2_Dmetric_results, LandFlux_Dmetric_results, NPP_Dmetric_results)
 write.csv(Dmetric_results, file = file.path(OUTPUT_DIR, 'E.all_Dmetric_results'), row.names = FALSE)
