@@ -8,8 +8,8 @@ This read me provides a general overview of the project code, for more deatils a
 
 The project code is broken up into three parts. 
 * `code/part_1`: standalone hector is run x times using the quasi random combinations of n C parameters. After cleaning up the hector 
-results the hector runs are filtered by observational data. 
-* `code/part_2`: parameter sets used in standalone Hector runs that pass through the observational filtering process are then used in hector - GCAM
+results the hector runs are compared to the observational data products using the Dn method.
+* `code/part_2`: select Hector parameter sets based on some criteria to pass along to use in Hector-GCAM.
 * `code/visualize`: contains the code to visualize and graph results.
 
 ![](./docs/flow_chart.png)
