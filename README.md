@@ -12,3 +12,4 @@ results the hector runs are compared to the observational data products using th
 * `code/part_2`: select Hector parameter sets based on some criteria to pass along to use in Hector-GCAM.
 * `code/visualize`: contains the code to visualize and graph results.
 
+![](./docs/flow_chart.png)
