@@ -15,27 +15,19 @@ library(tibble)
 
 
 # 0.A User decisions
-#
-# Decide a name for a sub directory that will be used to store the ini files and 
-# xml pointers. 
-sub_name   <- "min_mid_max"  
-
-# the rcp 
-rcpXX <- "rcp26"
-
-# 0.B Default set up 
-# Define directories
+sub_name          <- "extremes" 
 pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'; setwd( pic_hectorSA_path ) # Where the hecotr-SA-npar lives on pic
-pic_gcam_path     <- '/pic/projects/GCAM/Dorheim/CMS/gcam-core'                                  # where CMS gcam-core lives
-gcam_ini_path     <- file.path(pic_gcam_path, "input/climate", sub_name)                         # The dir to write the new hector-gcam ini files to 
-xml_pointer_path  <- file.path(pic_gcam_path, "exe/batch", sub_name)                             # The dir to write the poitner xml files to 
+param_path        <- file.path(pic_hectorSA_path, 'sub-out', 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
 
+# The gcam dirs must reflect the gcam parallel structure
+pic_gcam_path     <- '/pic/projects/GCAM/Dorheim/CMS/GCAM5/gcam-parallel'     # Where CMS gcam-parallel lives
+gcam_ini_path     <- file.path(pic_gcam_path, "input/climate", sub_name)      # The dir to write the new hector-gcam ini files to 
+xml_pointer_path  <- file.path(pic_gcam_path, "configuration-sets", sub_name) # The dir to write the poitner xml files to 
 
 
 # Decide what hector paramters to use in the hector-gcam ini files. These paramters should come 
 # from part 2 A that selects the paramter combinations to read into hector-gcam.
-param_sets <- readr::read_csv(file.path(pic_hectorSA_path, "int-out", rcpXX, "2A.selected_parameter_sets.csv"))
-
+param_sets <- read.csv(param_path, stringsAsFactors = FALSE)
 
 
 # Clean up or create the ini directory.
@@ -88,7 +80,7 @@ ini_path_list   <- lapply( 1 : nrow( param_sets ), function( i ) {
   q10  <- param_sets[ i, 'q10' ]
   s    <- param_sets[i, 's']
   diff <- param_sets[ i, 'diff' ]
-# run_index <- sprintf( paste0('%0', run_index_total_digits, 'd' ), param_sets[ i, 'run_index' ] )
+  # run_index <- sprintf( paste0('%0', run_index_total_digits, 'd' ), param_sets[ i, 'run_index' ] )
   
   # Create the path and the file for the new ini
   run_name <- param_sets[i, 'run_name']
@@ -127,10 +119,10 @@ create_pointer_xml <- function(input, output_ini_path){
   replacement <- input[["replacement"]]
   xml_name    <- input[["new_ini"]]
   
-
+  
   # Load the template xml file
   xml_doc <- xmlTreeParse(file.path(pic_hectorSA_path, "input", "xml_pointer_template.xml"), useInternal = TRUE)
-
+  
   # Replace the string in the xml node with the new one pointing to the nex xml file.
   lapply(getNodeSet(xml_doc, "//hector-ini-file"), function(n) {
     xmlValue(n) <- gsub("../input/climate/rcpXX/replace.ini", replacement, xmlValue(n))
@@ -138,7 +130,7 @@ create_pointer_xml <- function(input, output_ini_path){
   
   # Save the pointer xml
   saveXML(xml_doc, file = file.path(output_ini_path, xml_name))
-
+  
   # Clean up and return useful information
   remove(xml_doc)
   
@@ -190,12 +182,12 @@ batch_maker <- function(xml_df, batch_path, batch_name){
 # Use the pointer xml full file names to create columns for the scenario 
 # name and relative xml path. 
 tibble(full_name = pointer_xmls) %>% 
-  mutate(xml_path = gsub(paste0(pic_gcam_path, "/exe/"), "", full_name)) %>% 
+  mutate(xml_path = gsub(paste0(pic_gcam_path, "/configuration-sets/"), "", full_name)) %>% 
   mutate(scenario_name = gsub(".xml", "", basename(xml_path))) -> 
   xml_df
 
 
-batch_maker(xml_df, file.path(pic_gcam_path, "exe/batch"), sub_name)
+batch_maker(xml_df, file.path(pic_gcam_path, "configuration-sets/"), sub_name)
 
 
 # End ---- 

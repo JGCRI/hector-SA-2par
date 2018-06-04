@@ -1,5 +1,6 @@
 # Purpose: Calculate the Dn statistics for each Hector run and the Dc cut off value. 
-# This script requires functions defined in E.0.Dmetric_functions
+# This script requires functions defined in E.0.Dmetric_functions. This calculates the 
+# Dn metric scores for each variable / observational product independently. 
 
 # 0. Set Up ------------------------------------------------------------------------
 # The working directory should be the project directory. 
@@ -166,14 +167,12 @@ NPP_Dn_values %>%
 
 
 
-
-
 # 5. Save Outputs ------------------------------------------------------------------------
 
-#write.csv(Tgav_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.Tgav_Dmetric_results'), row.names = FALSE)
-#write.csv(atmCO2_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.atmCO2_Dmetric_results'), row.names = FALSE)
-#write.csv(LandFlux_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.LandFlux_Dmetric_results'), row.names = FALSE)
+# write.csv(Tgav_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.Tgav_Dmetric_results'), row.names = FALSE)
+# write.csv(atmCO2_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.atmCO2_Dmetric_results'), row.names = FALSE)
+# write.csv(LandFlux_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.LandFlux_Dmetric_results'), row.names = FALSE)
 
-
+# Save as a large file
 Dmetric_results <- bind_rows(Tgav_Dmetric_results, atmCO2_Dmetric_results, LandFlux_Dmetric_results, NPP_Dmetric_results)
-write.csv(Dmetric_results, file = file.path(OUTPUT_DIR, 'E.all_Dmetric_results'), row.names = FALSE)
+write.csv(Dmetric_results, file = file.path(OUTPUT_DIR, 'E.all_Dmetric_independent_results.csv'), row.names = FALSE)

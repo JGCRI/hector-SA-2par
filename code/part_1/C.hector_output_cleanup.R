@@ -45,7 +45,7 @@ cleanup_wide %>%
   gather(year, value, -run_name, -variable, -units) %>% 
   mutate(year = as.integer(gsub('X', '', year))) -> 
   long_format 
-  
+
 # Separate into data sets by variable name
 data_list <- split(long_format, long_format$variable)
 

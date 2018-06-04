@@ -8,6 +8,7 @@ if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be t
 library(purrr)
 library(dplyr)
 library(ggplot2)
+library(VennDiagram)
 
 
 # Define directories
@@ -46,6 +47,9 @@ Dn_matching_long %>%
   Dn_matching_wide
 
 
+# NPP observation and Hector data 
+NPP_data <- read.csv(file.path(OUTPUT_DIR, 'D.NPP_Dn_input_table.csv'), stringsAsFactors = FALSE)
+
 # 2. Run Count Figures ------------------------------------------------------------------------
 
 # The number of passing runs per variable 
@@ -61,7 +65,7 @@ ggplot(run_count_df) +
   labs(x = NULL, 
        y = 'number of matching runs', 
        title = 'Dn metric matching run count', 
-       caption = 'alpha = 0.05 \n window = 15 \n sigma = 2 * sd') -> 
+       caption = 'alpha = 0.05 \n window = 15 \n sigma = 2 * sd \n rolling sd not used on NPP') -> 
   script_output$Dn_matching_count
 
 
@@ -84,8 +88,54 @@ ggplot(stacked_run_count) +
   labs(x = NULL, 
        y = 'number of matching runs', 
        title = 'Dn metric matching run count for stacked variables', 
-       caption = 'alpha = 0.05 \n window = 15 \n sigma = 2 * sd') + 
+       caption = 'alpha = 0.05 \n window = 15 \n sigma = 2 * sd \n rolling sd not used for NPP') + 
   theme(legend.title = element_blank()) ->
   script_output$Dn_matching_count_stacked
+
+# Save the run names as individual sets for used in the VienDiagram! 
+atmCO2_set   <- pull(select(filter(Dn_matching_wide, `atm CO2` == 1), run_name))
+LandFlux_set <- pull(select(filter(Dn_matching_wide, `Land Flux` == 1), run_name))
+Tgav_set     <- pull(select(filter(Dn_matching_wide, `Tgav` == 1), run_name))
+NPP_set      <- pull(select(filter(Dn_matching_wide, `NPP` == 1), run_name))
+
+
+venn.diagram(list("Land Flux" = LandFlux_set, "atm CO2" = atmCO2_set, "Tgav" = Tgav_set, 
+                  "NPP" = NPP_set),
+             fill = c("red", "green", "blue", "orange"),
+             alpha = c(0.5, 0.5, 0.5, 0.5), cex = 2, main = "Matching Dn Metric Run Count",
+             filename = "./diag-out/run_count_venndiagram.png")
+
+
+
+# 3. Obs vs Hector Figures -------------------------------------------------------------------------------
+
+
+# Plot all of the Hector NPP values and observational data. Mark the runs that "match" based on the Dn metric. 
+
+NPP_obs <- filter(NPP_data, run_name == 'hectorSA-0001')
+
+NPP_data %>% 
+  filter(run_name %in% pull(filter(Dn_matching_wide, NPP == 1), run_name)) -> 
+  matching_NPP
+
+
+ggplot() + 
+  geom_line(data = NPP_data, aes(year, model, color = 'Hector', group = run_name)) + 
+  geom_line(data = matching_NPP, aes(year, model, color = "Matching Hector", group = run_name)) + 
+  geom_ribbon(data = NPP_obs, aes(year, ymin = obs - s2n, ymax = obs + s2n, fill = 'observational data'), alpha = 0.3)+ 
+  geom_line(data = NPP_obs, aes(year, obs, color= 'observational data'), size = 1.5) + 
+  scale_color_manual(values = c('grey', 'pink', 'blue')) + 
+  scale_fill_manual(values = c('blue')) + 
+  labs(title = 'Hector Runs vs Global MODIS NPP', 
+       x = 'year', 
+       y = 'Pg C / Yr') + 
+  theme_bw()
+
+
+
+  
+  
+
+
 
 
