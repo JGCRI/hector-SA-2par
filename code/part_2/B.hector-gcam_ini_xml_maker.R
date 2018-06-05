@@ -93,10 +93,10 @@ ini_path_list   <- lapply( 1 : nrow( param_sets ), function( i ) {
   
   # Change the paramter values in the ini file to match the paramter values from the 
   # paramter set csv file.
-  new_ini[ 75 ]  <- paste0( 'beta=', beta, '     \t; 0.36=about +20% @2xCO2' ) 
-  new_ini[ 76 ]  <- paste0( 'q10_rh=', q10, '\t\t; respiration response Q10, unitless' )
-  new_ini[ 146 ] <- paste0( 'S=', s, ' \t\t\t\t; equilibrium climate sensitivity for 2xCO2, degC' )
-  new_ini[ 147 ] <- paste0( 'diff=', diff, '\t\t\t; ocean heat diffusivity, cm2/s' )
+  new_ini[ 69 ]  <- paste0( 'beta=', beta, '     \t; 0.36=about +20% @2xCO2' ) 
+  new_ini[ 70 ]  <- paste0( 'q10_rh=', q10, '\t\t; respiration response Q10, unitless' )
+  new_ini[ 140 ] <- paste0( 'S=', s, ' \t\t\t\t; equilibrium climate sensitivity for 2xCO2, degC' )
+  new_ini[ 141 ] <- paste0( 'diff=', diff, '\t\t\t; ocean heat diffusivity, cm2/s' )
   writeLines( new_ini, ini_file )
   close( ini_file )
   
