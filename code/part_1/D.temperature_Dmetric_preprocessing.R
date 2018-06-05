@@ -18,6 +18,10 @@ sub_dir <- 'rcp26'
 BASE <- getwd() 
 INT_OUTPUT_DIR <- file.path(BASE, 'int-out', sub_dir)
 
+# Define the reference period for the observational products and the 
+# Hector data. 
+ref_period <- 1950:1990
+
 # 1. Import and Format Obs Data ------------------------------------------------------------------------
 
 # Import and format the observational data set. 
@@ -31,6 +35,23 @@ ob_df %>%
   # Discard the entries that have NAs for some of the observations.
   na.omit %>% 
   gather(source, value, GISS, NOAA, HadCRUT4, Berkeley) %>% 
+  group_by(year) -> 
+  temp_data_long 
+
+
+# Subset the temperature data and determine the average temperature
+# for each source over the reference period. 
+temp_data_long %>% 
+  filter(year %in% ref_period) %>% 
+  group_by(source) %>%  
+  summarise(ref_value = mean(value)) %>% 
+  ungroup -> 
+  reference_df
+
+# Remove the reference value from the observational data. 
+temp_data_long %>%
+  full_join(reference_df, by = 'source') %>% 
+  mutate(value = value - ref_value) %>% 
   group_by(year) %>% 
   summarise(obs = mean(value), 
             s2n = var(value)) %>% 
@@ -49,7 +70,7 @@ hector_data      <- read.csv(hector_tgav_path, stringsAsFactors = FALSE)
 
 # Find the mean temperature for each run over the observation reference period.
 hector_data %>%  
-  filter(year %in% 1951 : 1990, 
+  filter(year %in% ref_period, 
          variable == "Tgav") %>% 
   group_by(run_name) %>% 
   summarise(ref_value = mean(value)) %>% 

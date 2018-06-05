@@ -2,6 +2,9 @@
 .Rproj.user
 
 code/run-all.R
+docs/**
+diag-out/**
 
 **.out
 **.csv
+
