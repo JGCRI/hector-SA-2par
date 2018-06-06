@@ -14,7 +14,7 @@ library(xml2)
 library(tibble)
 
 
-# 0.A User decisions
+# User decisions
 sub_name          <- "extremes" 
 pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'; setwd( pic_hectorSA_path ) # Where the hecotr-SA-npar lives on pic
 param_path        <- file.path(pic_hectorSA_path, 'sub-out', 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
@@ -34,7 +34,7 @@ param_sets <- read.csv(param_path, stringsAsFactors = FALSE)
 if(dir.exists(gcam_ini_path)){
   
   old_ini <- as.vector(list.files(gcam_ini_path, ".ini", full.names = T))
-  message("Removing ", paste(old_ini, collapse = " , "))
+  message("Removing old ", sub_name, "/ini files.")
   file.remove(old_ini)
   
 } else {
@@ -46,7 +46,7 @@ if(dir.exists(gcam_ini_path)){
 if(dir.exists(xml_pointer_path)){
   
   old_xml <- as.vector(list.files(xml_pointer_path, ".xml", full.names = T))
-  message("Removing ", paste(old_xml, collapse = " , "))
+  message("Removing old ", sub_name, "/xml files.")
   file.remove(old_xml)
   
 } else {
@@ -70,7 +70,7 @@ template_name <- paste0("hector-gcam_template.ini")
 ini_template  <- readLines(file.path(pic_hectorSA_path, "input", "hector-gcam_template.ini"))
 
 # This is left over from LY idk what it does
-run_index_total_digits <- nchar( as.character( max( param_sets$run_index ) ) )  
+run_index_total_digits <- nrow(param_sets)
 
 # Create the hector gcam ini files using the paramters extracted from the filtered paramter sets file.
 ini_path_list   <- lapply( 1 : nrow( param_sets ), function( i ) { 
@@ -182,12 +182,12 @@ batch_maker <- function(xml_df, batch_path, batch_name){
 # Use the pointer xml full file names to create columns for the scenario 
 # name and relative xml path. 
 tibble(full_name = pointer_xmls) %>% 
-  mutate(xml_path = gsub(paste0(pic_gcam_path, "/configuration-sets/"), "", full_name)) %>% 
+  mutate(xml_path = paste0("..", gsub(pic_gcam_path, "", full_name))) %>% 
   mutate(scenario_name = gsub(".xml", "", basename(xml_path))) -> 
   xml_df
 
 
-batch_maker(xml_df, file.path(pic_gcam_path, "configuration-sets/"), sub_name)
+batch_maker(xml_df, file.path(pic_gcam_path, "/configuration-sets/"), sub_name)
 
 
 # End ---- 
