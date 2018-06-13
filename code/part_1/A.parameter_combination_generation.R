@@ -29,7 +29,7 @@ names( combination_df ) <- c( 'beta', 'q10', 's', 'diff' )
 # so shift the range from 0 - 1 to desired range for each parameter 
 
 # shift the beta from 0 ~ 1 to 0 ~ 1 
-# so shift is needed 
+# so no shift is needed 
 
 # shift the q10 from 0 ~ 1 to 0.2 ~ 5 
 combination_df$q10 <- combination_df$q10 * ( max( q10_range ) - min( q10_range ) ) + min( q10_range )
