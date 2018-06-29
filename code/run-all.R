@@ -10,8 +10,6 @@
 BASE <- getwd() 
 if(basename(BASE) != "hector-SA-npar"){stop("Working directory should be the project location.")}
 
-
-
 # Part 1 ---------------------------------------------------------------------------------------------------
 
 # A 
@@ -41,7 +39,7 @@ if(basename(BASE) != "hector-SA-npar"){stop("Working directory should be the pro
 source(file.path(BASE, 'code', 'part_1', 'D.atmCO2_Dmetric_preprocessing.R'))
 source(file.path(BASE, 'code', 'part_1', 'D.LandFlux_Dmetric_preprocessing.R'))
 source(file.path(BASE, 'code', 'part_1', 'D.NPP_Dmetric_preprocessing.R'))
-source(file.path(BASE, 'code', 'part_1', 'D.temperature_Dmetric_preprocessing.R'))
+source(file.path(BASE, 'code', 'part_1', 'D.Tgav_Dmetric_preprocessing.R'))
 
 # E 
 # 
@@ -62,6 +60,21 @@ source(file.path(BASE, 'code', 'part_2', 'A.1.parameter_selection_extremes_metho
 # 
 # Make the Hector GCAM inis, pointer xmls, and batch xml. This script needs to be run on pic or wherever 
 # gcam-parallel is set up. 
-source(file.path(BASE, 'code', 'part_2', 'B.hector-gcam_ini_xml_maker.R'))
+# source(file.path(BASE, 'code', 'part_2', 'B.hector-gcam_ini_xml_maker.R'))
 
-# Part 2 is not complete... 
+# C 
+#
+# Extract queries from the database_basexdbs and save in a single rgcam.proj output. This script 
+# needs to be run on pic or wherever the gcam-parallel strucutre is set up. 
+# source(file.path(BASE, 'code', 'part_2', 'C.extract_GCAM_database_basexdb'))
+
+# D 
+# 
+# Process the rgcam project into a series of tibbles that is ready fro visualization and anlaysis. 
+# This script depends on the merged project created in step C is saved in the sub-out directory. 
+source(file.path(BASE, 'code', 'part_2', 'D.process_GCAM_output.R'))
+
+
+# Visualize --------------------------------------------------------------------------------------
+
+# TODO... 
