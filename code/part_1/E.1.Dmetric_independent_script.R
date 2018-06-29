@@ -25,7 +25,7 @@ source(file.path(BASE, 'code', 'part_1', 'E.0.Dmetric_functions.R'))
 # temperature record. 
 
 # Import the temperature data. 
-Tgav_Dn_input <- read.csv(file.path(BASE, 'int-out', sub_dir, 'D.temperature_Dmetric_input_table.csv'), 
+Tgav_Dn_input <- read.csv(file.path(BASE, 'int-out', sub_dir, 'D.Tgav_Dmetric_input_table.csv'), 
                           stringsAsFactors = FALSE ) 
 
 # Calculate the Dn value for each Hector run 
@@ -40,7 +40,7 @@ Tgav_Dn_input %>%
 Tgav_Dn_input %>% 
   filter(run_name == 'hectorSA-0001') %>% 
   select(year, obs, s2n) %>% 
-  Dc_func(alpha = 0.05) %>% 
+  Dc_func(alpha = 0.05, sd_coef = 2) %>% 
   mutate(variable = 'Tgav') ->
   Tgav_Dc
 
@@ -174,5 +174,5 @@ NPP_Dn_values %>%
 # write.csv(LandFlux_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.LandFlux_Dmetric_results'), row.names = FALSE)
 
 # Save as a large file
-Dmetric_results <- bind_rows(Tgav_Dmetric_results, atmCO2_Dmetric_results, LandFlux_Dmetric_results, NPP_Dmetric_results)
+Dmetric_results <- bind_rows(Tgav_Dmetric_results, atmCO2_Dmetric_results, NPP_Dmetric_results)
 write.csv(Dmetric_results, file = file.path(OUTPUT_DIR, 'E.all_Dmetric_independent_results.csv'), row.names = FALSE)
