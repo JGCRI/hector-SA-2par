@@ -9,6 +9,7 @@
 # Load required libs
 library(dplyr)
 library(tidyr)
+library(knitr)
 library(ggplot2)
 
 # Set up the dirs
@@ -17,7 +18,7 @@ sub_dir <- "rcp26"                                      # Define the int-out sub
 Dn_file <- "E.all_Dmetric_independent_results.csv"      # Define the Dn metric file to process 
 
 # Variables 
-variable_list <- c("atm CO2", "Land Flux", "NPP", "Tgav")
+variable_list <- c("atm CO2", "NPP", "Tgav")
 
 # Load the selection functions 
 source(file.path(BASE, 'code', 'part_2', 'A.0.Hector_run_selection_functions.R'))
@@ -29,6 +30,7 @@ script_output = list()
 
 # Import the Dn results
 readr::read_csv(list.files(file.path(BASE,'int-out', sub_dir), Dn_file, full.names = T)) %>%  
+  filter(variable %in% variable_list) %>% 
   mutate(passing = if_else(Dn <= Dc, T, F)) %>% 
   select(run_name, variable, passing) %>% 
   spread(variable, passing) -> 
@@ -42,56 +44,28 @@ read.csv(list.files(file.path(BASE,'int-out', sub_dir), "C.Tgav_hector_run_clean
   Hector_2100_values
 
 # Combine the wide Dn metric data and the Hector 2100 values into a single data frame.
-Dn_Hector_2100 <- full_join(wide_passing_Dn, Hector_2100_values, by = "run_name") 
+Dn_Hector_2100          <- full_join(wide_passing_Dn, Hector_2100_values, by = "run_name") 
+categorized_2100_values <- categorize_runs(Dn_Hector_2100, variable_list)
 
 # Now that the passing Dn metric and 2100 Hector values are combined into a single data 
 # frame select the extreeme values in each observation category.
-extreeme_values <- select_extreeme_values(data = Dn_Hector_2100,  obs_list = c("atm CO2", "Land Flux", "NPP", "Tgav")) 
+extreme_values <- select_extreme_values(Dn_Hector_2100, variable_list) 
   
 # Count the runs.
-run_count_df <- run_count(data = Dn_Hector_2100,  obs_list = c("atm CO2", "Land Flux", "NPP", "Tgav")) 
+run_count_df <- run_count(Dn_Hector_2100, variable_list) 
 
 
-# 1.B. Plot Extreeme 2100 Tgav --------------------------------------------------------------------------
+# 1.B. Diagnotic Plots --------------------------------------------------------------------------
 
-# Plot the range of the 2100 values. 
-# In order to make the plot a little more coherent oroder the filters by the magnitude of the difference. 
-extreeme_values %>% 
-  group_by(filter_name) %>% 
-  # Calculate the magnitude of the range.
-  summarise(value = abs(diff(value))) %>% 
-  ungroup  %>% 
-  # Arrange the data frame by the range magnitude.
-  arrange(desc(value)) -> 
-  filter_factor_order
+# Plot the 2100 values and the extreme values that are going to be used in Hector-GCAM. 
 
-# Add the max value to the run count data frame to use as the location for where to plot the 
-# run count. 
-extreeme_values %>% 
-  filter(extreeme == 'max') %>%  
-  select(filter_name, value) %>%  
-  left_join(run_count_df, by = 'filter_name') -> 
-  run_count_df
-
-# Use the filter names from the filter_factor_order data frame as factor levels.
-extreeme_values$filter_name <- factor(x = extreeme_values$filter_name, levels = filter_factor_order$filter_name, order = TRUE)
-run_count_df$filter_name    <- factor(x = run_count_df$filter_name, levels = filter_factor_order$filter_name, order = TRUE)
-
-# Plot the range
-extreeme_values %>% 
-  ggplot(aes(filter_name, value, color = filter_name, fill = filter_name)) + 
-  geom_line(size = 10) + 
-  theme(axis.text.x = element_text(angle = 60, hjust = 1), 
-        legend.title = element_blank(), 
-        legend.position = 'none', 
-        text = element_text(size=14)) + 
-  geom_text(data = run_count_df, aes(x = filter_name, y = value, label = count), size = 5, vjust=-.2) + 
-  labs(x = NULL, 
-       y = '2100 Tgav deg C', 
-       title = '2100 Tgav Range', 
-       caption = 'With the number of runs that match the obs combinations') -> 
-  script_output$'2100_Tgav_range'
-
+categorized_2100_values %>% 
+  full_join(run_count_df, by = 'filter_name') %>% 
+  ggplot() + 
+  geom_jitter( aes(filter_name, value, color = filter_name) ) + 
+  geom_point( data = extreme_values, aes(filter_name, value)) + 
+  labs(title = 'Hector-GCAM run selection') -> 
+  diag_plot
 
 
 # 2. Create the Selected Parameter Set -------------------------------------------------------------
@@ -105,13 +79,24 @@ parameter_set$run_name <- paste0( 'hectorSA-', sprintf( '%04d', parameter_set$ru
 # method can include duplicates but we do not want to spend computing time running 
 # duplicate Hector-GCAM runs.
 parameter_set %>% 
-  filter(run_name %in% unique(extreeme_values$run_name)) %>% 
+  filter(run_name %in% unique(extreme_values$run_name)) %>% 
   select(-run_index) -> 
   Hector_GCAM_parameters
+
+# Make a mapping file of the selected paramter runs to keep track of why a partifular run was selected. 
+extreme_values %>% 
+  select(run_name, variable, filter_name, extreme) %>% 
+  distinct -> 
+  Hector_GCAM_parameter_mapping
+
 
 # Save the output in the secondary output file
 file_name <- file.path( BASE, 'sub-out', 'A.Hector_GCAM_parameters.csv' )
 write.csv( Hector_GCAM_parameters, file = file_name, row.names = FALSE )
+
+file_name <- file.path(BASE, 'sub-out', 'A.Hector_GCAM_parameters_mapping.csv')
+write.csv( Hector_GCAM_parameter_mapping, file = file_name, row.names = FALSE )
+save(script_output, file = file.path(BASE, 'diag-out', 'Tgav_2100.rda'))
 
 # End
 
