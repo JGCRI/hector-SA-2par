@@ -26,19 +26,27 @@ dirs <- dir(pattern = "exe_", full.names = T)
 proj_list  <- file.path(dirs,  paste0('proj_', basename(dirs), '.proj'))
 
 for (prj in proj_list){
-  path         <- dirname(proj_list[prj])
-  conn         <- localDBConn(dbPath = file.path(path, "db"), dbFile = "database_basexdb")
-  project_file <- addScenario(conn, proj_list[prj], queryFile = query_path)
+
+    path <- dirname(proj_list[prj])
+    
+    contents <- list.dirs(path, full.names = T, recursive = T)
+    
+    if( any( grepl("database_basexdb", contents) ) ){
+      
+      conn         <- localDBConn(dbPath = file.path(path, "db"), dbFile = "database_basexdb")
+      project_file <- addScenario(conn, proj_list[prj], queryFile = query_path)
+      
+    }
 }
 
-message('Saving... ', paste(proj_list, sep = ', '))
+message('Saving... \n', paste(proj_list, collapse =  ' \n'))
 
 
 # 2. Concatenate projs ---------------------------------------------------------------------------
 
 # Merge the projects into a single proj
 proj_files <- list.files(pattern = "proj_[0-9]+.proj", recursive = T, full.names = T)
-prj        <- mergeProjects("proj_merge.proj", proj_files, clobber = TRUE)
+prj        <- mergeProjects("proj_merge.proj", proj_files)
 
 message('Saving... ', proj_merge.proj)
 # End
