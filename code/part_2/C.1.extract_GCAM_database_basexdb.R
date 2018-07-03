@@ -46,6 +46,7 @@ message('Saving... \n', paste(proj_list, collapse =  ' \n'))
 
 # Merge the projects into a single proj
 proj_files <- list.files(pattern = "proj_[0-9]+.proj", recursive = T, full.names = T)
+proj_files <- proj_files[file.exists(proj_files)]
 prj        <- mergeProjects("proj_merge.proj", proj_files)
 
 message('Saving... ', proj_merge.proj)

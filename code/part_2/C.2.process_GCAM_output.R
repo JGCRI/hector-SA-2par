@@ -47,9 +47,9 @@ gcam_run_mapping <- read.csv(path, stringsAsFactors = FALSE)
 modify_depth(gcam_proj, 2, function(input){
   
   input %>% 
-    separate(col = scenario, into  = c("run_name", "policy"), sep = "__", remove = TRUE) %>%        # Extract the run_name and the policy name from the scenario name
-    inner_join(select(gcam_run_mapping, run_name, filter_name), by = "run_name") %>%                # Add the filter_name category by joining the gcam_run_mapping file
-    rename(units = Units) ->                                                                        # Rename units 
+    separate(col = scenario, into  = c("run_name", "policy"), sep = "_", remove = TRUE) %>%        # Extract the run_name and the policy name from the scenario name
+    inner_join(select(gcam_run_mapping, run_name, filter_name, extreme), by = "run_name") %>%      # Add the filter_name category by joining the gcam_run_mapping file
+    rename(units = Units) ->                                                                       # Rename units 
     output 
     
   output$filter_name <- factor(output$filter_name, filterName_factor, ordered = TRUE)   # Add factor levels
