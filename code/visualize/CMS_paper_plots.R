@@ -377,7 +377,7 @@ to_plot <- gcam_output
 
 # Calculate the Global CO2 emissions
 gcam_output$`CO2 emissions by region` %>% 
-  group_by(run_name, year, filter_name, units, policy) %>%
+  group_by(run_name, year, filter_name, units, policy, extreme) %>%
   summarise(value = sum(value)) %>%
   ungroup ->
   to_plot$'Global CO2 emissions'
@@ -386,19 +386,38 @@ gcam_output$`CO2 emissions by region` %>%
 # Calculate the total primary energy consumption in the US. 
 gcam_output$'Energy consumption by sector'%>% 
   filter(region == "USA") %>% 
-  group_by(run_name, year,filter_name, units, policy) %>% 
+  group_by(run_name, year,filter_name, units, policy, extreme) %>% 
   summarise(value = sum(value)) %>% 
   ungroup -> 
   to_plot$'Total energy consumption in USA'
 
+# Create a mapping tibble that catgorizes the fuels into different fuel classes. 
+tibble( fuel =  unique(gcam_output$`Primary Energy Consumption (Direct Equivalent)`$fuel)) %>% 
+  mutate(fuel_class = if_else(grepl("[B|b]iomass", fuel), "bioenergy", "NA")) %>% 
+  mutate(fuel_class = if_else(fuel %in% c("Coal", "Oil", "Natural Gas"), "fossil fuel", fuel_class)) %>% 
+  mutate(fuel_class = if_else(fuel %in% c("Geothermal", "Hydro", "Nuclear", "Solar", "Wind"), "renewable", fuel_class)) %>% 
+  filter_all(all_vars(. != "NA")) -> 
+  fuel_mapping
+
+gcam_output$`Primary Energy Consumption (Direct Equivalent)` %>% 
+  filter(region == 'USA') %>% 
+  full_join(fuel_mapping, by = 'fuel') %>% 
+  group_by(run_name, policy, year, filter_name, fuel_class, extreme) %>% 
+  summarise(value = sum(value)) %>% 
+  ungroup %>% 
+  na.omit %>% 
+  mutate(units = NA)  ->
+  to_plot$'USA categorized primary energy consumption'
 
 # 4 B GCAM Plots ------------------------------------------------------------------------------------------------
 
 # Make a list of the queries and observational filters to plot
-plot_queries        <- list('CO2 concentrations', 'Global mean temperature', 'Climate forcing', 'Total energy consumption in USA', 'Global CO2 emissions') 
+plot_queries        <- list('CO2 concentrations', 'Global mean temperature', 'Climate forcing',
+                            'Total energy consumption in USA', 'Global CO2 emissions') 
 names(plot_queries) <- plot_queries
 
-plot_filters <- c('None', 'atm CO2', 'atm CO2, NPP, Tgav')
+#plot_filters <- c('None', 'atm CO2', 'atm CO2, NPP, Tgav')
+plot_filters <- unique(to_plot$`CO2 concentrations`$filter_name)
 
 # Plot the reference runs only
 # Map the ploting code to all of the query tibbles.
@@ -430,7 +449,7 @@ map(plot_queries, function(query_name,
   # Create the line plot
   ggplot(to_plot) +
     geom_line(aes(year, value, color = filter_name, group = run_name), size = 1.5) +
-    geom_point(data = points_tibble, aes(year, value, color = filter_name), size = 2) +
+    geom_point(data = points_tibble, aes(year, value, color = filter_name, shape = extreme), size = 2) +
     scale_color_manual(values = color_vector[ names(color_vector) %in% unique(to_plot$filter_name) ]) +
     UNIVERSTAL_THEME +
     theme(legend.position = 'bottom') +
@@ -444,11 +463,14 @@ map(plot_queries, function(query_name,
 
 # Plot the target runs only 
 # Map the polting code to all fo the query tibbles. 
-map(plot_queries, function(query_name, 
-                           filters = 'Tgav',
-                           policy_name = '2deg', 
+map(c(plot_queries,
+      "CO2 prices" = "CO2 prices",
+      "USA categorized primary energy consumption" = "USA categorized primary energy consumption"), 
+    function(query_name, 
+                           filters = plot_filters,
+                           policy_name = 'RF-2p6', 
                            data = to_plot, 
-                           subtitle = 'policy runs'){
+                           subtitle = 'target runs'){
   
   # Subset the data and arrange so that the color order is correct
   data[[query_name]] %>% 
@@ -462,7 +484,7 @@ map(plot_queries, function(query_name,
     filter(year == 2100) %>% 
     filter(filter_name %in% to_plot$filter_name) %>%
     select(-year) %>% 
-    bind_cols(year = seq(from = 2101.5, by = 1, length.out = nrow(.))) ->
+    bind_cols(year = seq(from = 2101, by = 0.5, length.out = nrow(.))) ->
     points_tibble
   
   # # Parse information variable and unit infromation to use to lable the plots
@@ -472,51 +494,7 @@ map(plot_queries, function(query_name,
   # Create the line plot
   ggplot(to_plot) +
     geom_line(aes(year, value, color = filter_name, group = run_name), size = 1.5) +
-    geom_point(data = points_tibble, aes(year, value, color = filter_name), size = 2) +
-    scale_color_manual(values = color_vector[ names(color_vector) %in% unique(to_plot$filter_name) ]) +
-    UNIVERSTAL_THEME +
-    theme(legend.position = 'bottom') +
-    labs(title = query_name,
-         subtitle = subtitle,
-         y = units)
-  
-}) -> 
-  script_output$gcam$policy_only
-
-
-
-# Plot the difference between the policy and the refernce runs 
-# Plot the policy runs only 
-# Map the polting code to all fo the query tibbles. 
-map(plot_queries, function(query_name, 
-                           filters = 'Tgav',
-                           policy_name = '2deg', 
-                           data = to_plot, 
-                           subtitle = 'target runs'){
-  
-  # Subset the data and arrange so that the color order is correct
-  data[[query_name]] %>% 
-    filter(filter_name %in% filters) %>% 
-    filter(year >= 2010 & policy == policy_name) -> 
-    to_plot
-  
-  # Create a tibble of of 2100 manx and mins to plot past year 2100 to represent 
-  # the spread.
-  to_plot %>% 
-    filter(year == 2100) %>% 
-    filter(filter_name %in% to_plot$filter_name) %>%
-    select(-year) %>% 
-    bind_cols(year = seq(from = 2101.5, by = 1, length.out = nrow(.))) ->
-    points_tibble
-  
-  # # Parse information variable and unit infromation to use to lable the plots
-  units  <- unique(to_plot$units)
-  q_name <- query_name
-  
-  # Create the line plot
-  ggplot(to_plot) +
-    geom_line(aes(year, value, color = filter_name, group = run_name), size = 1.5) +
-    geom_point(data = points_tibble, aes(year, value, color = filter_name), size = 2) +
+    geom_point(data = points_tibble, aes(year, value, color = filter_name, shape = extreme), size = 2) +
     scale_color_manual(values = color_vector[ names(color_vector) %in% unique(to_plot$filter_name) ]) +
     UNIVERSTAL_THEME +
     theme(legend.position = 'bottom') +
@@ -527,63 +505,73 @@ map(plot_queries, function(query_name,
 }) -> 
   script_output$gcam$target_only
 
+# Modify the primary energy consumption plot
+script_output$gcam$target_only$`USA categorized primary energy consumption`+
+  facet_wrap('fuel_class', scales = 'free') + 
+  labs(y = NULL) ->
+  script_output$gcam$target_only$`USA categorized primary energy consumption`
+  
 
-# Plot the policy results
-map(plot_queries, function(query_name, 
-                           filters = 'Tgav',
+
+# Plot the difference between the policy and the refernce runs 
+# Plot the policy runs only 
+# Map the polting code to all fo the query tibbles. 
+map(c(plot_queries,  "CO2 prices" = "CO2 prices", 
+      "USA categorized primary energy consumption" = "USA categorized primary energy consumption"),
+    function(query_name, 
+                           filters = plot_filters,
                            policy_name = 'policy', 
                            data = to_plot, 
-                           subtitle = 'policy runs (target - reference)'){
-    
-    # Subset the data and arrange so that the color order is correct
-    data[[query_name]] %>% 
-      filter(filter_name %in% filters) %>% 
-      filter(year >= 2015 & policy == policy_name) -> 
-      to_plot
-    
-  if(nrow(to_plot) > 1){
-    
-    # Subset the data and arrange so that the color order is correct
-    data[[query_name]] %>% 
-      filter(filter_name %in% filters) %>% 
-      filter(year >= 2015 & policy == policy_name) -> 
-      to_plot
-    
-    # Create a tibble of of 2100 manx and mins to plot past year 2100 to represent 
-    # the spread.
-    to_plot %>% 
-      filter(year == 2100) %>% 
-      filter(filter_name %in% to_plot$filter_name) %>%
-      select(-year) %>% 
-      bind_cols(year = seq(from = 2101.5, by = 1, length.out = nrow(.))) ->
-      points_tibble
-    
-    # # Parse information variable and unit infromation to use to lable the plots
-    units  <- unique(to_plot$units)
-    q_name <- query_name
-    
-    # Create the line plot
-    ggplot(to_plot) +
-      geom_line(aes(year, value, color = filter_name, group = run_name), size = 1.5) +
-      geom_point(data = points_tibble, aes(year, value, color = filter_name), size = 2) +
-      scale_color_manual(values = color_vector[ names(color_vector) %in% unique(to_plot$filter_name) ]) +
-      UNIVERSTAL_THEME +
-      theme(legend.position = 'bottom') +
-      labs(title = query_name,
-           subtitle = subtitle,
-           y = units)
-    
-  } else {
-    
-    # If there are no policy results to plot return a NULL plot
-    NULL
-    
-  }
-
-    
-    
-  }) -> 
+                           subtitle = 'policy (target - ref)'){
+  
+  # Subset the data and arrange so that the color order is correct
+  data[[query_name]] %>% 
+    filter(filter_name %in% filters) %>% 
+    filter(year >= 2015 & policy == policy_name) -> 
+    to_plot
+  
+  # Create a tibble of of 2100 manx and mins to plot past year 2100 to represent 
+  # the spread.
+  to_plot %>% 
+    filter(year == 2100) %>% 
+    filter(filter_name %in% to_plot$filter_name) %>%
+    select(-year) %>% 
+    bind_cols(year = seq(from = 2101, by = 0.5, length.out = nrow(.))) ->
+    points_tibble
+  
+  # # Parse information variable and unit infromation to use to lable the plots
+  units  <- unique(to_plot$units)
+  q_name <- query_name
+  
+  # Create the line plot
+  ggplot(to_plot) +
+    geom_line(aes(year, value, color = filter_name, group = run_name), size = 1.5) +
+    geom_point(data = points_tibble, aes(year, value, color = filter_name, shape = extreme), size = 2) +
+    scale_color_manual(values = color_vector[ names(color_vector) %in% unique(to_plot$filter_name) ]) +
+    UNIVERSTAL_THEME +
+    theme(legend.position = 'bottom') +
+    labs(title = query_name,
+         subtitle = subtitle,
+         y = units)
+  
+}) -> 
   script_output$gcam$policy
+
+# Modify the primary energy consumption plot
+script_output$gcam$policy$`USA categorized primary energy consumption`+
+  facet_wrap('fuel_class', scales = 'free') + 
+  labs(y = NULL) ->
+  script_output$gcam$policy$`USA categorized primary energy consumption`
+
+
+# Print all of the gcam plots!
+
+
+
+
+
+
+
 
 
 # 4 Save --------------------------------------------------------------------------
