@@ -10,6 +10,10 @@
 BASE <- getwd() 
 if(basename(BASE) != "hector-SA-npar"){stop("Working directory should be the project location.")}
 
+# TODO: after the project code is finalized, consider commenting out the set up sections in the individual
+# scripts so that the set up section here has ultimate control... or nah? idk how to go about this but 
+# it is something to think about. 
+
 # Part 1 ---------------------------------------------------------------------------------------------------
 
 # A 
@@ -66,13 +70,13 @@ source(file.path(BASE, 'code', 'part_2', 'A.1.parameter_selection_extremes_metho
 #
 # Extract queries from the database_basexdbs and save in a single rgcam.proj output. This script 
 # needs to be run on pic or wherever the gcam-parallel strucutre is set up. 
-# source(file.path(BASE, 'code', 'part_2', 'C.extract_GCAM_database_basexdb'))
+# source(file.path(BASE, 'code', 'part_2', 'C.1.extract_GCAM_database_basexdb.R'))
 
 # D 
 # 
 # Process the rgcam project into a series of tibbles that is ready fro visualization and anlaysis. 
-# This script depends on the merged project created in step C is saved in the sub-out directory. 
-source(file.path(BASE, 'code', 'part_2', 'D.process_GCAM_output.R'))
+# This script depends on the merged project created in step C is saved in the out-2 directory. 
+source(file.path(BASE, 'code', 'part_2', 'C.2.process_GCAM_output.R'))
 
 
 # Visualize --------------------------------------------------------------------------------------

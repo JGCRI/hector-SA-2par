@@ -17,7 +17,7 @@ library(tibble)
 # User decisions
 sub_name          <- "extremes" 
 pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'; setwd( pic_hectorSA_path ) # Where the hecotr-SA-npar lives on pic
-param_path        <- file.path(pic_hectorSA_path, 'sub-out', 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
+param_path        <- file.path(pic_hectorSA_path, 'out-2', 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
 
 # The gcam dirs must reflect the gcam parallel structure
 pic_gcam_path     <- '/pic/projects/GCAM/Dorheim/CMS/GCAM5/gcam-parallel'     # Where CMS gcam-parallel lives
@@ -125,7 +125,7 @@ create_pointer_xml <- function(input, output_ini_path){
   
   # Replace the string in the xml node with the new one pointing to the nex xml file.
   lapply(getNodeSet(xml_doc, "//hector-ini-file"), function(n) {
-    xmlValue(n) <- gsub("../input/climate/rcpXX/replace.ini", replacement, xmlValue(n))
+    xmlValue(n) <- gsub("../input/climate/sub_dir/replace.ini", replacement, xmlValue(n))
   })
   
   # Save the pointer xml

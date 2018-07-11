@@ -21,7 +21,7 @@ library(gridExtra);
 
 # Directory and script set up 
 BASE          <- getwd() # the base dir
-rcpXX         <- 'rcp26' # the rcp sub directory to pull the data from  
+sub_dir       <- 'rcp26' # the out-1/ sub direcotry name 
 
 
 # Visual constants to make sure that all figures have a constant 
@@ -47,7 +47,7 @@ save_png <- FALSE
 
 # Import the cleaned up hector results, format into long format. Do not calcualte the moving 
 # average now because it will take too long. 
-hector_all <- readr::read_csv(file.path(BASE, 'int-out', rcpXX, "C.hector_run_cleanup.csv")) 
+hector_all <- readr::read_csv(file.path(BASE, 'out-1', sub_dir, "C.hector_run_cleanup.csv")) 
 
 # If you are intested in visualizing the several times I would suggest subsetting the number 
 # of hector runs you are working with in order to decrease the plotting time. 
@@ -61,7 +61,7 @@ hector_all %>%
 
 
 # The filtering by obs window results.
-flags <- readr::read_csv(file.path(BASE, 'int-out', rcpXX, 'filter_flag.csv')) 
+flags <- readr::read_csv(file.path(BASE, 'out-1', sub_dir, 'filter_flag.csv')) 
 
 # add_filter_info: is a function that formats the the falgs data frame into long format and 
 # classifies what observational filters the hector run passes through. 
@@ -225,9 +225,9 @@ passing_temp %>%
 hector_years <- unique(passing_temp_refRemoved$year)  
 
 # Import and complete the temp observation  
-incomplete_obs <- readr::read_csv(file.path(BASE, 'int-out', 'observations', 'D.temperature_obervation_ma.csv'))   
+incomplete_obs <- readr::read_csv(file.path(BASE, 'out-1', 'observations', 'D.temperature_obervation_ma.csv'))   
 
-incomplete_obs <- read.csv( './int-out/observations/D.temperature_obervation_ma.csv', stringsAsFactors = F )   
+incomplete_obs <- read.csv( './out-1/observations/D.temperature_obervation_ma.csv', stringsAsFactors = F )   
 
 tibble(year = hector_years, remove = 1) %>%   
   left_join(incomplete_obs, by = "year") %>%  
@@ -627,7 +627,7 @@ gcam_results_plot <- function(input_data, title = NULL, caption = NULL, subtitle
 ## Import and format data ---------------------------------------------------------
 
 # Import the csv file used to generate the ini files and add the filter info. 
-readr::read_csv(file.path(BASE, 'int-out', rcpXX, '2A.selected_parameter_sets.csv')) %>% 
+readr::read_csv(file.path(BASE, 'out-1', sub_dir, '2A.selected_parameter_sets.csv')) %>% 
   full_join(filtered_flags %>% 
               select(filter_flag, filter) %>% 
               distinct, by = "filter_flag") %>% 
@@ -637,7 +637,7 @@ readr::read_csv(file.path(BASE, 'int-out', rcpXX, '2A.selected_parameter_sets.cs
 
 
 # Import the database.proj 
-path    <- file.path(BASE, "int-out", "rcp26", "proj_merge_RFtarget.proj")
+path    <- file.path(BASE, "out-1", "rcp26", "proj_merge_RFtarget.proj")
 db_proj <- get(load(path))
 
 # Vector of quries to plot
@@ -944,7 +944,7 @@ global_CO2_emissions %>%
 # Save -------------------------------------------------------------------------------------------------------
 
 # Save all of the figures as .rda objects
-fig_path <- file.path(BASE, "diag-out","UIUC_figures")
+fig_path <- file.path(BASE, "out-fig","UIUC_figures")
 dir.create(fig_path, showWarnings = FALSE)
 
 if(save_rda) {

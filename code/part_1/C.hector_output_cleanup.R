@@ -4,8 +4,8 @@ library( 'tidyr' )
 library( 'readr' )
 library( 'map' )
 
-# Define the rcp to process
-rcpXX <- 'rcp26'
+# Define the out-1/sub_dir name
+sub_dir <- 'rcp26'
 
 # Select the variables to save as individual files. 
 keep_variables <- c('atm_land_flux', 'Ca', 'Tgav', 'npp')
@@ -14,7 +14,7 @@ keep_variables <- c('atm_land_flux', 'Ca', 'Tgav', 'npp')
 # The working directory should be the project directory. 
 if(!(basename(getwd()) == 'hector-SA-npar')){stop('working directory should be the project directory')}
 
-raw_output <- read.csv( file.path('./int-out', rcpXX, 'B.hector_run_results.txt'), header = F, stringsAsFactors = F )
+raw_output <- read.csv( file.path('./out-1', sub_dir, 'B.hector_run_results.txt'), header = F, stringsAsFactors = F )
 
 names( raw_output ) <- c( 'year', 'run_name', 'spinup', 'component', 'variable', 'value', 'units' )
 
@@ -28,14 +28,14 @@ vars <- sort( unique( cleanup_df$variable ) )
 
 cleanup_wide <- spread( cleanup_df, year, value )
 
-write.csv( cleanup_wide, file.path('./int-out', rcpXX, 'C.hector_run_cleanup.csv'), row.names = F )
+write.csv( cleanup_wide, file.path('./out-1', sub_dir, 'C.hector_run_cleanup.csv'), row.names = F )
 
 
 # ---
 # Filter flag table
-filter_flag <- read.csv( file.path('./int-out/A.par4_combinations.csv'), stringsAsFactors = F )
+filter_flag <- read.csv( file.path('./out-1/A.par4_combinations.csv'), stringsAsFactors = F )
 filter_flag$run_name <- paste0( 'hectorSA-', sprintf( '%04d', filter_flag$run_index ) )
-write.csv( filter_flag, file.path('./int-out', rcpXX, 'filter_flag.csv'), row.names = F )
+write.csv( filter_flag, file.path('./out-1', sub_dir, 'filter_flag.csv'), row.names = F )
 
 
 # --------------------------------------------------
@@ -57,6 +57,6 @@ map(data_list, function(data){
   f_name <- paste0('C.', vari, '_hector_run_cleanup.csv')
   
   # Write the data as a csv output.
-  write.csv(data, file.path('./int-out', rcpXX, f_name), row.names = F ) })
+  write.csv(data, file.path('./out-1', sub_dir, f_name), row.names = F ) })
 
 

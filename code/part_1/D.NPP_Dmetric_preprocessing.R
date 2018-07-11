@@ -10,7 +10,7 @@ library(tidyr)
 
 # Set up the directories
 BASE    <- getwd() # must be the project location
-sub_dir <- 'rcp26' # the name of the int-out sub directory to search for Hector data
+sub_dir <- 'rcp26' # the name of the out-1 sub directory to search for Hector data
 
 
 # TRUE/FALSE to save the intermediate outputs created when processing the NPP data
@@ -95,15 +95,15 @@ global_NPP$s2n <- signif(global_NPP$obs * .10, 3)
 if(save_intermediates){
   
   # Save the labeled MODIS file 
-  file_name <- file.path(BASE, 'int-out', 'observations', 'MODIS_NPP_labeled.csv')
+  file_name <- file.path(BASE, 'out-1', 'observations', 'MODIS_NPP_labeled.csv')
   write.csv(data, fie = file_name, row.names = FALSE)
   
   # the m2 MODIS file 
-  file_name <- file.path(BASE, 'int-out', 'observations', 'MODIS_NPP_m2.csv')
+  file_name <- file.path(BASE, 'out-1', 'observations', 'MODIS_NPP_m2.csv')
   write.csv(data_m2, file = file_name, row.names = FALSE)
   
   # the MODIS file g C / year 
-  file_name <- file.path(BASE, 'int-out', 'observations', 'MODIS_NPP_noArea_landWeights.csv')
+  file_name <- file.path(BASE, 'out-1', 'observations', 'MODIS_NPP_noArea_landWeights.csv')
   write.csv(no_area_values, file = file_name, row.names = FALSE)
   
   
@@ -113,7 +113,7 @@ if(save_intermediates){
 # Process Hector NPP ----------------------------------------------------------------------------------------
 
 # Import the Hector NPP data 
-all_hector_npp <- read.csv(file.path(BASE, 'int-out', sub_dir, 'C.npp_hector_run_cleanup.csv'), stringsAsFactors = FALSE)
+all_hector_npp <- read.csv(file.path(BASE, 'out-1', sub_dir, 'C.npp_hector_run_cleanup.csv'), stringsAsFactors = FALSE)
 
 # Subset Hector NPP to make sure that it only includes NPP data for the same years as the observational 
 # dataset being process.
@@ -124,7 +124,7 @@ all_hector_npp %>%
   NPP_Dn_input_table
 
 # Save the Dn metric input table.
-output_file <- file.path(BASE, 'int-out', sub_dir, 'D.NPP_Dmetric_input_table.csv')
+output_file <- file.path(BASE, 'out-1', sub_dir, 'D.NPP_Dmetric_input_table.csv')
 write.csv(NPP_Dn_input_table, output_file, row.names = F)  
   
   

@@ -14,7 +14,7 @@ library(VennDiagram)
 # Define directories
 BASE       <- getwd()
 sub_dir    <- 'rcp26'
-OUTPUT_DIR <- file.path(BASE, 'int-out', sub_dir)
+OUTPUT_DIR <- file.path(BASE, 'out-1', sub_dir)
 
 
 # Script output 
@@ -23,7 +23,7 @@ script_output <- list()
 # 1. Import and Format Data Frames ------------------------------------------------------------------------
 
 # Import the parameter values and add run_name column.
-npar_wide          <- read.csv(file.path(BASE, 'int-out', 'A.par4_combinations.csv'))
+npar_wide          <- read.csv(file.path(BASE, 'out-1', 'A.par4_combinations.csv'))
 npar_wide$run_name <- paste0( 'hectorSA-', sprintf( '%04d', npar_wide$run_index ) )
 
 # Format the paramter values as a long data frame.
@@ -103,7 +103,7 @@ venn.diagram(list("Land Flux" = LandFlux_set, "atm CO2" = atmCO2_set, "Tgav" = T
                   "NPP" = NPP_set),
              fill = c("red", "green", "blue", "orange"),
              alpha = c(0.5, 0.5, 0.5, 0.5), cex = 2, main = "Matching Dn Metric Run Count",
-             filename = "./diag-out/run_count_venndiagram.png")
+             filename = "./out-fig/run_count_venndiagram.png")
 
 
 

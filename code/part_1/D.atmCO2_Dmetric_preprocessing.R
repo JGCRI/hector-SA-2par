@@ -17,7 +17,7 @@ sub_dir <- 'rcp26'
 # Set up directoires 
 BASE <- getwd() # should be equal to the proect location 
 if(basename(BASE) != "hector-SA-npar"){stop("Working directory should be project location.")}
-INT_OUTPUT_DIR <- file.path(BASE, 'int-out', sub_dir)
+INT_OUTPUT_DIR <- file.path(BASE, 'out-1', sub_dir)
 
 
 # 1. Import and Format Obs Data ------------------------------------------------------------------
@@ -50,7 +50,7 @@ obs_data %>%
 
 # 2. Import and Format Hector Data ---------------------------------------------------------------
 
-hector_co2_path <- list.files(file.path(BASE, 'int-out', sub_dir), 'C.Ca_hector_run_cleanup.csv', full.names = T)
+hector_co2_path <- list.files(file.path(BASE, 'out-1', sub_dir), 'C.Ca_hector_run_cleanup.csv', full.names = T)
 hector_data     <- readr::read_csv(hector_co2_path)
 
 # Ensure that the data frame only contains the Ca variable and the same years from the 
@@ -68,7 +68,7 @@ hector_data %>%
   full_join(annual_obs_data %>% select(year, obs, s2n), by = "year") -> 
   CO2_Dn_input_table
 
-output_file <- file.path(BASE, 'int-out', sub_dir, 'D.atmCO2_Dmetric_input_table.csv')
+output_file <- file.path(BASE, 'out-1', sub_dir, 'D.atmCO2_Dmetric_input_table.csv')
 write.csv( CO2_Dn_input_table, output_file, row.names = F )
 
 

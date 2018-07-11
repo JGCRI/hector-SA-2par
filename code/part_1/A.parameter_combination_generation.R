@@ -1,17 +1,21 @@
+
+# Purpose: this script generates the hector input carbon - climate cycle parameter combinations 
+# to use in standalone hecotr. 
+
+# 0. Set Up ----------------------------------------------------------------
+# Set up directoires 
+BASE <- getwd() # should be equal to the proect location 
+if(basename(BASE) != "hector-SA-npar"){stop("Working directory should be project location.")}
+
 # this script generates beta, q10, s, and diff combinations using quasi-random generator 
 library( 'rngWELL' )
 library( 'randtoolbox' )
 
-# ----------------------------------------------------------------
-# Settings you will definitely need to overwrite in your code
-setwd( 'c:/Users/feng999/Documents/CMS/hector-SA-npar' )
 
-# ----------------------------------------------------------------
+# 1. Set Up Geneator Inputs ----------------------------------------------------------------
 # set seed for random generator 
 setSeed( 6 )
 
-# ----------------------------------------------------------------
-# Settings you may probably need to overwrite
 beta_range <- c( 0, 1 )
 q10_range <- c( 0.2, 5 )
 s_range <- c( 1, 7 )
@@ -19,7 +23,7 @@ diff_range <- c( 0.5, 4 )
 
 combination_amount <- 5000 
 
-# ----------------------------------------------------------------
+# 2. Generate Sequences ---------------------------------------------------------------------
 # quasi-random -- Sobol sequence
 combination_mat <- sobol( combination_amount, 4 ) # 4-D  
 combination_df <- data.frame( combination_mat )
@@ -44,16 +48,17 @@ combination_df <- round( combination_df, 5 )
 
 # add run index 
 combination_df$run_index <- sprintf( '%04d', 1 : nrow( combination_df ) ) 
-combination_df <- combination_df[ , c( 'run_index', 'beta', 'q10', 's', 'diff' ) ]
+combination_df$run_name  <- paste0('hectorSA-', sprintf( '%04d', 1 : nrow( combination_df ) )) 
+combination_df <- combination_df[ , c( 'run_index', 'run_name', 'beta', 'q10', 's', 'diff' ) ]
 
-# -------------------------------------------------------------------
+# 3. Save output -------------------------------------------------------------------
 # write out
-write.csv( combination_df, './int-out/A.par4_combinations.csv', row.names = F )
+write.csv( combination_df, './out-1/A.par4_combinations.csv', row.names = F )
 
-# -------------------------------------------------------------------
+# 4. Sanity plot -------------------------------------------------------------------
 # diagnostic 
 # sample plot 1  
-jpeg( "./diag-out/beta vs q10.jpeg", width = 500, height = 500, res = 72)
+jpeg( "./out-fig/beta vs q10.jpeg", width = 500, height = 500, res = 72)
 plot( x = combination_df$beta, 
       y = combination_df$q10, 
       'p',
@@ -61,7 +66,7 @@ plot( x = combination_df$beta,
 dev.off( )
 
 # sample plot 2 
-jpeg( "./diag-out/beta vs s.jpeg", width = 500, height = 500, res = 72)
+jpeg( "./out-fig/beta vs s.jpeg", width = 500, height = 500, res = 72)
 plot( x = combination_df$beta, 
       y = combination_df$s, 
       'p',

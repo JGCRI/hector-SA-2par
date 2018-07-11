@@ -4,7 +4,7 @@ library(dplyr)
 
 BASE <- getwd()
 
-params_df <- read.csv(file.path(BASE, 'int-out','A.par4_combinations.csv'), stringsAsFactors = FALSE)
+params_df <- read.csv(file.path(BASE, 'out-1','A.par4_combinations.csv'), stringsAsFactors = FALSE)
 
 scatter3D(params_df$beta, params_df$q10, params_df$diff, phi = 0, col = 'black', 
           xlab = 'beta', ylab = 'Q 10', zlab = 'diff', bty = 'g')
