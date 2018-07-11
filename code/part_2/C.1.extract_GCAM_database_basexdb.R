@@ -61,7 +61,7 @@ proj_files <- list.files(paste0('./', exe_dir), pattern = "proj_[0-9]+.proj", re
 proj_files <- proj_files[file.exists(proj_files)]
 prj        <- mergeProjects(paste0("./proj_merge", gsub('exe', '', exe_dir),".proj"), proj_files)
 
-# You will want to make sure that the merged project is located in the hector-SA-npar/sub-out 
+# You will want to make sure that the merged project is located in the hector-SA-npar/out-2 
 
 
 message('Saving... ', proj_merge.proj)

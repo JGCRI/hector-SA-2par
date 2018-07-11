@@ -15,7 +15,7 @@ library(dplyr)
 
 # Diectories
 BASE    <- getwd()   # The BASE name direcotry, should be the working direcoty (where the project is located).
-sub_dir <- 'rcp26'   # The name of the int-out/sub_dir to process data from and write data out to 
+sub_dir <- 'rcp26'   # The name of the out-1/sub_dir to process data from and write data out to 
 
 # 1. Import Data --------------------------------------------------------------------------------------
 
@@ -63,7 +63,7 @@ concatenated_HadCRUT_1950 %>%
 # reference period, see https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/ensemble_series_format.html. 
 
 # Import Hector temperature. 
-full_Hector_temp <- read.csv(file.path(BASE, 'int-out', sub_dir, 'C.Tgav_hector_run_cleanup.csv'), stringsAsFactors = FALSE)
+full_Hector_temp <- read.csv(file.path(BASE, 'out-1', sub_dir, 'C.Tgav_hector_run_cleanup.csv'), stringsAsFactors = FALSE)
 
 
 # Find the average value for eacch run durring the reference year. 
@@ -91,7 +91,7 @@ Hector_calibrated_temp %>%
   left_join(obs_data, by = 'year') -> 
   Tgav_Dn_metric_input_table
 
-output_file <- file.path(BASE, 'int-out', sub_dir, 'D.Tgav_Dmetric_input_table.csv')
+output_file <- file.path(BASE, 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv')
 write.csv(Tgav_Dn_metric_input_table, output_file, row.names = F)
 
 

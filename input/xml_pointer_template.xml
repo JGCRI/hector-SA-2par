@@ -2,7 +2,7 @@
 <scenario>
    <world>
       <HectorModel>
-         <hector-ini-file>../input/climate/rcpXX/replace.ini</hector-ini-file>
+         <hector-ini-file>../input/climate/sub_dir/replace.ini</hector-ini-file>
       </HectorModel>
    </world>
 </scenario>

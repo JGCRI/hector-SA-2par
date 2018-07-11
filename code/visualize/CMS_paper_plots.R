@@ -16,7 +16,7 @@ library(rgcam);   library(ggExtra)
 
 # Directories
 BASE    <- getwd() 
-sub_dir <- 'rcp26' # The name of the int-out/sub_dir to pull the standalone Hector results from
+sub_dir <- 'rcp26' # The name of the out-1/sub_dir to pull the standalone Hector results from
 
 # Load the functions 
 source(file.path(BASE, 'code', 'part_2', 'A.0.Hector_run_selection_functions.R'))
@@ -32,7 +32,7 @@ script_output = list()
 # 1. Import Data ---------------------------------------------------------------------------------------
 
 # Import the Dn results
-readr::read_csv(list.files(file.path(BASE,'int-out', sub_dir), Dn_file, full.names = T)) %>%  
+readr::read_csv(list.files(file.path(BASE,'out-1', sub_dir), Dn_file, full.names = T)) %>%  
   mutate(passing = if_else(Dn <= Dc, T, F)) %>% 
   select(run_name, variable, passing) %>% 
   spread(variable, passing) -> 
@@ -40,24 +40,22 @@ readr::read_csv(list.files(file.path(BASE,'int-out', sub_dir), Dn_file, full.nam
 
 
 # Import the Hector temperature
-Hector_tgav  <- read.csv(list.files(file.path(BASE,'int-out', sub_dir), "C.Tgav_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE)  
-Hector_atmC  <- read.csv(list.files(file.path(BASE,'int-out', sub_dir), "C.Ca_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE)  
+Hector_tgav  <- read.csv(list.files(file.path(BASE,'out-1', sub_dir), "C.Tgav_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE)  
+Hector_atmC  <- read.csv(list.files(file.path(BASE,'out-1', sub_dir), "C.Ca_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE)  
 
 
 # Import the Dn input tables 
-Dn_Tgav_input <- read.csv( file.path( BASE, 'int-out', sub_dir, 'D.Tgav_Dmetric_input_table.csv' )) 
-Dn_CO2_input  <- read.csv( file.path( BASE, 'int-out', sub_dir, 'D.atmCO2_Dmetric_input_table.csv' )) 
-Dn_NPP_input  <- read.csv( file.path( BASE, 'int-out', sub_dir, 'D.NPP_Dmetric_input_table.csv' )) 
+Dn_Tgav_input <- read.csv( file.path( BASE, 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv' )) 
+Dn_CO2_input  <- read.csv( file.path( BASE, 'out-1', sub_dir, 'D.atmCO2_Dmetric_input_table.csv' )) 
+Dn_NPP_input  <- read.csv( file.path( BASE, 'out-1', sub_dir, 'D.NPP_Dmetric_input_table.csv' )) 
 
 
 # Import the paramter combination data frame
-# TODO will need to remove the run_name mutate call. 
-Hector_param <- read.csv( file.path(BASE, 'int-out', 'A.par4_combinations.csv'), stringsAsFactors = FALSE ) %>%  
-  mutate(run_name = paste0('hectorSA-', sprintf( '%04d', 1 : nrow( . ) )) )
+Hector_param <- read.csv( file.path(BASE, 'out-1', 'A.par4_combinations.csv'), stringsAsFactors = FALSE ) 
 
 
 # Import the GCAM data and format as a flat list and then concatenate based on tibble name.
-flatten_list <- flatten( map(GCAM_list, function(name){ get(load( file.path(BASE, 'sub-out', name) )) }) )
+flatten_list <- flatten( map(GCAM_list, function(name){ get(load( file.path(BASE, 'out-2', name) )) }) )
 
 tibble_names        <- unique(names(flatten_list))
 names(tibble_names) <- tibble_names
@@ -522,4 +520,4 @@ script_output$gcam_target$`USA categorized primary energy consumption` +
 # save in which format or not save. 
 
 
-#save(script_output, file = file.path(BASE, 'diag-out', 'CMS_paper_plots.rda'))
+#save(script_output, file = file.path(BASE, 'out-fig', 'CMS_paper_plots.rda'))

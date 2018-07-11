@@ -14,7 +14,7 @@ library(ggplot2)
 
 # Set up the dirs
 BASE    <- getwd()                                      # Must be the project dir
-sub_dir <- "rcp26"                                      # Define the int-out subdirectory to search 
+sub_dir <- "rcp26"                                      # Define the out-1 subdirectory to search 
 Dn_file <- "E.all_Dmetric_independent_results.csv"      # Define the Dn metric file to process 
 
 # Variables 
@@ -29,7 +29,7 @@ script_output = list()
 # 1.A. Select Extreme 2100 Values --------------------------------------------------------------------------------
 
 # Import the Dn results
-readr::read_csv(list.files(file.path(BASE,'int-out', sub_dir), Dn_file, full.names = T)) %>%  
+readr::read_csv(list.files(file.path(BASE,'out-1', sub_dir), Dn_file, full.names = T)) %>%  
   filter(variable %in% variable_list) %>% 
   mutate(passing = if_else(Dn <= Dc, T, F)) %>% 
   select(run_name, variable, passing) %>% 
@@ -38,7 +38,7 @@ readr::read_csv(list.files(file.path(BASE,'int-out', sub_dir), Dn_file, full.nam
 
 # Import a Hector data set to use in the selection process. We are interested in the 
 # extreeme max/min temperatures in year 2100 for each possible combination. 
-read.csv(list.files(file.path(BASE,'int-out', sub_dir), "C.Tgav_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE) %>% 
+read.csv(list.files(file.path(BASE,'out-1', sub_dir), "C.Tgav_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE) %>% 
   filter(year == 2100) %>% 
   select(run_name, variable, year, value) -> 
   Hector_2100_values
@@ -71,7 +71,7 @@ categorized_2100_values %>%
 # 2. Create the Selected Parameter Set -------------------------------------------------------------
 
 # Import the parameter combinations and add the run_name column.
-parameter_set          <- read.csv(file.path(BASE, 'int-out', 'A.par4_combinations.csv'), stringsAsFactors = FALSE)
+parameter_set          <- read.csv(file.path(BASE, 'out-1', 'A.par4_combinations.csv'), stringsAsFactors = FALSE)
 parameter_set$run_name <- paste0( 'hectorSA-', sprintf( '%04d', parameter_set$run_index ))
                           
 # Subset the parameter data frame so that it only includes the parameter sets selected. 
@@ -91,12 +91,12 @@ extreme_values %>%
 
 
 # Save the output in the secondary output file
-file_name <- file.path( BASE, 'sub-out', 'A.Hector_GCAM_parameters.csv' )
+file_name <- file.path( BASE, 'out-2', 'A.Hector_GCAM_parameters.csv' )
 write.csv( Hector_GCAM_parameters, file = file_name, row.names = FALSE )
 
-file_name <- file.path(BASE, 'sub-out', 'A.Hector_GCAM_parameters_mapping.csv')
+file_name <- file.path(BASE, 'out-2', 'A.Hector_GCAM_parameters_mapping.csv')
 write.csv( Hector_GCAM_parameter_mapping, file = file_name, row.names = FALSE )
-save(script_output, file = file.path(BASE, 'diag-out', 'Tgav_2100.rda'))
+save(script_output, file = file.path(BASE, 'out-fig', 'Tgav_2100.rda'))
 
 # End
 

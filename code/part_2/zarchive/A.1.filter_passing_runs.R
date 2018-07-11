@@ -11,8 +11,8 @@ if(basename(BASE) != 'hector-SA-npar'){stop('working directory should be the pro
 # Library
 library(dplyr)
 
-# Define the rcp to process
-rcpXX <- "rcp26"
+# Select the out-1/ sub directory name
+sub_dir <- "rcp26"
 
 
 # Import Data  
@@ -22,8 +22,8 @@ rcpXX <- "rcp26"
 # the next level. Also import the raw hector results, right now we are only interested in the passing 
 # along the parameter combinations that predict the min, max, and, mid 2100 temp.
 
-filter_flag <- readr::read_csv(file.path("./int-out", rcpXX , "filter_flag.csv"))
-hector_results_wide <- readr::read_csv(file.path( "./int-out", rcpXX,"C.hector_run_cleanup.csv"))
+filter_flag <- readr::read_csv(file.path("./out-1", sub_dir , "filter_flag.csv"))
+hector_results_wide <- readr::read_csv(file.path( "./out-1", sub_dir,"C.hector_run_cleanup.csv"))
 
 
 # Define Functions 
@@ -106,6 +106,6 @@ hector_results_wide %>%
   filtered_hector_results
 
 # Save 
-write.csv(param_set, file = file.path(".", "int-out", rcpXX, "2A.selected_parameter_sets.csv"), row.names = F)
-write.csv(filtered_hector_results, file = file.path(".", "int-out", rcpXX, "2A.selected_hector_results.csv"), row.names = F)
+write.csv(param_set, file = file.path(".", "out-1", sub_dir, "2A.selected_parameter_sets.csv"), row.names = F)
+write.csv(filtered_hector_results, file = file.path(".", "out-1", sub_dir, "2A.selected_hector_results.csv"), row.names = F)
 

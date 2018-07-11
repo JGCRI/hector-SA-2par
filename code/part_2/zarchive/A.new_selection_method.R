@@ -13,7 +13,7 @@ library(ggplot2)
 
 # Set up the dirs
 BASE    <- getwd()                                      # Must be the project dir
-sub_dir <- "rcp26"                                      # Define the int-out subdirectory to search 
+sub_dir <- "rcp26"                                      # Define the out-1 subdirectory to search 
 Dn_file <- "E.all_Dmetric_independent_results.csv"      # Define the Dn metric file to process 
 
 # Variables 
@@ -28,7 +28,7 @@ script_output = list()
 # 1.A. Select Extreme 2100 Values --------------------------------------------------------------------------------
 
 # Import the Dn results
-readr::read_csv(list.files(file.path(BASE,'int-out', sub_dir), Dn_file, full.names = T)) %>%  
+readr::read_csv(list.files(file.path(BASE,'out-1', sub_dir), Dn_file, full.names = T)) %>%  
   mutate(passing = if_else(Dn <= Dc, T, F)) %>% 
   select(run_name, variable, passing) %>% 
   spread(variable, passing) -> 
@@ -36,7 +36,7 @@ readr::read_csv(list.files(file.path(BASE,'int-out', sub_dir), Dn_file, full.nam
 
 # Import a Hector data set to use in the selection process. We are interested in the 
 # extreeme max/min temperatures in year 2100 for each possible combination. 
-read.csv(list.files(file.path(BASE,'int-out', sub_dir), "C.Tgav_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE) %>% 
+read.csv(list.files(file.path(BASE,'out-1', sub_dir), "C.Tgav_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE) %>% 
   filter(year == 2100) %>% 
   select(run_name, variable, year, value) -> 
   Hector_2100_values
