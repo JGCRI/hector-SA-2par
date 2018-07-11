@@ -91,6 +91,118 @@ select_extreme_values <- function(data, obs_list){
 }
 
 
+
+# select_boxplot_values() -------------------------------------------------------------------------------
+
+# This function selects the values that correspond with boxplot values withitn the different filter
+# categoires. The function  uses two inputs, a wide data frame containing columns of T/F values 
+# indicating whether or not the Hector run matches observations based on the Dn/Dc metric, 
+# and a value column of a Hector variable from a single year to select the median, IRQ, and whisker values from. 
+
+
+select_boxplot_values <- function(data, obs_list){
+  
+  # The idea is that the selection function will be applied as many times as there should 
+  # be layers of combinations of the observational products. Since we want to do 
+  # all of the products individually and then stacked as many times as possible we will 
+  # want to generate the observation combinations for as many times as we have observations.
+  
+  bind_rows(sapply(1:length(obs_list), FUN = function(index){
+    
+    # Generate all of the possible combinations for index number 
+    # of stacked observations.
+    filters <- combn(obs_list, index)
+    
+    # Now for each of the filters or possible observational combinations select the 
+    # extreme max and min values for the Hector runs "match" all of the observations 
+    # in the filter.
+    bind_rows(apply(filters, 2, FUN = function(filters){
+      
+      # Format the a filter name based on the observation combination
+      # used to subset the data.
+      filter_name <- paste(filters, collapse = ', ' ) 
+      
+      data %>% 
+        # Subset the data so that all of the Hector variables match
+        # observations according to the Dn / Dc metrics. We can used 
+        # filter_at to do this because we are working with a wide data 
+        # frame that contains T/F if a Hector run has a matching Dn for 
+        # a single variable.
+        filter_at(filters, all_vars(. == TRUE)) %>% 
+        # Add the filter name
+        mutate(filter_name = filter_name) -> 
+        intermediate_df
+
+      # Find the box plot values
+      median <- median(intermediate_df$value)
+      upper_IQR <- quantile(intermediate_df$value, .75)
+      lower_IQR <- quantile(intermediate_df$value, .25)
+      upper_whisker <- quantile(intermediate_df$value, 0.75) + 1.5 * IQR(intermediate_df$value)
+      lower_whisker <- quantile(intermediate_df$value, 0.25) - 1.5 * IQR(intermediate_df$value)
+        
+      # Determine which values are closest to the box plot values
+      intermediate_df %>%  
+        mutate(median = abs(median - value), 
+               upper_IQR = abs(upper_IQR - value), 
+               lower_IQR = abs(lower_IQR - value), 
+               upper_whisker = abs(upper_whisker - value), 
+               lower_whisker = abs(lower_whisker - value)) %>% 
+        gather(boxplot, diff, median, upper_IQR, lower_IQR, upper_whisker, lower_whisker) ->
+        differance_df
+      
+      
+      # Identify the entires that correspond to to the smallest category. 
+      differance_df %>% 
+        group_by(boxplot, filter_name) %>% 
+        filter(diff == min(diff)) %>% 
+        ungroup -> 
+        output
+      
+      # Only return the distinct output.
+      distinct(output)
+      
+    }))
+    
+  }, simplify = F)) -> 
+    filtered_boxplot
+  
+  
+  
+  # Now subset the data to find the unfiltered box plot values
+  
+  # Find the box plot values
+  median <- median(data$value)
+  upper_IQR <- quantile(data$value, .75)
+  lower_IQR <- quantile(data$value, .25)
+  upper_whisker <- quantile(data$value, 0.75) + 1.5 * IQR(data$value)
+  lower_whisker <- quantile(data$value, 0.25) - 1.5 * IQR(data$value)
+  
+  # Find the values that are closest to the boxplot values
+  data %>% 
+    mutate(median = abs(median - value), 
+           upper_IQR = abs(upper_IQR - value), 
+           lower_IQR = abs(lower_IQR - value), 
+           upper_whisker = abs(upper_whisker - value), 
+           lower_whisker = abs(lower_whisker - value)) %>% 
+    gather(boxplot, diff, median, upper_IQR, lower_IQR, upper_whisker, lower_whisker) ->
+    differance_df
+  
+  # Identify the entires that correspond to to the smallest category. 
+  differance_df %>% 
+    mutate(filter_name = 'None') %>% 
+    group_by(boxplot, filter_name) %>% 
+    filter(diff == min(diff)) %>% 
+    ungroup -> 
+    output
+  
+  
+  # Concatenate the filtered and unfiltered box plot values into a single data frame. 
+  bind_rows(filtered_boxplot, output) %>%  
+    select(run_name, year, value, filter_name, boxplot)
+  
+}
+
+
 # categorize_runs() -------------------------------------------------------------------------------
 
 # This function categorizes a run into the different observational product filters is matches 
