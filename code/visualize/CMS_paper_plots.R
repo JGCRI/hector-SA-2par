@@ -2,8 +2,6 @@
 # Purpose: This script is intended to be an invesitgation into the Hector runs that pass the observation filters based 
 # on the Dn metric analysis. 
 
-# TODO This script is not perfect yet, there is still a fair amount of clean up to do... 
-
 # 0. Set Up ---------------------------------------------------------------------------------------------
 # Make sure that the working directory is equal to the project directory
 if( ! 'hector-SA-npar.Rproj' %in% list.files() ){ stop( 'Working dir must be the project location' ) }
@@ -18,12 +16,20 @@ library(rgcam);   library(ggExtra)
 BASE    <- getwd() 
 sub_dir <- 'rcp26' # The name of the out-1/sub_dir to pull the standalone Hector results from
 
+
 # Load the functions 
 source(file.path(BASE, 'code', 'part_2', 'A.0.Hector_run_selection_functions.R'))
+
 
 # Specify the Dn method and the GCAM results to import 
 Dn_file   <- 'E.all_Dmetric_independent_results.csv'
 GCAM_list <- list('GCAM_min.rda', 'GCAM_max.rda', 'GCAM_median.rda') 
+
+
+# Determine if/how to save the script outputs
+# Options png/rda or NULL (nothing)
+save_script_output <- 'png'  
+
 
 # Output 
 script_output = list()
@@ -65,11 +71,16 @@ gcam_rslt <- map(tibble_names, function(name){  bind_rows( flatten_list[names(fl
 
 # 2. Mapping Information ------------------------------------------------------------------------------------------------------
 
+# Factor order for the standalone Hector plots 
+hector_filter_order <- c('None', 'atm CO2', 'NPP', 'Tgav', 'atm CO2, NPP', 'atm CO2, Tgav', 'NPP, Tgav', 'atm CO2, NPP, Tgav')
+
 # Create a tibble that can be use to map the run_name to filter_name and filter count.
 categorize_runs(wide_passing_Dn, c('atm CO2', 'NPP', 'Tgav')) %>% 
   select(run_name, filter_name) %>% 
   left_join(run_count(wide_passing_Dn, c('atm CO2', 'NPP', 'Tgav')), by = 'filter_name') -> 
   mapping_tibble
+
+mapping_tibble$filter_name <- factor(mapping_tibble$filter_name, hector_filter_order, ordered = TRUE)
 
 # Create a consistent color palette, the easiest way to do this is via a hard coded vector. 
 color_vector <- c('None' = 'grey', 'NPP' = "#E69F00", 'atm CO2' = "#56B4E9", 'atm CO2, NPP' =  "#009E73", 
@@ -82,11 +93,6 @@ theme_bw() +
         legend.position = 'none', 
         text = element_text(size=16)) -> 
   UNIVERSTAL_THEME 
-
-
-# Factor order for the standalone Hector plots 
-hector_filter_order <- c('None', 'atm CO2', 'NPP', 'Tgav', 'atm CO2, NPP', 'atm CO2, Tgav', 'NPP, Tgav', 'atm CO2, NPP, Tgav')
-
 
 ############################################################################################################################
 # 3. Create Standalone Hector Plots ----------------------------------------------------------------------------------------
@@ -117,6 +123,10 @@ ggplot() +
        title = 'Hector output vs obs') + 
   scale_color_manual(values = c('blue', 'orange', 'grey')) -> 
   script_output$comparison$temp
+
+
+
+
 
 # Fig 2 Hector atcm CO2 vs Obs ---------------------------------------------------------------------------------
 
@@ -192,7 +202,7 @@ ggplot(run_count_df) +
   scale_fill_manual(values = color_vector) +
   UNIVERSTAL_THEME + 
   labs(x = NULL, 
-       y = 'passing Hector runs (Dn <= Dc)', 
+       y = 'number of passing runs', 
        title = 'Passing Runs Count') -> 
   script_output$run_count
 
@@ -202,20 +212,20 @@ ggplot(run_count_df) +
 # plot_2100_value function that plots the year 2100 jitter plots and add median black line. 
 plot_2100_value <- function(input, title = NULL, subtitle = NULL, ylab = NULL){
   
-  # Determine the range for the 2100 temperature filters.
-  input %>% 
-    select(value, filter_name, count) %>%  
-    group_by(filter_name) %>% 
-    summarise(range_value = abs(max(value) - min(value)), 
+ # Determine the range for the 2100 temperature filters.
+  input %>%
+    select(value, filter_name, count) %>%
+    group_by(filter_name) %>%
+    summarise(range_value = abs(max(value) - min(value)),
               max = max(value),
-              count = max(count)) %>% 
-    ungroup %>% 
+              count = max(count)) %>%
+    ungroup %>%
     arrange(desc(range_value)) ->
     Hector_2100_range
   
   # Use the 2100 temp range to order the filters.
-  input$filter_name <- factor(input$filter_name, Hector_2100_range$filter_name, ordered = T )
-  mapping_tibble$filter_name <- factor(mapping_tibble$filter_name, Hector_2100_range$filter_name, ordered = T )
+ # input$filter_name <- factor(input$filter_name, Hector_2100_range$filter_name, ordered = T )
+  mapping_tibble$filter_name <- factor(mapping_tibble$filter_name, hector_filter_order, ordered = T )
   
   
   # Make a jitter dodge plot of the 2100 year values.
@@ -387,6 +397,26 @@ my_plot +
   scale_color_manual(values = color_vector[ names(color_vector) %in% filters_to_plot]) -> 
   script_output$'Tgav full time series colored by filter plot'
 
+
+# Just a plain old full Tgav time series from the 500 Hector runs
+
+Tgav_filters %>%  
+  filter(filter_name == 'None') -> 
+  all_runs
+
+  ggplot(all_runs) +
+  geom_line(aes(year, value, color = filter_name, group = run_name)) + 
+  UNIVERSTAL_THEME +
+  labs(title = 'Standalone Hector Tgav', 
+       y = 'deg C') +
+  scale_color_manual(values = color_vector[ names(color_vector) %in% unique(all_runs$filter_name)]) -> 
+    script_output$'Tgav all 5000 runs'
+  
+  
+
+
+
+
 ############################################################################################################################
 # 4. Create GCAM Plots -----------------
 ############################################################################################################################
@@ -513,11 +543,89 @@ script_output$gcam_target$`USA categorized primary energy consumption` +
   labs(y = NULL) -> 
   script_output$gcam_target$`USA categorized primary energy consumption`
 
+# C Extract table information ------------------------------------------------------
+
+gcam_rslt$`CO2 price` %>%  
+  filter(policy == 'RF-2p6' & year == 2100) %>%  
+  group_by(policy, filter_name) %>% 
+  summarise(min = min(value), max = max(value)) %>% 
+  mutate(range = max - min) -> 
+  range_info
+  
+gcam_rslt$`CO2 price` %>%  
+  filter(policy == 'RF-2p6' & year == 2100, keep == 'median') %>%  
+  group_by(policy, filter_name) %>%  
+  summarise(median = paste(value, collapse = ', ')) %>% 
+  ungroup %>% 
+  full_join(range_info, by = c('policy', 'filter_name')) %>%  
+  select(filter_name, median, min, max, range) %>%  
+  kable
+  
+
+  
 # 4 Save --------------------------------------------------------------------------
 
-# TODO I will want some method that will allow me to pretty easily save the plots in rda format, I will also want the ability 
-# to save the figures as png files. I will also probably want to enable th user with the ability to decide if they want to 
-# save in which format or not save. 
+# TODO this is not the best way to save the plots but it works for now.
+
+output_dir <- file.path(BASE, 'out-fig', 'CMS_paper_plots'); dir.create(output_dir, showWarnings = FALSE)
+
+if( is.null( save_script_output ) ) {
+  
+  message('Not saving the script outputs')
+  
+} else if ( save_script_output == 'rda' ) {
+  
+  # save(list(script_output$comparison), file = file.path(output_dir, 'obs_hector_comparison.rda'))
+  # save(script_output$run_count, file = file.path(output_dir, 'run_count.rda'))
+  # save(script_output$`2100 value`, file = file.path(output_dir, '2100_value.rda'))
+  # save(script_output$param, file = file.path(output_dir, 'parameter_space.rda'))
+  # save(script_output$gcam_reference, file = file.path(output_dir, 'gcam_reference.rda'))
+  # save(script_output$gcam_target, file = file.path(output_dir, 'gcam_target.rda'))
+  # save(script_output$gcam_policy, file = file.path(output_dir, 'gcam_policy.rda'))
+  # 
+  # save(script_output$`Tgav full time series colored by filter plot`, file = file.path(output_dir, 'Tgav_categorized.rda'))
+  
+
+} else if (save_script_output == 'png' ) {
+  
+  my_plot_func <- function(input, tibble_name, baseName){
+    
+    file <- file.path(output_dir, paste0(baseName, '_', tibble_name, '.png'))
+    ggsave(file, input[[tibble_name]], width = 6, height = 8, units = 'in')
+    
+  }
+  
+  names(script_output$gcam_policy) %>% 
+    map(my_plot_func, input = script_output$gcam_policy, baseName = 'GCAM_policy')
+  
+  names(script_output$comparison) %>% 
+    map(my_plot_func, input = script_output$comparison, baseName = 'comparison')
+  
+  names(script_output$`2100 value`) %>% 
+    map(my_plot_func, input = script_output$`2100 value`, baseName = '2100-value')
+  
+  names(script_output$param) %>% 
+    map(my_plot_func, input = script_output$param, baseName = 'param')
+  
+  names(script_output$gcam_reference) %>% 
+    map(my_plot_func, input = script_output$gcam_reference, baseName = 'GCAM_ref')
+  
+  names(script_output$gcam_target) %>% 
+    map(my_plot_func, input = script_output$gcam_target, baseName = 'GCAM_target')
+  
+  ggsave(file.path(output_dir, paste0('Tgav-full_categorized.png')), 
+         script_output$`Tgav full time series colored by filter plot`, 
+         width = 6, height = 6, units = 'in')
+  
+  ggsave(file.path(output_dir, paste0('run-count.png')), 
+         script_output$run_count, 
+         width = 6, height = 8, units = 'in')
+
+  ggsave(file.path(output_dir, paste0('Tgav all 5000 runs.png')), 
+         script_output$'Tgav all 5000 runs', 
+         width = 6, height = 8, units = 'in')
+  
+}
 
 
-#save(script_output, file = file.path(BASE, 'out-fig', 'CMS_paper_plots.rda'))
+
