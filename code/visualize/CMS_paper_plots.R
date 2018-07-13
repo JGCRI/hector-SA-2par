@@ -23,7 +23,7 @@ source(file.path(BASE, 'code', 'part_2', 'A.0.Hector_run_selection_functions.R')
 
 # Specify the Dn method and the GCAM results to import 
 Dn_file   <- 'E.all_Dmetric_independent_results.csv'
-GCAM_list <- list('GCAM_min.rda', 'GCAM_max.rda', 'GCAM_median.rda') 
+GCAM_list <- list('GCAM_min.rda', 'GCAM_max.rda') #, 'GCAM_median.rda') 
 
 
 # Determine if/how to save the script outputs
@@ -275,6 +275,54 @@ Hector_atmC %>%
   Hector_2100_atmC
 
 script_output$'2100 value'$CO2 <- plot_2100_value(Hector_2100_atmC, ylab = 'ppmv CO2', title = 'atm CO2 2100 values')
+
+
+# Pull out the max values and the paratmers for the Tgav and atm CO2 
+Hector_2100_values %>% 
+  bind_rows(Hector_2100_atmC) %>% 
+  group_by(filter_name, variable) %>%
+  filter(value == max(value)) %>% 
+  left_join(Hector_param, by = 'run_name') %>%  
+  select(run_name, filter_name, variable, value, beta, q10, s, diff) %>% 
+  knitr::kable() -> 
+  script_output$kable$`2100 extremes`
+
+# Plot the CO2 vs the Tgav
+Hector_2100_values %>% 
+  rename(Tgav = value) %>% 
+  full_join(Hector_2100_atmC %>% 
+              select(atmCO2 = value, run_name, year, filter_name),
+            by = c('run_name', 'year', 'filter_name')) %>% 
+    select(run_name, year, atmCO2, Tgav, filter_name) -> 
+  Tgav_CO2_2100
+
+Tgav_CO2_2100$filter_name <- factor(Tgav_CO2_2100$filter_name, hector_filter_order, ordered = T)
+
+plot <- ggplot()
+
+# In order to get the points to stack on top of each other properly we have to add them 
+# to the plot one at a time, do this using a for loop.
+for(name in hector_filter_order){
+  
+  to_plot <- filter(Tgav_CO2_2100, filter_name == name)
+
+  plot +
+    geom_point(data = to_plot, aes(Tgav, atmCO2, color = filter_name)) + 
+    stat_ellipse(data = to_plot, aes(Tgav, atmCO2, color = filter_name, fill = filter_name), geom = "polygon",
+                 type = "norm", alpha = 0.2, size = 1) ->
+    plot
+}
+  
+plot +  
+  scale_fill_manual(values = color_vector[names(color_vector) %in% unique(Tgav_CO2_2100$filter_name)]) + 
+  scale_color_manual(values = color_vector[names(color_vector) %in% unique(Tgav_CO2_2100$filter_name)]) + 
+  UNIVERSTAL_THEME +
+  labs(title = '2100 Tgav vs atm CO2') + 
+  theme(legend.position = 'bottom') +
+  coord_cartesian(xlim = c(0, 7.5), ylim = c(300,750)) -> 
+  script_output$'2100 value'$CO2_Tgav
+
+
 
 
 # Fig 6 - 10 Parmater Spaces -----------------------------------------------------------------------------
@@ -591,7 +639,7 @@ if( is.null( save_script_output ) ) {
   my_plot_func <- function(input, tibble_name, baseName){
     
     file <- file.path(output_dir, paste0(baseName, '_', tibble_name, '.png'))
-    ggsave(file, input[[tibble_name]], width = 6, height = 8, units = 'in')
+    ggsave(file, input[[tibble_name]], width = 8, height = 8, units = 'in')
     
   }
   
