@@ -2,20 +2,33 @@
 # Purpose: This script processes the HadCRUT annual global temperature ensemble members in preperation 
 # to create the temperature Dn metric table. This script uses data that is too large to 
 
+# Note: The if statement in section 0 determines what the BASE & sub_dir 
+# is set to depending on how the script is being sourced. If it is being 
+# sourced from the run_all script then BASE and sub_dir used are going to 
+# be defined there. If sourcing a single script at a time then BASE & sub_dir 
+# will be defined here.
+
 # 0. Set Up -------------------------------------------------------------------------------------------
-
-# The working direcotry should be the project location.
-if( ! "hector-SA-npar.Rproj" %in% list.files() ) {
-  stop('Working directory must be set to the project location')
-  }
-
-# Load libs
 library(purrr)
 library(dplyr)
 
-# Diectories
-BASE    <- getwd()   # The BASE name direcotry, should be the working direcoty (where the project is located).
-sub_dir <- 'rcp26'   # The name of the out-1/sub_dir to process data from and write data out to 
+# Define directories
+if(!exists('run_all')){
+  
+  # Base directory 
+  BASE       <- getwd()
+  if(!"hector-SA-npar.Rproj" %in% list.files(BASE)){stop('BASE must be the project location')}
+  
+  # The out-1/sub_directory to pull data from
+  sub_dir    <- 'vary_q10_only'
+
+}
+
+script_name <- 'D.Tgav_Dmetric_preprocessing.R'
+seperator   <- '----------'
+message(script_name)
+message('BASE directory is ', BASE, appendLF = T)
+message('pulling/saving data from out/', sub_dir, appendLF = T)
 
 # 1. Import Data --------------------------------------------------------------------------------------
 
@@ -94,5 +107,4 @@ Hector_calibrated_temp %>%
 output_file <- file.path(BASE, 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv')
 write.csv(Tgav_Dn_metric_input_table, output_file, row.names = F)
 
-
-# End 
+message(seperator)

@@ -1,17 +1,33 @@
 # Purpose: Aggregate gridded MODIS NPP data to total global NPP data. Then prepare the Dn 
 # metric input data to include obs, model, and variability columns.
 
+# Note: The if statement in section 0 determines what the BASE & sub_dir 
+# is set to depending on how the script is being sourced. If it is being 
+# sourced from the run_all script then BASE and sub_dir used are going to 
+# be defined there. If sourcing a single script at a time then BASE & sub_dir 
+# will be defined here.
 
 # 0. Set Up  ----------------------------------------------------------------------------------------------
-
-# Load the required libs
 library(dplyr)
 library(tidyr)
 
-# Set up the directories
-BASE    <- getwd() # must be the project location
-sub_dir <- 'rcp26' # the name of the out-1 sub directory to search for Hector data
+# Define directories
+if(!exists('run_all')){
+  
+  # Base directory 
+  BASE       <- getwd()
+  if(!"hector-SA-npar.Rproj" %in% list.files(BASE)){stop('BASE must be the project location')}
+  
+  # The out-1/sub_directory to pull data from
+  sub_dir    <- 'vary_q10_only'
 
+}
+
+script_name <- 'D.NPP_Dmetric_preprocessing.R'
+seperator   <- '----------'
+message(script_name)
+message('BASE directory is ', BASE, appendLF = T)
+message('pulling/saving data from out/', sub_dir, appendLF = T)
 
 # TRUE/FALSE to save the intermediate outputs created when processing the NPP data
 save_intermediates <- FALSE
@@ -84,7 +100,7 @@ no_area_values %>%
 
 # Format global NPP
 names(global_NPP) <- 'obs'
-global_NPP$year   <- as.integer(row.names(unnamed_global_NPP))     
+global_NPP$year   <- as.integer(row.names(global_NPP))     
 global_NPP$units  <- 'Pg C/yr'
  
 # We are going to assume that the NPP observations have around a 10 % error. 
@@ -127,8 +143,4 @@ all_hector_npp %>%
 output_file <- file.path(BASE, 'out-1', sub_dir, 'D.NPP_Dmetric_input_table.csv')
 write.csv(NPP_Dn_input_table, output_file, row.names = F)  
   
-  
-# End 
-
-
-
+message(seperator)
