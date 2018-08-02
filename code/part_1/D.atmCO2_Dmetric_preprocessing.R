@@ -3,20 +3,38 @@
 # a data frame containing hector values, observational values and an observational data variability value.
 
 
-# 0. Set Up --------------------------------------------------------------------------------------
+# Note: The if statement in section 0 determines what the BASE & sub_dir 
+# is set to depending on how the script is being sourced. If it is being 
+# sourced from the run_all script then BASE and sub_dir used are going to 
+# be defined there. If sourcing a single script at a time then BASE & sub_dir 
+# will be defined here.
 
-# Load required libraries
+# 0. Set Up --------------------------------------------------------------------------------------
 library(tidyr)
 library(dplyr)
+library(purrr)
 
 
-# Define the intermediate output sub directory
-sub_dir <- 'rcp26'
+# Define directories
+if(!exists('run_all')){
+  
+  # Base directory 
+  BASE       <- getwd()
+  if(!"hector-SA-npar.Rproj" %in% list.files(BASE)){stop('BASE must be the project location')}
+  
+  # The out-1/sub_directory to pull data from
+  sub_dir    <- 'vary_q10_only'
+
+}
 
 
-# Set up directoires 
-BASE <- getwd() # should be equal to the proect location 
-if(basename(BASE) != "hector-SA-npar"){stop("Working directory should be project location.")}
+script_name <- 'D.atmCO2_Dmetric_preprocessing.R'
+seperator   <- '----------'
+message(script_name)
+message('BASE directory is ', BASE, appendLF = T)
+message('pulling/saving data from out/', sub_dir, appendLF = T)
+
+
 INT_OUTPUT_DIR <- file.path(BASE, 'out-1', sub_dir)
 
 
@@ -71,5 +89,4 @@ hector_data %>%
 output_file <- file.path(BASE, 'out-1', sub_dir, 'D.atmCO2_Dmetric_input_table.csv')
 write.csv( CO2_Dn_input_table, output_file, row.names = F )
 
-
-# End 
+message(seperator)
