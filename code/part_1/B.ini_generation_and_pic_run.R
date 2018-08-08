@@ -1,12 +1,23 @@
-# this script creates ini file using each combination of parameters, then runs the hector, then 
-# extracts desired output and write into output file. 
+# Purpose: this script creates ini file using each combination of parameters, 
+# then runs the hector, then extracts desired output and write into output file. 
 
 # -----------------------------------------------------------------------------
 # 0. set up some basics
 library( 'tidyr' )
 
 # The out-1/sub_dir name, this will determine where the script output is saved.
-sub_dir <- "rcp26"
+# Define directories
+if(!exists('run_all')){
+  
+  # The out-1/sub_directory to pull data from
+  sub_dir    <- 'vary_q10_only'
+  
+}
+
+script_name <- 'B.ini_generation_and_pic_run.R'
+seperator   <- '----------'
+message(script_name)
+message('pulling/saving data to out/', sub_dir, appendLF = T)
 
 # -----------------------------------------------------------------------------
 # 0.5 Settings you will definitely need to overwrite in your code
@@ -101,3 +112,4 @@ out_res_list <- lapply( 1 : nrow( pc_df ), function( i ) {
 } ) 
 
 close( result_file_con )
+message(seperator)

@@ -57,7 +57,7 @@ names(ob_df) <- c("year", "obs", "s2n")
 
 # 2. Import and Format Hector Data --------------------------------------------------
 hector_land_flux_path <- list.files(INT_OUTPUT_DIR, "C.atm_land_flux_hector_run_cleanup.csv", full.names = T)
-hector_data           <- readr::read_csv(hector_land_flux_path)
+hector_data           <- read.csv(hector_land_flux_path, stringsAsFactors = FALSE)
 
 
 # Subset the Hector data frame so that it only includes the atm land flux data 

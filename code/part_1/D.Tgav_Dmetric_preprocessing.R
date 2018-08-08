@@ -83,7 +83,7 @@ full_Hector_temp <- read.csv(file.path(BASE, 'out-1', sub_dir, 'C.Tgav_hector_ru
 full_Hector_temp %>% 
   filter(year %in% 1961:1990) %>% 
   group_by(run_name) %>% 
-  summarise(ref_value = mean(value)) %>% 
+  summarise(ref_value = mean(as.numeric(value))) %>% 
   ungroup -> 
   reference_values_df
 
@@ -92,7 +92,7 @@ full_Hector_temp %>%
 full_Hector_temp %>%
   filter(year %in% obs_data$year) %>% 
   left_join(reference_values_df, by = 'run_name') %>% 
-  mutate(model = value - ref_value) %>% 
+  mutate(model = as.numeric(value) - ref_value) %>% 
   select(run_name, year, model) -> 
   Hector_calibrated_temp
   
