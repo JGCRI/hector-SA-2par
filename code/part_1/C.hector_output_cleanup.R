@@ -61,6 +61,7 @@ cleanup_wide <- spread( cleanup_df, year, value )
 
 write.csv( cleanup_wide, file.path('./out-1', sub_dir, 'C.hector_run_cleanup.csv'), row.names = F )
 
+cleanup_wide <- read.csv(file.path('./out-1', sub_dir, 'C.hector_run_cleanup.csv'))
 
 # ---
 # Filter flag table
@@ -73,7 +74,9 @@ write.csv( filter_flag, file.path('./out-1', sub_dir, 'filter_flag.csv'), row.na
 # Format into the long format 
 cleanup_wide %>% 
   filter(variable %in% keep_variables) %>% 
+  select(-spinup, -component) %>% 
   gather(year, value, -run_name, -variable, -units) %>% 
+  filter(year != 'spinup') %>% 
   mutate(year = as.integer(gsub('X', '', year))) -> 
   long_format 
 

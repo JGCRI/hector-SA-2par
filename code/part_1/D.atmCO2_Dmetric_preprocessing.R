@@ -69,7 +69,7 @@ obs_data %>%
 # 2. Import and Format Hector Data ---------------------------------------------------------------
 
 hector_co2_path <- list.files(file.path(BASE, 'out-1', sub_dir), 'C.Ca_hector_run_cleanup.csv', full.names = T)
-hector_data     <- readr::read_csv(hector_co2_path)
+hector_data     <- read.csv(hector_co2_path, stringsAsFactors = FALSE)
 
 # Ensure that the data frame only contains the Ca variable and the same years from the 
 # as the observation data set.
