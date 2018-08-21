@@ -21,7 +21,7 @@ library(gridExtra);
 
 # Directory and script set up 
 BASE          <- getwd() # the base dir
-sub_dir       <- 'rcp26' # the out-1/ sub direcotry name 
+sub_dir       <- 'rcp26' # the out-1/ sub directory name 
 
 
 # Visual constants to make sure that all figures have a constant 

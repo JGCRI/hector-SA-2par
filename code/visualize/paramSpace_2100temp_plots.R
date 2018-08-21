@@ -35,7 +35,7 @@ readr::read_csv(list.files(file.path(BASE,'out-1', sub_dir), Dn_file, full.names
 Hector_tgav  <- read.csv(list.files(file.path(BASE,'out-1', sub_dir), "C.Tgav_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE)  
   
 # Import the paramter combination data frame
-Hector_param <- read.csv( file.path(BASE, 'out-1', 'A.par4_combinations.csv'), stringsAsFactors = FALSE ) %>%  
+Hector_param <- read.csv( file.path(BASE, 'out-1', sub_dir, 'A.par4_combinations.csv'), stringsAsFactors = FALSE ) %>%  
   mutate(run_name = paste0('hectorSA-', sprintf( '%04d', 1 : nrow( . ) )) )
 
 
