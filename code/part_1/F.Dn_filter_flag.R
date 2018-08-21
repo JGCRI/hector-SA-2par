@@ -34,7 +34,8 @@ OUTPUT_DIR <- file.path(BASE, 'out-1', sub_dir)
 # 1. Input Data ------------------------------------------------------------------------
 
 # Load the csv containing the csv of Dn metric results. 
-Dn_tibble <- read.csv(file.path(BASE, 'out-1', sub_dir, 'E.all_Dmetric_independent_results.csv' ), stringsAsFactors = FALSE)
+#Dn_tibble <- read.csv(file.path(BASE, 'out-1', sub_dir, 'E.all_Dmetric_independent_results.csv' ), stringsAsFactors = FALSE)
+Dn_tibble <- read.csv(file.path(BASE, 'out-1', sub_dir, 'E.Dn_metric_results.csv'), stringsAsFactors = FALSE)
 
 # Load the filter flag csv, the results from the Dn filtering will go here. 
 filter_flag <- readr::read_csv(file.path(BASE, 'out-1', sub_dir, 'filter_flag.csv' ))

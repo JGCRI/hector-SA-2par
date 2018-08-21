@@ -102,8 +102,6 @@ dir.create(dir_path, showWarnings = FALSE)
 write.csv(vary_diff_s, file = file.path(dir_path, 'A.par4_combinations.csv'), row.names = FALSE)
 
 
-message(seperator)
-
 # 6. Vary diff only -------------------------------------------------------------------------------------
 
 # Replace the s, beta and q10 values with the default values 
@@ -111,12 +109,29 @@ vary_diff_only <- input_params
 
 vary_diff_only$q10  <- default_q10
 vary_diff_only$beta <- default_beta
-vary_diff_only$s <- default_beta
+vary_diff_only$s    <- default_s
 
 
 dir_path <- file.path(BASE, 'out-1', 'vary_diff_only')
 dir.create(dir_path, showWarnings = FALSE)
 write.csv(vary_diff_only, file = file.path(dir_path, 'A.par4_combinations.csv'), row.names = FALSE)
+
+
+message(seperator)
+
+# 7. Vary s only -------------------------------------------------------------------------------------
+
+# Replace the s, beta and q10 values with the default values 
+vary_s_only <- input_params
+
+vary_s_only$q10  <- default_q10
+vary_s_only$beta <- default_beta
+vary_s_only$diff <- default_diff
+
+
+dir_path <- file.path(BASE, 'out-1', 'vary_s_only')
+dir.create(dir_path, showWarnings = FALSE)
+write.csv(vary_s_only, file = file.path(dir_path, 'A.par4_combinations.csv'), row.names = FALSE)
 
 
 message(seperator)

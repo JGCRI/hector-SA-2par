@@ -10,10 +10,6 @@
 # will be defined here.
 
 # 0. Set Up --------------------------------------------------------------------------------------
-library(tidyr)
-library(dplyr)
-library(purrr)
-
 
 # Define directories
 if(!exists('run_all')){
@@ -27,6 +23,11 @@ if(!exists('run_all')){
 
 }
 
+
+library(tidyr)
+library(dplyr)
+library(purrr)
+source(file.path(BASE, 'code', 'part_1', 'D.0.Dmetric_preprocessing_functions.R')) # The simga2 function
 
 script_name <- 'D.atmCO2_Dmetric_preprocessing.R'
 seperator   <- '----------'
@@ -51,7 +52,8 @@ names(obs_data) <- c("year", "month" , "decimal_date", "average", "interpolated"
 # incomplete are the 1958 and 2018, the first data collection year and the current year.
 
 # Subset the data so that it only includes the complete years.
-complete_years <- 1959:2017
+#complete_years <- 1959:2017
+complete_years <- 1959:2005
 obs_data       <- filter(obs_data, year %in% complete_years)
 
 
@@ -62,8 +64,10 @@ obs_data %>%
             s2n = var(interpolated)) %>%  
   ungroup %>%
   mutate(variable = "atm_CO2", 
-         units = "ppm") -> 
+         units = "ppm") %>% 
+  mutate(sigma2 = sigma2(., sd_coef = 2, use_rolling_sd = TRUE)) ->
   annual_obs_data
+
 
 
 # 2. Import and Format Hector Data ---------------------------------------------------------------
@@ -83,7 +87,7 @@ hector_data %>%
 # 3. Prepare the Dn Input Data Frame -----------------------------------------------------------
 
 hector_data %>%  
-  full_join(annual_obs_data %>% select(year, obs, s2n), by = "year") -> 
+  full_join(annual_obs_data %>% select(year, obs, s2n, sigma2), by = "year") -> 
   CO2_Dn_input_table
 
 output_file <- file.path(BASE, 'out-1', sub_dir, 'D.atmCO2_Dmetric_input_table.csv')

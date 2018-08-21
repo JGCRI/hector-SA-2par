@@ -35,38 +35,40 @@ Dn_func <- function(data){
 
 # Dc_func 
 # is a function that will calculate the Dn metric cut off value. This function requires an observational 
-# time series and the observational error values. This function will calculate b and a for the gama
-# distribution from the input data.
+# time series and the observational error values and the difference in model vs observational variability. 
 
-Dc_func <- function(data, alpha, sd_coef = 2, use_rolling_sd = TRUE){
+Dc_func <- function(data, alpha, sd_coef = 2){
   
   # Check for required columns
-  req_columns <- c('obs', 's2n')
+  req_columns <- c('obs', 's2n', 'sigma2')
   missing     <- req_columns[!req_columns %in% names(data)]
   if( length(missing) >= 1 ){stop("Missing ", paste(missing, collapse = ", "), " from data frame." )}
   
   # Define the shape parameter
   n <- nrow(data)
   a <- n / 2 
-  
-  # Define the scale parameter
-  if(use_rolling_sd){
-    
-    rolling_sd <- rollapply(data$obs, width = 5, FUN = function(x){ sd_coef * sd(x) }, na.pad = T)
-    sigma_sqrd <- mean( rolling_sd , na.rm = T ) ^ 2
-    
-  } else {
-    
-    sigma_sqrd <-  (sd_coef * sd(data$obs)) ^ 2
-    
-  }
 
-  b          <- (1/n^2) * sum(sigma_sqrd / data$s2n)
+  
+  b <- (1/n^2) * sum(data$sigma2 / data$s2n)
   
   # Find Dc based on the alpha percentile
   Dc <- qgamma((1 - alpha), shape = a, scale = b)
   
   # Return Dc
-  tibble(Dc = Dc, sigm_squared = sigma_sqrd, b = b, alpha = alpha)
+  tibble(Dc = Dc, b = b, alpha = alpha)
   
+}
+
+
+# join_Dmetric
+# is a function that will combine two tibbles togeter by a dummb column and then drop the dummy column, 
+# use this to join the Dn and Dc results into a single tibble. 
+
+join_Dmetric <- function(data1, data2){
+  
+  data1$index <- 1
+  data2$index <- 1
+  
+  full_join(data1, data2, by = 'index') %>% 
+    select(-index)
 }
