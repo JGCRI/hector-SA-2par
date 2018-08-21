@@ -10,8 +10,6 @@
 
 
 # 0. Set Up ------------------------------------------------------------------------
-library( 'readxl' )
-
 # Define directories
 if(!exists('run_all')){
   
@@ -23,6 +21,9 @@ if(!exists('run_all')){
   sub_dir    <- 'vary_q10_only'
   
 }
+
+library( 'readxl' )
+source(file.path(BASE, 'code', 'part_1', 'D.0.Dmetric_preprocessing_functions.R')) # The simga2 function
 
 script_name <- 'D.LandFlux_Dmetric_preprocessing.R'
 seperator   <- '----------'
@@ -53,6 +54,8 @@ ob_df$s2n <- 0.8 ^ 2
 # Rename the observational data frame 
 names(ob_df) <- c("year", "obs", "s2n")
 
+sigma2_value <- sigma2(ob_df, sd_coef = 2, use_rolling_sd = TRUE)
+ob_df$sigma2 <- sigma2_value
 
 
 # 2. Import and Format Hector Data --------------------------------------------------
@@ -72,7 +75,7 @@ hector_data %>%
 # 3. Prepare the Dn Input Data Frame -----------------------------------------------------------
 
 hector_data %>%  
-  full_join(ob_df %>% select(year, obs, s2n), by = "year") -> 
+  full_join(ob_df %>% select(year, obs, s2n, sigma2), by = "year") -> 
   LandFlux_Dn_input_table
 
 output_file <- file.path(BASE, 'out-1', sub_dir, 'D.LandFlux_Dmetric_input_table.csv')

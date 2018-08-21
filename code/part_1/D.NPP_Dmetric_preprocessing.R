@@ -8,9 +8,6 @@
 # will be defined here.
 
 # 0. Set Up  ----------------------------------------------------------------------------------------------
-library(dplyr)
-library(tidyr)
-
 # Define directories
 if(!exists('run_all')){
   
@@ -19,15 +16,22 @@ if(!exists('run_all')){
   if(!"hector-SA-npar.Rproj" %in% list.files(BASE)){stop('BASE must be the project location')}
   
   # The out-1/sub_directory to pull data from
-  sub_dir    <- 'vary_q10_only'
+  sub_dir    <- 'vary_4_params'
 
 }
+
+
+library(dplyr)
+library(tidyr)
+source(file.path(BASE, 'code', 'part_1', 'D.0.Dmetric_preprocessing_functions.R')) # The simga2 function
+
 
 script_name <- 'D.NPP_Dmetric_preprocessing.R'
 seperator   <- '----------'
 message(script_name)
 message('BASE directory is ', BASE, appendLF = T)
 message('pulling/saving data from out/', sub_dir, appendLF = T)
+
 
 # TRUE/FALSE to save the intermediate outputs created when processing the NPP data
 save_intermediates <- FALSE
@@ -100,11 +104,19 @@ no_area_values %>%
 
 # Format global NPP
 names(global_NPP) <- 'obs'
-global_NPP$year   <- as.integer(row.names(global_NPP))     
+global_NPP$year   <- as.integer(row.names(global_NPP))
+
+global_NPP <- global_NPP[global_NPP$year < 2005, ]
+
 global_NPP$units  <- 'Pg C/yr'
  
 # We are going to assume that the NPP observations have around a 10 % error. 
 global_NPP$s2n <- signif(global_NPP$obs * .10, 3)
+
+# Add the sigma^2 value 
+sigma2_value      <- sigma2(global_NPP, sd_coef = 2, use_rolling_sd = FALSE)
+global_NPP$sigma2 <- sigma2_value
+
 
 
 # If the save intermediates option is set to be true. 
