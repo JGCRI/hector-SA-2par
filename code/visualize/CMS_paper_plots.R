@@ -2,6 +2,8 @@
 # Purpose: This script is intended to be an invesitgation into the Hector runs that pass the observation filters based 
 # on the Dn metric analysis. 
 
+# TODO incorperate the GCAM cost plots we like
+
 # 0. Set Up ---------------------------------------------------------------------------------------------
 # Make sure that the working directory is equal to the project directory
 if( ! 'hector-SA-npar.Rproj' %in% list.files() ){ stop( 'Working dir must be the project location' ) }
@@ -14,7 +16,7 @@ library(rgcam);   library(ggExtra)
 
 # Directories
 BASE    <- getwd() 
-sub_dir <- 'rcp26' # The name of the out-1/sub_dir to pull the standalone Hector results from
+sub_dir <- 'vary_4_params' # The name of the out-1/sub_dir to pull the standalone Hector results from
 
 
 # Load the functions 
@@ -38,7 +40,7 @@ script_output = list()
 # 1. Import Data ---------------------------------------------------------------------------------------
 
 # Import the Dn results
-readr::read_csv(list.files(file.path(BASE,'out-1', sub_dir), Dn_file, full.names = T)) %>%  
+readr::read_csv(list.files(file.path(BASE,'out-1', sub_dir), Dn_file, full.names = T)) %>%
   mutate(passing = if_else(Dn <= Dc, T, F)) %>% 
   select(run_name, variable, passing) %>% 
   spread(variable, passing) -> 
@@ -57,11 +59,11 @@ Dn_NPP_input  <- read.csv( file.path( BASE, 'out-1', sub_dir, 'D.NPP_Dmetric_inp
 
 
 # Import the paramter combination data frame
-Hector_param <- read.csv( file.path(BASE, 'out-1', 'A.par4_combinations.csv'), stringsAsFactors = FALSE ) 
+Hector_param <- read.csv( file.path(BASE, 'out-1', sub_dir, 'A.par4_combinations.csv'), stringsAsFactors = FALSE ) 
 
 
 # Import the GCAM data and format as a flat list and then concatenate based on tibble name.
-flatten_list <- flatten( map(GCAM_list, function(name){ get(load( file.path(BASE, 'out-2', name) )) }) )
+flatten_list <- flatten( map(GCAM_list, function(name){ get(load( file.path(BASE, 'out-2', sub_dir, name) )) }) )
 
 tibble_names        <- unique(names(flatten_list))
 names(tibble_names) <- tibble_names
@@ -95,7 +97,7 @@ theme_bw() +
   UNIVERSTAL_THEME 
 
 ############################################################################################################################
-# 3. Create Standalone Hector Plots ----------------------------------------------------------------------------------------
+# 3. Create Standalone Hector Plots --------------
 ############################################################################################################################
 # Fig 1 Hector Temp vs Obs -------------------------------------------------------------------------------------
 

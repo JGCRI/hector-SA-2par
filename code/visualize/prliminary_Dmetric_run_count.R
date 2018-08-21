@@ -13,7 +13,7 @@ library(VennDiagram)
 
 # Define directories
 BASE       <- getwd()
-sub_dir    <- 'rcp26'
+sub_dir    <- 'vary_q10_only'
 OUTPUT_DIR <- file.path(BASE, 'out-1', sub_dir)
 
 
@@ -23,7 +23,7 @@ script_output <- list()
 # 1. Import and Format Data Frames ------------------------------------------------------------------------
 
 # Import the parameter values and add run_name column.
-npar_wide          <- read.csv(file.path(BASE, 'out-1', 'A.par4_combinations.csv'))
+npar_wide          <- read.csv(file.path(BASE, 'out-1', sub_dir, 'A.par4_combinations.csv'))
 npar_wide$run_name <- paste0( 'hectorSA-', sprintf( '%04d', npar_wide$run_index ) )
 
 # Format the paramter values as a long data frame.
@@ -34,7 +34,7 @@ npar_wide %>%
 
 
 # Import and format the Dn data.
-Dn_metric_unformatted <- read.csv(file.path(OUTPUT_DIR, 'E.all_Dmetric_results'), stringsAsFactors = FALSE)
+Dn_metric_unformatted <- read.csv(file.path(OUTPUT_DIR, 'E.all_Dmetric_independent_results.csv'), stringsAsFactors = FALSE)
 
 # Add a flag to determine if the run matches the observations based on Dn stats. 
 Dn_matching_long <- mutate(Dn_metric_unformatted, matching = if_else(Dn <= Dc, 1, 0))
@@ -48,7 +48,7 @@ Dn_matching_long %>%
 
 
 # NPP observation and Hector data 
-NPP_data <- read.csv(file.path(OUTPUT_DIR, 'D.NPP_Dn_input_table.csv'), stringsAsFactors = FALSE)
+NPP_data <- read.csv(file.path(OUTPUT_DIR, 'D.NPP_Dmetric_input_table.csv'), stringsAsFactors = FALSE)
 
 # 2. Run Count Figures ------------------------------------------------------------------------
 
@@ -71,10 +71,10 @@ ggplot(run_count_df) +
 
 # Now do a stacked method for the passing run count 
 Dn_matching_wide %>% 
-  mutate('Land Flux & Tgav' = if_else(`Tgav` == 1 & `Land Flux` == 1, 1, 0 )) %>% 
-  mutate('Land Flux & Tgav & atm CO2' = if_else(`Tgav` == 1 & `Land Flux` == 1 & `atm CO2` == 1, 1, 0 )) %>% 
+#  mutate('Land Flux & Tgav' = if_else(`Tgav` == 1 & `Land Flux` == 1, 1, 0 )) %>% 
+ # mutate('Land Flux & Tgav & atm CO2' = if_else(`Tgav` == 1 & `Land Flux` == 1 & `atm CO2` == 1, 1, 0 )) %>% 
   mutate('Tgav & atm CO2' = if_else(`Tgav` == 1 & `atm CO2` == 1, 1, 0 )) %>% 
-  select(run_name, `Land Flux`, `Land Flux & Tgav`, `Land Flux & Tgav & atm CO2`, `Tgav & atm CO2`) %>%
+#  select(run_name, `Land Flux`, `Land Flux & Tgav`, `Land Flux & Tgav & atm CO2`, `Tgav & atm CO2`) %>%
   gather(stacked_variable, passing, -run_name) %>%
   group_by(stacked_variable) %>% 
   summarise(count = sum(passing)) %>% 
@@ -94,16 +94,16 @@ ggplot(stacked_run_count) +
 
 # Save the run names as individual sets for used in the VienDiagram! 
 atmCO2_set   <- pull(select(filter(Dn_matching_wide, `atm CO2` == 1), run_name))
-LandFlux_set <- pull(select(filter(Dn_matching_wide, `Land Flux` == 1), run_name))
+#LandFlux_set <- pull(select(filter(Dn_matching_wide, `Land Flux` == 1), run_name))
 Tgav_set     <- pull(select(filter(Dn_matching_wide, `Tgav` == 1), run_name))
 NPP_set      <- pull(select(filter(Dn_matching_wide, `NPP` == 1), run_name))
 
 
-venn.diagram(list("Land Flux" = LandFlux_set, "atm CO2" = atmCO2_set, "Tgav" = Tgav_set, 
-                  "NPP" = NPP_set),
-             fill = c("red", "green", "blue", "orange"),
-             alpha = c(0.5, 0.5, 0.5, 0.5), cex = 2, main = "Matching Dn Metric Run Count",
-             filename = "./out-fig/run_count_venndiagram.png")
+# venn.diagram(list("Land Flux" = LandFlux_set, "atm CO2" = atmCO2_set, "Tgav" = Tgav_set, 
+#                   "NPP" = NPP_set),
+#              fill = c("red", "green", "blue", "orange"),
+#              alpha = c(0.5, 0.5, 0.5, 0.5), cex = 2, main = "Matching Dn Metric Run Count",
+#              filename = "./out-fig/run_count_venndiagram.png")
 
 
 
@@ -111,7 +111,6 @@ venn.diagram(list("Land Flux" = LandFlux_set, "atm CO2" = atmCO2_set, "Tgav" = T
 
 
 # Plot all of the Hector NPP values and observational data. Mark the runs that "match" based on the Dn metric. 
-
 NPP_obs <- filter(NPP_data, run_name == 'hectorSA-0001')
 
 NPP_data %>% 
