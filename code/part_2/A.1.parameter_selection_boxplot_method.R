@@ -70,7 +70,7 @@ categorized_2100_values %>%
 # 2. Create the Selected Parameter Set -------------------------------------------------------------
 
 # Import the parameter combinations and add the run_name column.
-parameter_set          <- read.csv(file.path(BASE, 'out-1', 'A.par4_combinations.csv'), stringsAsFactors = FALSE)
+parameter_set          <- read.csv(file.path(BASE, 'out-1', sub_dir, 'A.par4_combinations.csv'), stringsAsFactors = FALSE)
 parameter_set$run_name <- paste0( 'hectorSA-', sprintf( '%04d', parameter_set$run_index ))
                           
 # Subset the parameter data frame so that it only includes the parameter sets selected. 
@@ -91,10 +91,13 @@ boxplot_values %>%
 
 
 # Save the output in the secondary output file
-file_name <- file.path( BASE, 'out-2', 'A.Hector_GCAM_parameters_boxplot_selection.csv' )
+output_dir <- file.path(BASE, 'out-2', sub_dir)
+dir.create(output_dir, showWarnings = FALSE)
+
+file_name <- file.path(output_dir, 'A.Hector_GCAM_parameters_boxplot_selection.csv' )
 write.csv( Hector_GCAM_parameters, file = file_name, row.names = FALSE )
 
-file_name <- file.path(BASE, 'out-2', 'A.Hector_GCAM_parameters_mapping_boxplot_selection.csv')
+file_name <- file.path(output_dir, 'A.Hector_GCAM_parameters_mapping_boxplot_selection.csv')
 write.csv( Hector_GCAM_parameter_mapping, file = file_name, row.names = FALSE )
 save(script_output, file = file.path(BASE, 'out-fig', 'Tgav_2100_boxplot_selection.rda'))
 

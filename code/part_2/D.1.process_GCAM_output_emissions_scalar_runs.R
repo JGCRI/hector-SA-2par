@@ -1,8 +1,7 @@
 
 # Purpose: This script parses and processes query data from merged rgcam project and saves 
-# results as a flat list as a rda file by by the selection method. The idea is that the 
-# output from this script is ready to plot with limited processing in the visulization 
-# scripts. This script requires several user decisions to be made in section 0. 
+# results as a flat list as a rda file by by the selection method. From the scaled emissions 
+# GCAM output the idea is that outputs from this script should be ready to plot. 
 
 # 0. Set Up ---------------------------------------------------------------------------------------------
 # Make sure that the working directory is equal to the project directory
@@ -17,27 +16,19 @@ library(stringr)
 
 # Directories
 BASE    <- getwd() 
-sub_dir <- 'rcp26'
+sub_dir <- 'scaled_emissions' # This script should only work with this sub directory 
+
 
 # User Decisions - decide what project to process and what paramter mapping file to use. 
-proj_name    <- 'proj_merge_extreme.proj'
-mapping_name <- 'A.Hector_GCAM_parameters_mapping.csv'
-
-
-# Define the filer_name factor order, this vector will be used to orderr the filter_name 
-# factor to help with the plotting process.
-filterName_factor <- c('None', 'NPP', 'atm CO2', 'atm CO2, NPP', 'Tgav', 'NPP, Tgav', 'atm CO2, Tgav', 'atm CO2, NPP, Tgav') 
+proj_name    <- 'proj_merge_scaled_emissions.proj'
 
 
 # 1. Import Data ---------------------------------------------------------------------------------------
 
-# Import the merged R project that contains all of the GCAM output data. Also import the Hector paramter 
-# mapping file to add information about why a particular hector paramter set combination was used. 
-path      <- list.files(file.path(BASE, 'out-2'), proj_name, full.names = TRUE)
+# Import the merged R project that contains all of the GCAM output data. 
+path      <- list.files(file.path(BASE, 'out-2', sub_dir), proj_name, full.names = TRUE)
 gcam_proj <- get(load(path))
 
-path             <- list.files( file.path(BASE, 'out-2'), mapping_name, full.names = TRUE)
-gcam_run_mapping <- read.csv(path, stringsAsFactors = FALSE)
 
 
 # 3. Format Query Output  -------------------------------------------------------------------------------------
@@ -45,40 +36,31 @@ gcam_run_mapping <- read.csv(path, stringsAsFactors = FALSE)
 # The gcam_proj is curently sctrucured as an rgcam project output, a nested list. 
 # Format the information in the tibble in preperation for the join with the mapping file. 
 
-modify_depth(gcam_proj, 2, function(input){
-  
-  input %>% 
-    mutate(run_name = str_extract(scenario, 'hectorSA-[0-9]{4}')) %>%  
-    mutate(policy = gsub('hectorSA-[0-9]{4}', '', scenario)) %>% 
-    mutate(policy = gsub('_', '', policy)) %>%
-    inner_join(gcam_run_mapping, by = "run_name") %>%               # Add the filter_name category by joining the gcam_run_mapping file
-    rename(units = Units) %>%                                       # Rename the units
-    select(-scenario)->                                             # Drop the scenario column                          
-    output
-  
-  output$filter_name <- factor(output$filter_name, filterName_factor, ordered = TRUE)   # Add factor levels
+query_list        <- listQueries(gcam_proj)
+names(query_list) <- query_list
 
-  output  # Return output
-    
-  }) -> 
+map(query_list, function(query_name){
+  
+  # Extract the Query
+  getQuery(gcam_proj, query_name) %>% 
+    # Parse out information from the scenario name
+    tidyr::separate(scenario, into = c('run_name', 'emissions_scalar', 'policy'), sep = '_') %>% 
+    # Clean up the emissions scalar
+    mutate(emissions_scalar = gsub('EF-', '', emissions_scalar)) %>% 
+    mutate(emissions_scalar = gsub('p', '.', emissions_scalar)) %>% 
+    # Rename the units
+    rename(units = Units)  
+  
+}) -> 
   formatted_gcam_output
 
 
-# 4. rgcam project -> list ----------------------------------------------------------------------------
-
-# Exract all of the queries from and save results as individual tibbles in a list.
-query_list        <- listQueries(formatted_gcam_output)
-names(query_list) <- query_list
-
-data <- map(query_list, getQuery, projData = formatted_gcam_output)
-
-
-# 5. Calculate policy results ----------------------------------------------------------------------------------------
+# 4. Calculate policy results ----------------------------------------------------------------------------------------
 
 # Remove the reference run from the policy values for each query, only for the queries that contain data 
 # for both the reference and target runs. 
 
-map(data, function(input){
+map(formatted_gcam_output, function(input){
   
   # Save a copy of the input data tibble names. Latter on this will be used to 
   # select the columns to keep from the wide tibble.
@@ -129,17 +111,12 @@ map(data, function(input){
     # The query only contains values from one type of run return original input
     filter(input, !is.na(value))
     
-    }
-
+  }
+  
 }) -> 
   output
 
-# TODO the max NPP and None 2100 parameters are too hot to solve a target policy run and return the referene run, 
-# remove these runs to prevent confusion with plotting. 
-output <- modify(output, function(input){ filter(input, ! run_name %in% c('hectorSA-0975', 'hectorSA-3591')) })
-
-
-# 6. Format Units -----------------------------------------------------------------------------------------
+# 5. Format Units -----------------------------------------------------------------------------------------
 
 # The CO2 prices query reports units in tC, but we would like to convert the to 
 # units of tCO2. In order to do this mulitply by 44/12 (the ratio of the molecular/atomic wegihts)
@@ -158,7 +135,7 @@ output$`CO2 emissions by region` %>%
 # GCAM results were 1990$ but we would like to report values in terms of 2015$. 
 output %>% 
   modify(function(input){
-  
+    
     if( any(grepl('1990', input$units)) ){
       
       input %>% 
@@ -175,15 +152,14 @@ output %>%
   output
 
 
-# 7. Save the data by selection reason -------------------------------------------------------------------------------
+# 6. Save data -------------------------------------------------------------------------------
 
-selection <- unique(output$`Climate forcing`$keep)
 
-map(selection, function(keep, outputPath = file.path(BASE, 'out-2'), outputBaseName = 'GCAM'){
-  
-  modify(output, function(input){filter(input, keep == keep) }) %>% 
-    save(file = file.path(outputPath, paste0(outputBaseName, '_', keep, '.rda' )))
-  
-})
+output_file <- file.path(BASE, 'out-2', sub_dir, 'query_results.rda')
 
-# End
+save(output, file = output_file)
+
+
+
+
+
