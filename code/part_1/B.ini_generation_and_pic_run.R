@@ -1,5 +1,9 @@
 # Purpose: this script creates ini file using each combination of parameters, 
 # then runs the hector, then extracts desired output and write into output file. 
+# 
+# Before running on pic make sure that hector and the CMS repository are saved 
+# at the same dir level. Also check to make sure that section 0 and 0.5 are 
+# set up correctly.
 
 # -----------------------------------------------------------------------------
 # 0. set up some basics
@@ -10,9 +14,15 @@ library( 'tidyr' )
 if(!exists('run_all')){
   
   # The out-1/sub_directory to pull data from
-  sub_dir    <- 'vary_q10_only'
+  sub_dir    <- 'vary_4_params' # vary all 4 paramters
   
 }
+
+# Define the name of the hector template ini file name, should live in the
+# hector-SA-napr directory. 
+# ** Make sure that the emissions used by the ini are located in 
+# hector/inst/input/emisions**
+hector_ini_template <- 'template_hector_historical.ini' # the ini file 
 
 script_name <- 'B.ini_generation_and_pic_run.R'
 seperator   <- '----------'
@@ -27,7 +37,7 @@ pic_hector_path <- '/pic/projects/GCAM/Dorheim/CMS/hector'
 
 # -----------------------------------------------------------------------------
 # 1. set up some parameters
-year_list <- 1746 : 2100 
+year_list <- 1746 : 2015 
 var_list <- read.csv( './input/selected_output_variables.csv', stringsAsFactors = F )
 var_list <- var_list$variable
 
@@ -35,7 +45,7 @@ var_list <- var_list$variable
 # 2. read in some basics
 
 # ini template 
-ini_con <- file( paste0( './input/template_hector_', sub_dir, '.ini' ) ) 
+ini_con <- file( paste0( './input/', hector_ini_template) ) 
 ini_template <- readLines( ini_con )
 close( ini_con ) 
 
