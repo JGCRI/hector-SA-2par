@@ -14,11 +14,11 @@ library(ggplot2)
 
 # Set up the dirs
 BASE    <- getwd()                                      # Must be the project dir
-sub_dir <- "rcp26"                                      # Define the out-1 subdirectory to search 
-Dn_file <- "E.all_Dmetric_independent_results.csv"      # Define the Dn metric file to process 
+sub_dir <- "AGU"                                      # Define the out-1 subdirectory to search 
+Dn_file <- 'E.Dn_metric_results.csv'     # Define the Dn metric file to process 
 
 # Variables 
-variable_list <- c("atm CO2", "NPP", "Tgav")
+variable_list <-  c("Tgav, NPP, atmCO2 multi optimized", 'Tgav', 'atm CO2')
 
 # Load the selection functions 
 source(file.path(BASE, 'code', 'part_2', 'A.0.Hector_run_selection_functions.R'))
@@ -30,10 +30,10 @@ script_output = list()
 
 # Import the Dn results
 readr::read_csv(list.files(file.path(BASE,'out-1', sub_dir), Dn_file, full.names = T)) %>%  
-  filter(variable %in% variable_list) %>% 
+  filter(filter_name %in% variable_list) %>% 
   mutate(passing = if_else(Dn <= Dc, T, F)) %>% 
-  select(run_name, variable, passing) %>% 
-  spread(variable, passing) -> 
+  select(run_name, filter_name, passing) %>% 
+  spread(filter_name, passing) -> 
   wide_passing_Dn
 
 # Import a Hector data set to use in the selection process. We are interested in the 
@@ -89,10 +89,23 @@ extreme_values %>%
   distinct -> 
   Hector_GCAM_parameter_mapping
 
+# I don't want to stack the variables so do some filtering here. 
+Hector_GCAM_parameters %>%  
+  filter(filter_name %in% c('Tgav', 'atm CO2', 'Tgav, NPP, atmCO2 multi optimized')) ->
+  Hector_GCAM_parameters
+
+Hector_GCAM_parameter_mapping %>% 
+  filter(filter_name %in% c('Tgav', 'atm CO2', 'Tgav, NPP, atmCO2 multi optimized')) ->
+  Hector_GCAM_parameter_mapping
+
 
 # Save the output in the secondary output file
 output_dir <- file.path(BASE, 'out-2', sub_dir)
 dir.create(output_dir, showWarnings = FALSE)
+
+file_name <- file.path(output_dir, 'A.passing_Dn.csv')
+write.csv(wide_passing_Dn, file = file_name, row.names = FALSE)
+
 
 file_name <- file.path(output_dir, 'A.Hector_GCAM_parameters.csv' )
 write.csv( Hector_GCAM_parameters, file = file_name, row.names = FALSE )

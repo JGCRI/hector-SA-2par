@@ -85,7 +85,7 @@ discounted_data %>%
   mutate(range = `hotter end` - `cooler end`) %>% 
   select('Query Name' = title, 'Region' = region,  `hotter end`, 
          `cooler end`, range, 'Units' = units) %>% 
-  write.csv(., file = file.path(BASE, 'test.csv'), row.names = FALSE)
+  write.csv(., file = file.path(BASE, 'out-3', 'policy-cost.csv'), row.names = FALSE)
 
 
 
@@ -126,14 +126,17 @@ gcam_rslt$`Policy Cost By Period` %>%
   data
 
 data %>% 
+  mutate('2100 Tgav' = if_else(keep == 'max', 'hotter', 'cooler')) %>% 
   ggplot() + 
-  geom_line(aes(year, value, color = filter_name, group = run_name), 
+  geom_line(aes(year, value, color = `2100 Tgav`, group = run_name), 
             size = 1.5) + 
-  scale_color_manual(values = color_vector[ names(color_vector) %in% unique(data$filter_name)]) +
-  labs(title = unique(data$query_name), 
-       subtitle = 'global aggregate', 
-       y = unique(data$units)) + 
-  UNIVERSTAL_THEME 
+  scale_color_manual(values = c("cooler" = "blue", "hotter" = "red")) +
+  labs(title = paste0('Global ', unique(data$query_name)), 
+    #   subtitle = 'global aggregate', 
+       y = unique(data$units), 
+       x = 'Year') + 
+  UNIVERSTAL_THEME +
+  theme(legend.position = 'right') 
 
 
 data %>%  

@@ -16,7 +16,7 @@ if(basename(BASE) != "hector-SA-npar"){stop("Working directory should be the pro
 
 run_all <- TRUE
 
-sub_dir <- 'vary_diff_s'
+sub_dir <- 'vary_4_params'
 
 if( !any(grepl( sub_dir, list.dirs(file.path(BASE, 'out-1')))) ){
   
@@ -48,7 +48,7 @@ if( !any(grepl( sub_dir, list.dirs(file.path(BASE, 'out-1')))) ){
 # 1.D ####
 # Process observation and Hector data to make the input tables used to calculate the Dn and Dc metrics. 
 source(file.path(BASE, 'code', 'part_1', 'D.atmCO2_Dmetric_preprocessing.R'))
-source(file.path(BASE, 'code', 'part_1', 'D.LandFlux_Dmetric_preprocessing.R'))
+#source(file.path(BASE, 'code', 'part_1', 'D.LandFlux_Dmetric_preprocessing.R')) We aren't doing this one right now.. 
 source(file.path(BASE, 'code', 'part_1', 'D.NPP_Dmetric_preprocessing.R'))      # This script is slow
 source(file.path(BASE, 'code', 'part_1', 'D.Tgav_Dmetric_preprocessing.R'))
 

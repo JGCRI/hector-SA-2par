@@ -52,8 +52,8 @@ names(obs_data) <- c("year", "month" , "decimal_date", "average", "interpolated"
 # incomplete are the 1958 and 2018, the first data collection year and the current year.
 
 # Subset the data so that it only includes the complete years.
-#complete_years <- 1959:2017
-complete_years <- 1959:2005
+complete_years <- 1959:2016
+#complete_years <- 1959:2005
 obs_data       <- filter(obs_data, year %in% complete_years)
 
 

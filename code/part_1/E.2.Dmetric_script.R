@@ -31,7 +31,7 @@ message('BASE directory is ', BASE, appendLF = T)
 message('pulling/saving data from out/', sub_dir, appendLF = T)
 
 # Define the output directory
-OUTPUT_DIR <- file.path(BASE, 'out-1', sub_dir)
+OUTPUT_DIR <- file.path(BASE, 'out-1', 'AGU'); dir.create(OUTPUT_DIR)
 
 # Load the D metric functions, (Dn_func, Dc_func)
 source(file.path(BASE, 'code', 'part_1', 'E.0.Dmetric_functions.R'))
@@ -56,7 +56,7 @@ Tgav_Dn_input %>%
   select(obs, s2n, sigma2) %>% 
   distinct %>% 
   Dc_func(alpha = 0.05) %>% 
-  mutate(variable = 'Tgav') ->
+  mutate(filter_name = 'Tgav') ->
   Tgav_Dc
 
 Tgav_Dmetric_results <- join_Dmetric(Tgav_Dn_values, Tgav_Dc)
@@ -82,7 +82,7 @@ atmCO2_Dn_input %>%
   select(year, obs, s2n, sigma2) %>% 
   distinct %>% 
   Dc_func(alpha = 0.05) %>% 
-  mutate(variable = 'atm CO2') ->
+  mutate(filter_name = 'atm CO2') ->
   atmCO2_Dc
 
 
@@ -108,7 +108,7 @@ LandFlux_Dn_input %>%
   select(year, obs, s2n, sigma2) %>%
   distinct %>% 
   Dc_func(alpha = 0.05) %>%
-  mutate(variable = 'Land Flux') ->
+  mutate(filter_name = 'Land Flux') ->
   LandFlux_Dc
 
 LandFlux_Dmetric_results <- join_Dmetric(LandFlux_Dc, LandFlux_Dn_values)
@@ -131,7 +131,7 @@ NPP_Dn_input %>%
   select(year, obs, s2n, sigma2) %>% 
   distinct %>% 
   Dc_func(alpha = 0.05) %>% 
-  mutate(variable = 'NPP') ->
+  mutate(filter_name = 'NPP') ->
   NPP_Dc
 
 NPP_Dmetric_results <- join_Dmetric(NPP_Dn_values, NPP_Dc)
@@ -153,7 +153,7 @@ NPP_Tgav_atmCO2_input %>%
   select(obs, s2n, sigma2) %>%
   distinct %>% 
   Dc_func(alpha = 0.05) %>% 
-  mutate(variable = 'Tgav, NPP, atmCO2 multi optimized') -> 
+  mutate(filter_name = 'Tgav, NPP, atmCO2 multi optimized') -> 
   NPP_Tgav_atmCO2_Dc
 
 atmCO2_NPP_Tgav_Dmetric_results <- join_Dmetric(NPP_Tgav_atmCO2_Dn, NPP_Tgav_atmCO2_Dc)
