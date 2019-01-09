@@ -16,7 +16,7 @@ pic_gcam_dir <- '/pic/projects/GCAM/Dorheim/CMS/GCAM5/gcam-parallel'
 
 # Define the exe directory to search - this requires that all of the exe_x be manually moved into the 
 # the named exe_dir. 
-exe_dir <- 'exe_scaled_emissions'; setwd(pic_gcam_dir)
+exe_dir <- 'exe_AGU'; setwd(pic_gcam_dir)
 
 
 # Define the path to the hector sensitivity analysis repository 
@@ -37,19 +37,19 @@ dirs <- dir(path = exe_dir, pattern = 'exe_', full.names = T)
 # Generate the dir/proj_exe_x.proj.proj list.
 proj_list  <- file.path(dirs,  paste0('proj_', basename(dirs), '.proj'))
 
-# for (prj in proj_list){
-# 
-#     path <- dirname(prj)
-# 
-#     contents <- list.dirs(path, full.names = T, recursive = T)
-# 
-#     if( any( grepl("database_basexdb", contents) ) ){
-# 
-#       conn         <- localDBConn(dbPath = file.path(path, "db"), dbFile = "database_basexdb")
-#       project_file <- addScenario(conn = conn, proj = paste0('./', prj), queryFile = query_path)
-# 
-#     }
-# }
+for (prj in proj_list){
+
+    path <- dirname(prj)
+
+    contents <- list.dirs(path, full.names = T, recursive = T)
+
+    if( any( grepl("database_basexdb", contents) ) ){
+
+      conn         <- localDBConn(dbPath = file.path(path, "db"), dbFile = "database_basexdb")
+      project_file <- addScenario(conn = conn, proj = paste0('./', prj), queryFile = query_path)
+
+    }
+}
 
 # message('Saving... \n', paste(proj_list, collapse =  ' \n'))
 

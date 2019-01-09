@@ -15,8 +15,8 @@ library(tibble)
 
 
 # User decisions
-sub_name          <- "extremes" 
-sub_dir           <- 'some name'
+sub_name          <- "AGU" 
+sub_dir           <- 'AGU'
 pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'; setwd( pic_hectorSA_path ) # Where the hecotr-SA-npar lives on pic
 param_path        <- file.path(pic_hectorSA_path, 'out-2', sub_dir, 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
 
