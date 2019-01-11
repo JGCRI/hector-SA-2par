@@ -18,9 +18,9 @@ run_all <- TRUE
 
 sub_dir <- 'vary_4_params'
 
-if( !any(grepl( sub_dir, list.dirs(file.path(BASE, 'out-1')))) ){
+if( !any(grepl( sub_dir, list.dirs(file.path(BASE, 'output', 'out-1')))) ){
   
-  stop('Could not find out-1/', sub_dir)
+  stop('Could not find output/out-1/', sub_dir)
   
 }
 
@@ -31,7 +31,7 @@ if( !any(grepl( sub_dir, list.dirs(file.path(BASE, 'out-1')))) ){
 # Randomly generate the 50,000 paramter combinations to use with Hector, this should only be sourced once 
 # and the csv that is produced should be comitted so that the rest of the project code uses the correct 
 # paramter combinations.  
-# source(file.path(BASE, "code", "part_1", "A.parameter_combination_generation.R"))
+# source(file.path(BASE, "code", "part_1", "A.1.parameter_combination_generation.R"))
 
 
 # 1.B ####
@@ -43,13 +43,13 @@ if( !any(grepl( sub_dir, list.dirs(file.path(BASE, 'out-1')))) ){
 
 # 1.C ####
 # Clean up and fromat the Hector results. 
-#source(file.path(BASE, "code", "part_1", "C.hector_output_cleanup.R"))
+# source(file.path(BASE, "code", "part_1", "C.hector_output_cleanup.R"))
 
 # 1.D ####
 # Process observation and Hector data to make the input tables used to calculate the Dn and Dc metrics. 
 source(file.path(BASE, 'code', 'part_1', 'D.atmCO2_Dmetric_preprocessing.R'))
-#source(file.path(BASE, 'code', 'part_1', 'D.LandFlux_Dmetric_preprocessing.R')) We aren't doing this one right now.. 
-source(file.path(BASE, 'code', 'part_1', 'D.NPP_Dmetric_preprocessing.R'))      # This script is slow
+#source(file.path(BASE, 'code', 'part_1', 'D.LandFlux_Dmetric_preprocessing.R')) # We are not using this anymore  
+source(file.path(BASE, 'code', 'part_1', 'D.NPP_Dmetric_preprocessing.R'))       # This script is slow
 source(file.path(BASE, 'code', 'part_1', 'D.Tgav_Dmetric_preprocessing.R'))
 
 # 1.E ####
