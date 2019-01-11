@@ -25,10 +25,10 @@ script_name <- 'F.Dn_filter_flag.R'
 seperator   <- '----------'
 message(script_name)
 message('BASE directory is ', BASE, appendLF = T)
-message('pulling/saving data from out/', sub_dir, appendLF = T)
+message('output/out-1', sub_dir, appendLF = T)
 
 
-OUTPUT_DIR <- file.path(BASE, 'out-1', 'AGU')
+OUTPUT_DIR <- file.path(BASE, 'output','out-1', 'AGU')
 
 
 # 1. Input Data ------------------------------------------------------------------------

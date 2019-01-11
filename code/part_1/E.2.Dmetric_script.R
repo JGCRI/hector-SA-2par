@@ -28,10 +28,10 @@ script_name <- 'E.1.Dmetric_script.R'
 seperator   <- '----------'
 message(script_name)
 message('BASE directory is ', BASE, appendLF = T)
-message('pulling/saving data from out/', sub_dir, appendLF = T)
+message('output/out-1', sub_dir, appendLF = T)
 
 # Define the output directory
-OUTPUT_DIR <- file.path(BASE, 'out-1', 'AGU'); dir.create(OUTPUT_DIR)
+OUTPUT_DIR <- file.path(BASE, 'output', 'out-1', 'AGU'); dir.create(OUTPUT_DIR)
 
 # Load the D metric functions, (Dn_func, Dc_func)
 source(file.path(BASE, 'code', 'part_1', 'E.0.Dmetric_functions.R'))
@@ -42,7 +42,7 @@ source(file.path(BASE, 'code', 'part_1', 'E.0.Dmetric_functions.R'))
 # temperature record. 
 
 # Import the temperature data. 
-Tgav_Dn_input <- read.csv(file.path(BASE, 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv'), 
+Tgav_Dn_input <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv'), 
                           stringsAsFactors = FALSE ) 
 
 # Calculate the Dn value for each Hector run 
@@ -67,7 +67,7 @@ Tgav_Dmetric_results <- join_Dmetric(Tgav_Dn_values, Tgav_Dc)
 # atmospheric CO2 record. 
 
 # Import the temperature data. 
-atmCO2_Dn_input <- read.csv(file.path(BASE, 'out-1', sub_dir, 'D.atmCO2_Dmetric_input_table.csv'), 
+atmCO2_Dn_input <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'D.atmCO2_Dmetric_input_table.csv'), 
                             stringsAsFactors = FALSE ) 
 
 # Calculate the Dn value for each Hector run 
@@ -94,7 +94,7 @@ atmCO2_Dmetric_results <- join_Dmetric(atmCO2_Dc, atmCO2_Dn_values)
 # from the global carbon project data.
 
 # Import the temperature data.
-LandFlux_Dn_input <- read.csv(file.path(BASE, 'out-1', sub_dir, 'D.LandFlux_Dmetric_input_table.csv'),
+LandFlux_Dn_input <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'D.LandFlux_Dmetric_input_table.csv'),
                               stringsAsFactors = FALSE )
 
 # Calculate the Dn value for each Hector run
@@ -117,7 +117,7 @@ LandFlux_Dmetric_results <- join_Dmetric(LandFlux_Dc, LandFlux_Dn_values)
 # 4. NPP Only ---------------------------------------------------------------------------
 
 # Import the temperature data. 
-NPP_Dn_input <- read.csv(file.path(BASE, 'out-1', sub_dir, 'D.NPP_Dmetric_input_table.csv'), 
+NPP_Dn_input <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'D.NPP_Dmetric_input_table.csv'), 
                          stringsAsFactors = FALSE ) 
 
 # Calculate the Dn value for each Hector run 

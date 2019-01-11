@@ -27,10 +27,10 @@ script_name <- 'E.1.Dmetric_independent_script.R'
 seperator   <- '----------'
 message(script_name)
 message('BASE directory is ', BASE, appendLF = T)
-message('pulling/saving data from out/', sub_dir, appendLF = T)
+message('pulling/saving data from out/', 'output', sub_dir, appendLF = T)
 
 # Define the output directory
-OUTPUT_DIR <- file.path(BASE, 'out-1', sub_dir)
+OUTPUT_DIR <- file.path(BASE, 'output', 'out-1', sub_dir)
 
 # Load the D metric functions, (Dn_func, Dc_func)
 source(file.path(BASE, 'code', 'part_1', 'E.0.Dmetric_functions.R'))
