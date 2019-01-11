@@ -42,7 +42,7 @@ source(file.path(BASE, 'code', 'part_1', 'E.0.Dmetric_functions.R'))
 # temperature record. 
 
 # Import the temperature data. 
-Tgav_Dn_input <- read.csv(file.path(BASE, 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv'), 
+Tgav_Dn_input <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv'), 
                           stringsAsFactors = FALSE ) 
 
 # Calculate the Dn value for each Hector run 
