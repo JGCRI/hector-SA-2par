@@ -29,7 +29,7 @@ script_output = list()
 # 1.A. Select Extreme 2100 Values --------------------------------------------------------------------------------
 
 # Import the Dn results
-readr::read_csv(list.files(file.path(BASE,'out-1', sub_dir), Dn_file, full.names = T)) %>%  
+readr::read_csv(list.files(file.path(BASE,'output', 'out-1', sub_dir), Dn_file, full.names = T)) %>%  
   filter(filter_name %in% variable_list) %>% 
   mutate(passing = if_else(Dn <= Dc, T, F)) %>% 
   select(run_name, filter_name, passing) %>% 
@@ -38,7 +38,7 @@ readr::read_csv(list.files(file.path(BASE,'out-1', sub_dir), Dn_file, full.names
 
 # Import a Hector data set to use in the selection process. We are interested in the 
 # extreeme max/min temperatures in year 2100 for each possible combination. 
-read.csv(list.files(file.path(BASE,'out-1', sub_dir), "C.Tgav_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE) %>% 
+read.csv(list.files(file.path(BASE, 'output', 'out-1', sub_dir), "C.Tgav_hector_run_cleanup.csv", full.names = T), stringsAsFactors = FALSE) %>% 
   filter(year == 2100) %>% 
   select(run_name, variable, year, value) -> 
   Hector_2100_values
@@ -100,7 +100,7 @@ Hector_GCAM_parameter_mapping %>%
 
 
 # Save the output in the secondary output file
-output_dir <- file.path(BASE, 'out-2', sub_dir)
+output_dir <- file.path(BASE, 'output', 'out-2', sub_dir)
 dir.create(output_dir, showWarnings = FALSE)
 
 file_name <- file.path(output_dir, 'A.passing_Dn.csv')
@@ -112,7 +112,7 @@ write.csv( Hector_GCAM_parameters, file = file_name, row.names = FALSE )
 
 file_name <- file.path(output_dir, 'A.Hector_GCAM_parameters_mapping.csv')
 write.csv( Hector_GCAM_parameter_mapping, file = file_name, row.names = FALSE )
-save(script_output, file = file.path(BASE, 'out-fig', 'Tgav_2100.rda'))
+save(script_output, file = file.path(BASE, 'output', 'out-fig', 'Tgav_2100.rda'))
 
 # End
 

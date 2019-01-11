@@ -2,7 +2,10 @@
 # Purpose: This script extracts and merges GCAM output databases from the GCAM parallel runs into 
 # a single project file. This script needs to be run on pic or wherever the parallel gcam strcuture 
 # is set up. 
-# TODO figure out a way to avoid the manual steps associated with this script.
+#
+# This is set up to run on pic
+#
+# TODO figure out a way to avoid the manual steps associated with this script. 
 
 # 0. Set Up ----------------------------------------------------------------------------------------
 

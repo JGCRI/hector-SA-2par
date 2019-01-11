@@ -33,10 +33,10 @@ filterName_factor <- c('None', 'NPP', 'atm CO2', 'atm CO2, NPP', 'Tgav', 'NPP, T
 
 # Import the merged R project that contains all of the GCAM output data. Also import the Hector paramter 
 # mapping file to add information about why a particular hector paramter set combination was used. 
-path      <- list.files(file.path(BASE, 'out-2'), proj_name, full.names = TRUE)
+path      <- list.files(file.path(BASE, 'output', 'out-2'), proj_name, full.names = TRUE)
 gcam_proj <- get(load(path))
 
-path             <- list.files( file.path(BASE, 'out-2'), mapping_name, full.names = TRUE)
+path             <- list.files( file.path(BASE, 'output', 'out-2'), mapping_name, full.names = TRUE)
 gcam_run_mapping <- read.csv(path, stringsAsFactors = FALSE)
 
 
@@ -179,7 +179,7 @@ output %>%
 
 selection <- unique(output$`Climate forcing`$keep)
 
-map(selection, function(keep, outputPath = file.path(BASE, 'out-2'), outputBaseName = 'GCAM'){
+map(selection, function(keep, outputPath = file.path(BASE, 'output', 'out-2'), outputBaseName = 'GCAM'){
   
   modify(output, function(input){filter(input, keep == keep) }) %>% 
     save(file = file.path(outputPath, paste0(outputBaseName, '_', keep, '.rda' )))
