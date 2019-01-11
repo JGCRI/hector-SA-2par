@@ -34,7 +34,7 @@ message('BASE directory is ', BASE, appendLF = T)
 # 1. Import Data ---------------------------------------------------------------------------------------
 
 # Import the npar paramter combinations, the varying parameters values will come from this csv file.  
-input_params <- read.csv(file.path(BASE, 'out-1', 'A.par4_combinations.csv'), stringsAsFactors = FALSE)
+input_params <- read.csv(file.path(BASE, 'output', 'out-1', 'A.par4_combinations.csv'), stringsAsFactors = FALSE)
 
 # Define the default parameter values. 
 default_s     <- 3.0
@@ -53,7 +53,7 @@ vary_q10_only$s    <- default_s
 vary_q10_only$diff <- default_diff
 
 # Save the output 
-dir_path <- file.path(BASE, 'out-1', 'vary_q10_only') 
+dir_path <- file.path(BASE, 'output', 'out-1', 'vary_q10_only') 
 dir.create(dir_path, showWarnings = FALSE)
 write.csv(vary_q10_only, file = file.path(dir_path, 'A.par4_combinations.csv'), row.names = FALSE)
 
@@ -69,7 +69,7 @@ vary_beta_only$diff <- default_diff
 
 
 # Save the output 
-dir_path <- file.path(BASE, 'out-1', 'vary_beta_only')
+dir_path <- file.path(BASE, 'output', 'out-1', 'vary_beta_only')
 dir.create(dir_path, showWarnings = FALSE)
 write.csv(vary_beta_only, file = file.path(dir_path, 'A.par4_combinations.csv'), row.names = FALSE)
 
@@ -82,7 +82,7 @@ vary_beta_q10 <- input_params
 vary_beta_q10$s    <- default_s
 vary_beta_q10$diff <- default_diff
 
-dir_path <- file.path(BASE, 'out-1', 'vary_beta_q10')
+dir_path <- file.path(BASE, 'output', 'out-1', 'vary_beta_q10')
 dir.create(dir_path, showWarnings = FALSE)
 write.csv(vary_beta_q10, file = file.path(dir_path, 'A.par4_combinations.csv'), row.names = FALSE)
 
@@ -97,7 +97,7 @@ vary_diff_s <- input_params
 vary_diff_s$q10  <- default_q10
 vary_diff_s$beta <- default_beta
 
-dir_path <- file.path(BASE, 'out-1', 'vary_diff_s')
+dir_path <- file.path(BASE, 'output', 'out-1', 'vary_diff_s')
 dir.create(dir_path, showWarnings = FALSE)
 write.csv(vary_diff_s, file = file.path(dir_path, 'A.par4_combinations.csv'), row.names = FALSE)
 
@@ -112,7 +112,7 @@ vary_diff_only$beta <- default_beta
 vary_diff_only$s    <- default_s
 
 
-dir_path <- file.path(BASE, 'out-1', 'vary_diff_only')
+dir_path <- file.path(BASE, 'output', 'out-1', 'vary_diff_only')
 dir.create(dir_path, showWarnings = FALSE)
 write.csv(vary_diff_only, file = file.path(dir_path, 'A.par4_combinations.csv'), row.names = FALSE)
 
@@ -129,7 +129,7 @@ vary_s_only$beta <- default_beta
 vary_s_only$diff <- default_diff
 
 
-dir_path <- file.path(BASE, 'out-1', 'vary_s_only')
+dir_path <- file.path(BASE, 'output', 'out-1', 'vary_s_only')
 dir.create(dir_path, showWarnings = FALSE)
 write.csv(vary_s_only, file = file.path(dir_path, 'A.par4_combinations.csv'), row.names = FALSE)
 

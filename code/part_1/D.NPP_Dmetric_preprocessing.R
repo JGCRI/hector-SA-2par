@@ -30,7 +30,7 @@ script_name <- 'D.NPP_Dmetric_preprocessing.R'
 seperator   <- '----------'
 message(script_name)
 message('BASE directory is ', BASE, appendLF = T)
-message('pulling/saving data from out/', sub_dir, appendLF = T)
+message('output/', sub_dir, appendLF = T)
 
 
 # TRUE/FALSE to save the intermediate outputs created when processing the NPP data
@@ -123,15 +123,15 @@ global_NPP$sigma2 <- sigma2_value
 if(save_intermediates){
   
   # Save the labeled MODIS file 
-  file_name <- file.path(BASE, 'out-1', 'observations', 'MODIS_NPP_labeled.csv')
+  file_name <- file.path(BASE, 'output', 'out-1', 'observations', 'MODIS_NPP_labeled.csv')
   write.csv(data, fie = file_name, row.names = FALSE)
   
   # the m2 MODIS file 
-  file_name <- file.path(BASE, 'out-1', 'observations', 'MODIS_NPP_m2.csv')
+  file_name <- file.path(BASE, 'output', 'out-1', 'observations', 'MODIS_NPP_m2.csv')
   write.csv(data_m2, file = file_name, row.names = FALSE)
   
   # the MODIS file g C / year 
-  file_name <- file.path(BASE, 'out-1', 'observations', 'MODIS_NPP_noArea_landWeights.csv')
+  file_name <- file.path(BASE, 'output', 'out-1', 'observations', 'MODIS_NPP_noArea_landWeights.csv')
   write.csv(no_area_values, file = file_name, row.names = FALSE)
   
   
@@ -141,7 +141,7 @@ if(save_intermediates){
 # Process Hector NPP ----------------------------------------------------------------------------------------
 
 # Import the Hector NPP data 
-all_hector_npp <- read.csv(file.path(BASE, 'out-1', sub_dir, 'C.npp_hector_run_cleanup.csv'), stringsAsFactors = FALSE)
+all_hector_npp <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'C.npp_hector_run_cleanup.csv'), stringsAsFactors = FALSE)
 
 # Subset Hector NPP to make sure that it only includes NPP data for the same years as the observational 
 # dataset being process.
@@ -152,7 +152,7 @@ all_hector_npp %>%
   NPP_Dn_input_table
 
 # Save the Dn metric input table.
-output_file <- file.path(BASE, 'out-1', sub_dir, 'D.NPP_Dmetric_input_table.csv')
+output_file <- file.path(BASE, 'output', 'out-1', sub_dir, 'D.NPP_Dmetric_input_table.csv')
 write.csv(NPP_Dn_input_table, output_file, row.names = F)  
   
 message(seperator)

@@ -31,7 +31,7 @@ message(script_name)
 message('BASE directory is ', BASE, appendLF = T)
 message('pulling/saving data from out/', sub_dir, appendLF = T)
 
-INT_OUTPUT_DIR <- file.path(BASE, 'out-1', sub_dir)
+INT_OUTPUT_DIR <- file.path(BASE, 'output', 'out-1', sub_dir)
 
 
 # 1. Import and Format Obs Data -----------------------------------------------------
@@ -78,7 +78,7 @@ hector_data %>%
   full_join(ob_df %>% select(year, obs, s2n, sigma2), by = "year") -> 
   LandFlux_Dn_input_table
 
-output_file <- file.path(BASE, 'out-1', sub_dir, 'D.LandFlux_Dmetric_input_table.csv')
+output_file <- file.path(BASE, 'output', 'out-1', sub_dir, 'D.LandFlux_Dmetric_input_table.csv')
 write.csv(LandFlux_Dn_input_table, output_file, row.names = F)
 
 message(seperator)
