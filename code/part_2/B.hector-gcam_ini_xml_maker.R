@@ -18,7 +18,7 @@ library(tibble)
 sub_name          <- "AGU" 
 sub_dir           <- 'AGU'
 pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'; setwd( pic_hectorSA_path ) # Where the hecotr-SA-npar lives on pic
-param_path        <- file.path(pic_hectorSA_path, 'out-2', sub_dir, 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
+param_path        <- file.path(pic_hectorSA_path, 'output', 'out-2', sub_dir, 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
 
 # The gcam dirs must reflect the gcam parallel structure
 pic_gcam_path     <- '/pic/projects/GCAM/Dorheim/CMS/GCAM5/gcam-parallel'     # Where CMS gcam-parallel lives

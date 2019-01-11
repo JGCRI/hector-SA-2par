@@ -26,7 +26,7 @@ proj_name    <- 'proj_merge_scaled_emissions.proj'
 # 1. Import Data ---------------------------------------------------------------------------------------
 
 # Import the merged R project that contains all of the GCAM output data. 
-path      <- list.files(file.path(BASE, 'out-2', sub_dir), proj_name, full.names = TRUE)
+path      <- list.files(file.path(BASE, 'output', 'out-2', sub_dir), proj_name, full.names = TRUE)
 gcam_proj <- get(load(path))
 
 
@@ -155,7 +155,7 @@ output %>%
 # 6. Save data -------------------------------------------------------------------------------
 
 
-output_file <- file.path(BASE, 'out-2', sub_dir, 'query_results.rda')
+output_file <- file.path(BASE, 'output', 'out-2', sub_dir, 'query_results.rda')
 
 save(output, file = output_file)
 
