@@ -65,9 +65,9 @@ cleanup_wide <- read.csv(file.path('./out-1', sub_dir, 'C.hector_run_cleanup.csv
 
 # ---
 # Filter flag table
-filter_flag <- read.csv( file.path('./out-1', sub_dir, 'A.par4_combinations.csv'), stringsAsFactors = F )
+filter_flag <- read.csv( file.path('./output/out-1', sub_dir, 'A.par4_combinations.csv'), stringsAsFactors = F )
 filter_flag$run_name <- paste0( 'hectorSA-', sprintf( '%04d', filter_flag$run_index ) )
-write.csv( filter_flag, file.path('./out-1', sub_dir, 'filter_flag.csv'), row.names = F )
+write.csv( filter_flag, file.path('./output/out-1', sub_dir, 'filter_flag.csv'), row.names = F )
 
 
 # --------------------------------------------------

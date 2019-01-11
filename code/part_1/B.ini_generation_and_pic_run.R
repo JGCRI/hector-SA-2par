@@ -50,14 +50,14 @@ ini_template <- readLines( ini_con )
 close( ini_con ) 
 
 # parameter combination csv 
-pc_df <- read.csv( './out-1/A.par4_combinations.csv', stringsAsFactors = F )
+pc_df <- read.csv( './output/out-1/A.par4_combinations.csv', stringsAsFactors = F )
 
 run_index_total_digits <- nchar( as.character( max( pc_df$run_index ) ) )  
 
 # ----------------------------------------------------------------------------
 # 3. run hector and deal with hector outputs 
 result_file_name <- paste0( 'B.hector_run_results.txt' )
-result_file_path_name <- paste0( pic_hectorSA_path, '/out-1/', sub_dir, '/', result_file_name )
+result_file_path_name <- paste0( pic_hectorSA_path, '/output/out-1/', sub_dir, '/', result_file_name )
 result_file_con <- file( result_file_path_name, 'w' )
 
 out_res_list <- lapply( 1 : nrow( pc_df ), function( i ) { 

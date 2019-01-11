@@ -31,7 +31,7 @@ script_name <- 'D.Tgav_Dmetric_preprocessing.R'
 seperator   <- '----------'
 message(script_name)
 message('BASE directory is ', BASE, appendLF = T)
-message('pulling/saving data from out/', sub_dir, appendLF = T)
+message('output/', sub_dir, appendLF = T)
 
 
 
@@ -80,7 +80,7 @@ concatenated_HadCRUT_1950 %>%
 # reference period, see https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/ensemble_series_format.html. 
 
 # Import Hector temperature. 
-full_Hector_temp <- read.csv(file.path(BASE, 'out-1', sub_dir, 'C.Tgav_hector_run_cleanup.csv'), stringsAsFactors = FALSE)
+full_Hector_temp <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'C.Tgav_hector_run_cleanup.csv'), stringsAsFactors = FALSE)
 
 
 # Find the average value for eacch run durring the reference year. 
@@ -108,7 +108,7 @@ Hector_calibrated_temp %>%
   left_join(obs_data, by = 'year') -> 
   Tgav_Dn_metric_input_table
 
-output_file <- file.path(BASE, 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv')
+output_file <- file.path(BASE, 'output', 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv')
 write.csv(Tgav_Dn_metric_input_table, output_file, row.names = F)
 
 message(seperator)

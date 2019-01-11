@@ -29,7 +29,7 @@ script_name <- 'A.1.parameter_combination_generation.R'
 seperator   <- '----------'
 message(script_name)
 message('BASE directory is ', BASE, appendLF = T)
-message('pulling/saving data from out/', sub_dir, appendLF = T)
+message('output/', sub_dir, appendLF = T)
 
 # 1. Set Up Geneator Inputs ----------------------------------------------------------------
 # set seed for random generator 
@@ -72,24 +72,24 @@ combination_df <- combination_df[ , c( 'run_index', 'run_name', 'beta', 'q10', '
 
 # 3. Save output -------------------------------------------------------------------
 # write out
-write.csv( combination_df, './out-1/A.par4_combinations.csv', row.names = F )
+write.csv( combination_df, './output/out-1/A.par4_combinations.csv', row.names = F )
 
 # 4. Sanity plot -------------------------------------------------------------------
 # diagnostic 
 # sample plot 1  
-jpeg( "./out-fig/beta vs q10.jpeg", width = 500, height = 500, res = 72)
-plot( x = combination_df$beta, 
-      y = combination_df$q10, 
-      'p',
-      main = '2-d plot of beta vs q10' )
-dev.off( )
-
-# sample plot 2 
-jpeg( "./out-fig/beta vs s.jpeg", width = 500, height = 500, res = 72)
-plot( x = combination_df$beta, 
-      y = combination_df$s, 
-      'p',
-      main = '2-d plot of beta vs s' )
-dev.off( )
+# jpeg( ".output/out-fig/beta vs q10.jpeg", width = 500, height = 500, res = 72)
+# plot( x = combination_df$beta, 
+#       y = combination_df$q10, 
+#       'p',
+#       main = '2-d plot of beta vs q10' )
+# dev.off( )
+# 
+# # sample plot 2 
+# jpeg( ".output/out-fig/beta vs s.jpeg", width = 500, height = 500, res = 72)
+# plot( x = combination_df$beta, 
+#       y = combination_df$s, 
+#       'p',
+#       main = '2-d plot of beta vs s' )
+# dev.off( )
 
 message(seperator)
