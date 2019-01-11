@@ -22,7 +22,7 @@ sub_dir <- 'vary_4_params' # The name of the out-L/sub directory to pull data fr
 # 1. Import Data ---------------------------------------------------------------------------------------------
 
 # Import the query csv files from out-3
-files <- as.list(list.files(file.path(BASE, 'out-3', sub_dir, 'queries csv'), full.names = TRUE))
+files <- as.list(list.files(file.path(BASE, 'output', 'out-3', sub_dir, 'queries csv'), full.names = TRUE))
 names(files) <- files
 
 files %>% 
@@ -98,7 +98,7 @@ query_results_cost %>%
   map(function(x){
     
     name <- paste0(unique(x$query_name), '.rda')
-    save(x, file = file.path(BASE, 'out-3', sub_dir, name))
+    save(x, file = file.path(BASE, 'output', 'out-3', sub_dir, name))
     
   })
   
