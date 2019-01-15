@@ -36,7 +36,8 @@ process_flux_nc <- function(path){
   nc <- nc_open(path)
   
   # Parse out the data, area, and grid information from the nc
-  data_3d <- ncvar_get(nc, 'Total_Flux_Posterior')
+  data_3d        <- ncvar_get(nc, 'Total_Flux_Posterior')
+  data_3d_uncert <- ncvar_get(nc, 'Total_Flux_Posterior_Uncertainty')
   area    <- ncvar_get(nc, 'Area')
   lat     <- ncvar_get(nc, 'lat')
   lon     <- ncvar_get(nc, 'lon')
@@ -54,6 +55,9 @@ process_flux_nc <- function(path){
   data      <- aperm(data_3d, c(3,2,1))
   dim(data) <- c(12, nlat*nlon)
   
+  data_uncert      <- aperm(data_3d_uncert, c(3,2,1))
+  dim(data_uncert) <- c(12, nlat*nlon)
+  
   # Duplicate the area vector so that it matches gridcells.
   weights <- rep(x = area, nlon)
   
@@ -67,16 +71,25 @@ process_flux_nc <- function(path){
                            
                          })
   
+  global_uncert <- apply(data_uncert, 1, 
+                         function(input = x){
+                           
+                           sum(input * weights, na.rm = TRUE)
+                           
+                         })
+  
   
   # Calculate the annual value 
-  annual_value <- sum(global_values)
+  annual_value  <- sum(global_values)
+  annual_uncert <- sum(global_uncert)
   
   # Convert from  kg/s to PgC by muiltplying 31557600 seconds and 1e-12 to convert from kg to Pg
-  rslt_PgC <- annual_value * 31557600 * 1e-12
-  
+  rslt_PgC    <- annual_value * 31557600 * 1e-12
+  rslt_uncert <- annual_uncert * 31557600 * 1e-12
   
   data.frame(time = time,
              value = rslt_PgC,
+             uncertainty = rslt_uncert,
              units = 'PgC')
   
 }
@@ -98,9 +111,6 @@ write.csv(file = file.path(output_dir, 'CMSFluxTotalpost.csv'), x = global_annua
 
 
 # End 
-
-
-
 
 
 

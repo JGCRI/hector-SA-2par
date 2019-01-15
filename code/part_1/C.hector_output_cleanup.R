@@ -34,7 +34,7 @@ message('pulling/saving data from out/', sub_dir, appendLF = T)
 
 
 # Select the variables to save as individual files. 
-keep_variables <- c('atm_land_flux', 'Ca', 'Tgav', 'npp')
+keep_variables <- c('atm_land_flux', 'Ca', 'Tgav', 'npp', 'atmos_c')
 
 # --------------------------------------------------
 # The working directory should be the project directory. 
@@ -74,7 +74,7 @@ write.csv( filter_flag, file.path('./output/out-1', sub_dir, 'filter_flag.csv'),
 # Format into the long format 
 cleanup_wide %>% 
   filter(variable %in% keep_variables) %>% 
-  select(-spinup, -component) %>% 
+#  select(-spinup, -component) %>% 
   gather(year, value, -run_name, -variable, -units) %>% 
   filter(year != 'spinup') %>% 
   mutate(year = as.integer(gsub('X', '', year))) -> 
@@ -91,7 +91,7 @@ map(data_list, function(data){
   f_name <- paste0('C.', vari, '_hector_run_cleanup.csv')
   
   # Write the data as a csv output.
-  write.csv(data, file.path('./out-1', sub_dir, f_name), row.names = F ) })
+  write.csv(data, file.path('./output/out-1', sub_dir, f_name), row.names = F ) })
 
 message(seperator)
 
