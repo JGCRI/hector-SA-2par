@@ -67,7 +67,7 @@ process_flux_nc <- function(path){
   global_values <- apply(data, 1, 
                          function(input = x){
                            
-                           sum(input * weights, na.rm = TRUE)
+                           sum(input) # * weights, na.rm = TRUE)
                            
                          })
   
@@ -84,8 +84,8 @@ process_flux_nc <- function(path){
   annual_uncert <- sum(global_uncert)
   
   # Convert from  kg/s to PgC by muiltplying 31557600 seconds and 1e-12 to convert from kg to Pg
-  rslt_PgC    <- annual_value * 31557600 * 1e-12
-  rslt_uncert <- annual_uncert * 31557600 * 1e-12
+  rslt_PgC    <- annual_value * 31557600 / 1e12
+  rslt_uncert <- annual_uncert * 31557600 / 1e12
   
   data.frame(time = time,
              value = rslt_PgC,
@@ -110,6 +110,8 @@ output_dir <- 'C:/Users/dorh012/Documents/hector-SA-npar/input/observations'
 write.csv(file = file.path(output_dir, 'CMSFluxTotalpost.csv'), x = global_annual_posterior_flux, row.names = FALSE)
 
 
+
+nc <- nc_open('C:/Users/dorh012/Documents/hector-SA-npar/input/observations/CMSFluxTotalpost/CMSFluxTotalpost_2010_v1.nc4')
 # End 
 
 
