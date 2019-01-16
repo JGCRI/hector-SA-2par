@@ -31,7 +31,7 @@ message('BASE directory is ', BASE, appendLF = T)
 message('output/out-1', sub_dir, appendLF = T)
 
 # Define the output directory
-OUTPUT_DIR <- file.path(BASE, 'output', 'out-1', 'AGU'); dir.create(OUTPUT_DIR)
+OUTPUT_DIR <- file.path(BASE, 'output', 'out-1', sub_dir)
 
 # Load the D metric functions, (Dn_func, Dc_func)
 source(file.path(BASE, 'code', 'part_1', 'E.0.Dmetric_functions.R'))
@@ -93,25 +93,25 @@ atmCO2_Dmetric_results <- join_Dmetric(atmCO2_Dc, atmCO2_Dn_values)
 # Calcualte the Dn and the Dc metrics to compare Hector land flux with the observations
 # from the global carbon project data.
 
-# Import the temperature data.
-LandFlux_Dn_input <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'D.LandFlux_Dmetric_input_table.csv'),
-                              stringsAsFactors = FALSE )
-
-# Calculate the Dn value for each Hector run
-split(LandFlux_Dn_input, LandFlux_Dn_input$run_name) %>%
-  map_dfr( Dn_func ) ->
-  LandFlux_Dn_values
-
-# Subset the Dn input so that it only includes entries for one Hector run, so that
-# is only contains one set of observational values.
-LandFlux_Dn_input %>%
-  select(year, obs, s2n, sigma2) %>%
-  distinct %>% 
-  Dc_func(alpha = 0.05) %>%
-  mutate(filter_name = 'Land Flux') ->
-  LandFlux_Dc
-
-LandFlux_Dmetric_results <- join_Dmetric(LandFlux_Dc, LandFlux_Dn_values)
+# # Import the temperature data.
+# LandFlux_Dn_input <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'D.LandFlux_Dmetric_input_table.csv'),
+#                               stringsAsFactors = FALSE )
+# 
+# # Calculate the Dn value for each Hector run
+# split(LandFlux_Dn_input, LandFlux_Dn_input$run_name) %>%
+#   map_dfr( Dn_func ) ->
+#   LandFlux_Dn_values
+# 
+# # Subset the Dn input so that it only includes entries for one Hector run, so that
+# # is only contains one set of observational values.
+# LandFlux_Dn_input %>%
+#   select(year, obs, s2n, sigma2) %>%
+#   distinct %>% 
+#   Dc_func(alpha = 0.05) %>%
+#   mutate(filter_name = 'Land Flux') ->
+#   LandFlux_Dc
+# 
+# LandFlux_Dmetric_results <- join_Dmetric(LandFlux_Dc, LandFlux_Dn_values)
 
 
 # 4. NPP Only ---------------------------------------------------------------------------
