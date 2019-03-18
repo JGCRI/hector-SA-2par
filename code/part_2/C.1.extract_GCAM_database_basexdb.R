@@ -3,7 +3,7 @@
 # a single project file. This script needs to be run on pic or wherever the parallel gcam strcuture 
 # is set up. 
 #
-# This is set up to run on pic
+# This is set up to run on pic. For the bigger batches a job script may have to be submitted. 
 #
 # TODO figure out a way to avoid the manual steps associated with this script. 
 
@@ -19,12 +19,12 @@ pic_gcam_dir <- '/pic/projects/GCAM/Dorheim/CMS/GCAM5/gcam-parallel'
 
 # Define the exe directory to search - this requires that all of the exe_x be manually moved into the 
 # the named exe_dir. 
-exe_dir <- 'policy2_exe'; setwd(pic_gcam_dir)
+exe_dir <- 'policy1_exe'; setwd(pic_gcam_dir)
 
 
 # Define the path to the hector sensitivity analysis repository 
 pic_hector_SA_npar_dir <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'
-query_path             <- file.path(pic_hector_SA_npar_dir, 'input', 'cms_queries.xml')
+
 
 
 # 1. database_basexdb to project ------------------------------------------------------------------
@@ -49,12 +49,10 @@ for (prj in proj_list){
     if( any( grepl("database_basexdb", contents) ) ){
 
       conn         <- localDBConn(dbPath = file.path(path, "db"), dbFile = "database_basexdb")
-      project_file <- addScenario(conn = conn, proj = paste0('./', prj), queryFile = query_path)
+      project_file <- addScenario(conn = conn, proj = paste0('./', prj), clobber = TRUE)
 
     }
 }
-
-# message('Saving... \n', paste(proj_list, collapse =  ' \n'))
 
 
 # # 2. Concatenate projs ---------------------------------------------------------------------------
@@ -64,8 +62,6 @@ proj_files <- list.files(paste0('./', exe_dir), pattern = "proj_[0-9]+.proj", re
 proj_files <- proj_files[file.exists(proj_files)]
 prj        <- mergeProjects(paste0("./proj_merge", gsub('exe', '', exe_dir),".proj"), proj_files)
 
-# You will want to make sure that the merged project is located in the hector-SA-npar/out-2
-
-
+# You will want to make sure that the merged project is moved to the correct hector-SA-npar/out-2 location.  
 message('Saving... ', proj_merge.proj)
 # # End 
