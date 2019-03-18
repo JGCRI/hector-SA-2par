@@ -97,7 +97,7 @@ out_res_list <- lapply( 1 : nrow( pc_df ), function( i ) {
   
   # output extraction and out df 
   out_stream_name <- paste0( 'outputstream_', run_name, '.csv' ) 
-  out_stream_name_path <- file.path( pic_hector_path, 'output', 'out-1', sub_dir, out_stream_name )
+  out_stream_name_path <- file.path( pic_hector_path, 'output', out_stream_name )
   
   outstream_df <- read.csv( out_stream_name_path, stringsAsFactors = F, skip = 1 )
   
