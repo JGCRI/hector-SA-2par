@@ -72,7 +72,7 @@ combination_df <- combination_df[ , c( 'run_index', 'run_name', 'beta', 'q10', '
 
 # 3. Save output -------------------------------------------------------------------
 # write out
-write.csv( combination_df, './output/out-1/A.par4_combinations.csv', row.names = F )
+# write.csv( combination_df, './output/out-1/A.par4_combinations.csv', row.names = F )
 
 # 4. Sanity plot -------------------------------------------------------------------
 # diagnostic 
