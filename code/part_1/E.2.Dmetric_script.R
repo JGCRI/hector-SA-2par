@@ -20,7 +20,7 @@ if(!exists('run_all')){
   if(!"hector-SA-npar.Rproj" %in% list.files(BASE)){stop('BASE must be the project location')}
   
   # The out-1/sub_directory to pull data from
-  sub_dir    <- 'vary_4_params'
+  sub_dir    <- 'hist_emissions'
 }
 
 # Informative messages

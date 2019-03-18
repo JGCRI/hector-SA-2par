@@ -2,10 +2,9 @@ read me code/part_3
 
 
 So it turns out that is really hard to automate code to generate the configuration, batch.xml, and other files that are required 
-to do the find policy cost curve. There is a lot that will have to be done by hand, this read me outlines the steps. 
+to find the total cost of a policy run. There are two different ways to do this. 
 
-
-GCAM SET UP
+GCAM-CORE METHOD
 Before you set up GCAM to run the cost cruve you need CO2 price results from a policy target finder run (we did this in part_2)
 1. Create a carbon_tax_runName.xml based on the code/part_3/carbon_tax_template.xml. Replace the values with the correct CO2 prices. This 
 	xml should be saved in gcam-core/input/policy and will be read into the batch file. 
@@ -13,10 +12,15 @@ Before you set up GCAM to run the cost cruve you need CO2 price results from a p
 3. See code/part_3/config-template.xml for an example of the configuration file. Make sure that the configuration file uses the batch file and
 	that batch mode is turned on. Also check to make sure that the createCostCurve boolean is turned ON and that the find-path boolean is turned OFF.
 	
-	** you can check the GCAM results, the RF or temperautre results should match the results from the policy run from part_2. 
+	** you can check the GCAM results, the RF or temperautre results should match the results from the policy run from part_2. This requires a 
+	lot of work before starting the run and is prone to set up error. But is quick to solve.
+	
+GCAM-PARALLEL METHOD
+1. Change the <Value name="createCostCurve">0</Value> in the configuration files bools section from 0 to 1. 
+2. Set up the parallel GCAM to run the target finder, this really only works if you are NOT running a reference run. This requires minimal set uptime but will take a long time to run. 
+
 	
 PROCESSING OUTPUT 
 For some reason rgcam is not happy with the xml data base created by the cost curve configuration. Instead you will use Model Interface 
-to run batches and pull out specific query results. These results will be saved in out-3. 
-
-After all of the queries are saved in the out-3/queries csv code/part_3/A1.format_csv.R can be sourced to format the query results into something that can be plotted.
+to get the undiscounted and discounted results from the data bases. Save these results in csv files called gcam_rslts_discounted and 
+gcam_rslts_undiscounted. Becasue there are no units returned by model interface you will have to convert to desired dollar years and add unit information.

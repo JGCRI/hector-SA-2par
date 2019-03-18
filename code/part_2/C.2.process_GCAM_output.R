@@ -17,11 +17,11 @@ library(stringr)
 
 # Directories
 BASE    <- getwd() 
-sub_dir <- 'rcp26'
+sub_dir <- 'policy'
 
 # User Decisions - decide what project to process and what paramter mapping file to use. 
-proj_name    <- 'proj_merge_extreme.proj'
-mapping_name <- 'A.Hector_GCAM_parameters_mapping.csv'
+proj_name    <- 'proj_merge_policy.proj'
+mapping_name <- 'A.Hector_GCAM_parameters.csv'
 
 
 # Define the filer_name factor order, this vector will be used to orderr the filter_name 
@@ -33,10 +33,10 @@ filterName_factor <- c('None', 'NPP', 'atm CO2', 'atm CO2, NPP', 'Tgav', 'NPP, T
 
 # Import the merged R project that contains all of the GCAM output data. Also import the Hector paramter 
 # mapping file to add information about why a particular hector paramter set combination was used. 
-path      <- list.files(file.path(BASE, 'output', 'out-2'), proj_name, full.names = TRUE)
+path      <- list.files(file.path(BASE, 'output', 'out-2', sub_dir), proj_name, full.names = TRUE)
 gcam_proj <- get(load(path))
 
-path             <- list.files( file.path(BASE, 'output', 'out-2'), mapping_name, full.names = TRUE)
+path             <- list.files( file.path(BASE, 'output', 'out-2', sub_dir), mapping_name, full.names = TRUE)
 gcam_run_mapping <- read.csv(path, stringsAsFactors = FALSE)
 
 
@@ -48,15 +48,17 @@ gcam_run_mapping <- read.csv(path, stringsAsFactors = FALSE)
 modify_depth(gcam_proj, 2, function(input){
   
   input %>% 
+    distinct %>% 
     mutate(run_name = str_extract(scenario, 'hectorSA-[0-9]{4}')) %>%  
     mutate(policy = gsub('hectorSA-[0-9]{4}', '', scenario)) %>% 
+    select(-scenario) %>% 
     mutate(policy = gsub('_', '', policy)) %>%
-    inner_join(gcam_run_mapping, by = "run_name") %>%               # Add the filter_name category by joining the gcam_run_mapping file
-    rename(units = Units) %>%                                       # Rename the units
-    select(-scenario)->                                             # Drop the scenario column                          
+    left_join(gcam_run_mapping, by = "run_name") %>%               # Add the filter_name category by joining the gcam_run_mapping file
+    select(-X) %>% 
+    rename(units = Units) ->                                             # Drop the scenario column                          
     output
   
-  output$filter_name <- factor(output$filter_name, filterName_factor, ordered = TRUE)   # Add factor levels
+  #output$filter_name <- factor(output$filter_name, filterName_factor, ordered = TRUE)   # Add factor levels
 
   output  # Return output
     
@@ -134,22 +136,18 @@ map(data, function(input){
 }) -> 
   output
 
-# TODO the max NPP and None 2100 parameters are too hot to solve a target policy run and return the referene run, 
-# remove these runs to prevent confusion with plotting. 
-output <- modify(output, function(input){ filter(input, ! run_name %in% c('hectorSA-0975', 'hectorSA-3591')) })
-
-
 # 6. Format Units -----------------------------------------------------------------------------------------
 
 # The CO2 prices query reports units in tC, but we would like to convert the to 
 # units of tCO2. In order to do this mulitply by 44/12 (the ratio of the molecular/atomic wegihts)
 output$`CO2 prices` %>%  
-  mutate(value = value * 44/12,
+  mutate(value = value * 12/44,
          units = '1990$/tCO2') -> 
   output$`CO2 prices`
 
 # CO2 emissions query results must also be converted. 
 output$`CO2 emissions by region` %>%  
+  distinct %>% 
   mutate(value = value * 44/12,
          units = 'MTCO2') -> 
   output$`CO2 emissions by region`
@@ -175,15 +173,19 @@ output %>%
   output
 
 
-# 7. Save the data by selection reason -------------------------------------------------------------------------------
+# Save the output 
+saveRDS(output, file = file.path(BASE, 'output', 'out-2', sub_dir, 'C.GCAM_rslts.rds'))
 
-selection <- unique(output$`Climate forcing`$keep)
 
-map(selection, function(keep, outputPath = file.path(BASE, 'output', 'out-2'), outputBaseName = 'GCAM'){
-  
-  modify(output, function(input){filter(input, keep == keep) }) %>% 
-    save(file = file.path(outputPath, paste0(outputBaseName, '_', keep, '.rda' )))
-  
-})
-
-# End
+# # 7. Save the data by selection reason -------------------------------------------------------------------------------
+# 
+# selection <- unique(output$`Climate forcing`$keep)
+# 
+# map(selection, function(keep, outputPath = file.path(BASE, 'output', 'out-2'), outputBaseName = 'GCAM'){
+#   
+#   modify(output, function(input){filter(input, keep == keep) }) %>% 
+#     save(file = file.path(outputPath, paste0(outputBaseName, '_', keep, '.rda' )))
+#   
+# })
+# 
+# # End
