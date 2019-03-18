@@ -22,7 +22,7 @@ if(!exists('run_all')){
   BASE <- getwd()
   
   # The out-1/sub_directory to pull data from
-  sub_dir    <- 'vary_q10_only'
+  sub_dir    <- 'rcp26'
   
   }
 
@@ -61,22 +61,22 @@ cleanup_wide <- spread( cleanup_df, year, value )
 
 write.csv( cleanup_wide, file.path('./out-1', sub_dir, 'C.hector_run_cleanup.csv'), row.names = F )
 
-cleanup_wide <- read.csv(file.path('./out-1', sub_dir, 'C.hector_run_cleanup.csv'))
+cleanup_wide <- read.csv(list.files(file.path('./out-1', sub_dir), 'C.hector_run_cleanup.csv', full.names = TRUE))
 
 # ---
 # Filter flag table
-filter_flag <- read.csv( file.path('./output/out-1', sub_dir, 'A.par4_combinations.csv'), stringsAsFactors = F )
+filter_flag <- read.csv( file.path('./out-1', sub_dir, 'A.par4_combinations.csv'), stringsAsFactors = F )
 filter_flag$run_name <- paste0( 'hectorSA-', sprintf( '%04d', filter_flag$run_index ) )
-write.csv( filter_flag, file.path('./output/out-1', sub_dir, 'filter_flag.csv'), row.names = F )
+write.csv( filter_flag, file.path('./out-1', sub_dir, 'filter_flag.csv'), row.names = F )
 
 
 # --------------------------------------------------
 # Format into the long format 
 cleanup_wide %>% 
-  filter(variable %in% keep_variables) %>% 
-#  select(-spinup, -component) %>% 
+  dplyr::filter(variable %in% keep_variables) %>% 
+# select(-spinup, -component) %>% 
   gather(year, value, -run_name, -variable, -units) %>% 
-  filter(year != 'spinup') %>% 
+ # filter(year != 'spinup') %>% 
   mutate(year = as.integer(gsub('X', '', year))) -> 
   long_format 
 
@@ -91,7 +91,7 @@ map(data_list, function(data){
   f_name <- paste0('C.', vari, '_hector_run_cleanup.csv')
   
   # Write the data as a csv output.
-  write.csv(data, file.path('./output/out-1', sub_dir, f_name), row.names = F ) })
+  write.csv(data, file.path('./out-1', sub_dir, f_name), row.names = F ) })
 
 message(seperator)
 
