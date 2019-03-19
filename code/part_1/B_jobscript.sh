@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH -A GCAM
+#SBATCH -A CMS
 #SBATCH -t 10:00:00
 #SBATCH -N 1
 #SBATCH -p shared
 #SBATCH -n 1
 
 #Set up your environment you wish to run in with module commands.
-module purge
+#module purge
 module load R/3.2.0
 module load gcc/5.2.0
 
