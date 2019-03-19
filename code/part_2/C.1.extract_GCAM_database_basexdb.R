@@ -48,8 +48,10 @@ for (prj in proj_list){
 
     if( any( grepl("database_basexdb", contents) ) ){
 
-      conn         <- localDBConn(dbPath = file.path(path, "db"), dbFile = "database_basexdb")
-      project_file <- addScenario(conn = conn, proj = paste0('./', prj), clobber = TRUE)
+      conn               <- localDBConn(dbPath = file.path(path, "db"), dbFile = "database_basexdb")
+      project_file       <- addScenario(conn = conn, proj = paste0('./', prj), clobber = TRUE)
+      extra_project_file <- addScenario(conn = conn, proj = paste0('./', paste0(prj, 'extra.proj')), clobber = TRUE)
+      
 
     }
 }
@@ -58,9 +60,9 @@ for (prj in proj_list){
 # # 2. Concatenate projs ---------------------------------------------------------------------------
 # 
 # Merge the projects into a single proj
-proj_files <- list.files(paste0('./', exe_dir), pattern = "proj_[0-9]+.proj", recursive = T, full.names = T)
-proj_files <- proj_files[file.exists(proj_files)]
-prj        <- mergeProjects(paste0("./proj_merge", gsub('exe', '', exe_dir),".proj"), proj_files)
+path <- list.files(dirname(proj_list), '.proj', full.names = TRUE)
+prj  <- mergeProjects(paste0('./', sub_dir, '_proj.proj'), path)
+
 
 # You will want to make sure that the merged project is moved to the correct hector-SA-npar/out-2 location.  
 message('Saving... ', proj_merge.proj)
