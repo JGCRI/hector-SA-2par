@@ -61,7 +61,7 @@ names(concatenated_HadCRUT) <- c('year', 'value', 'sigma', 'sigma level of fully
 # 2. Calculate HadCRUT mean --------------------------------------------------------------------------------------
 
 # Subset the HadCRUT data so that it only contains values from 1950 and onwards. 
-concatenated_HadCRUT_1950 <- filter(concatenated_HadCRUT, year >= 1950, year <= 2016)
+concatenated_HadCRUT_1950 <- filter(concatenated_HadCRUT, year >= 1950, year <= 2014)
 #concatenated_HadCRUT_1950 <- filter(concatenated_HadCRUT, year >= 1950, year <= 2005)
 
 # Calcualte the HadCRUT annual ensemble mean valuue and the s2n from the sigma. 

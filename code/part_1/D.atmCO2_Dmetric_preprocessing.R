@@ -19,7 +19,7 @@ if(!exists('run_all')){
   if(!"hector-SA-npar.Rproj" %in% list.files(BASE)){stop('BASE must be the project location')}
   
   # The out-1/sub_directory to pull data from
-  sub_dir    <- 'vary_q10_only'
+  sub_dir    <- 'hist_emissions'
 
 }
 
@@ -52,7 +52,7 @@ names(obs_data) <- c("year", "month" , "decimal_date", "average", "interpolated"
 # incomplete are the 1958 and 2018, the first data collection year and the current year.
 
 # Subset the data so that it only includes the complete years.
-complete_years <- 1959:2016
+complete_years <- 1959:2014
 #complete_years <- 1959:2005
 obs_data       <- filter(obs_data, year %in% complete_years)
 

@@ -67,14 +67,14 @@ process_flux_nc <- function(path){
   global_values <- apply(data, 1, 
                          function(input = x){
                            
-                           sum(input) # * weights, na.rm = TRUE)
+                           input * weights
                            
                          })
   
   global_uncert <- apply(data_uncert, 1, 
                          function(input = x){
                            
-                           sum(input * weights, na.rm = TRUE)
+                           input * weights
                            
                          })
   
@@ -96,22 +96,18 @@ process_flux_nc <- function(path){
 
 
 # 2. Process the netcdfs --------------------------------------------------------------------
-nc_paths <- c('C:/Users/dorh012/Documents/hector-SA-npar/input/observations/CMSFluxTotalpost/CMSFluxTotalpost_2010_v1.nc4',
-              'C:/Users/dorh012/Documents/hector-SA-npar/input/observations/CMSFluxTotalpost/CMSFluxTotalpost_2011_v1.nc4',
-              'C:/Users/dorh012/Documents/hector-SA-npar/input/observations/CMSFluxTotalpost/CMSFluxTotalpost_2012_v1.nc4')
 
-
+nc_paths <- list.files(file.path(BASE, 'input', 'observations', 'CMSFluxTotalpost'), '.nc4', full.names = TRUE)
 global_annual_posterior_flux <- bind_rows(lapply(X = nc_paths, FUN = process_flux_nc))
 
 # 3. Save the results ----------------------------------------------------------------------
 
 # Save the output to the input/observations directory 
-output_dir <- 'C:/Users/dorh012/Documents/hector-SA-npar/input/observations'
+output_dir <- file.path(BASE, 'input', 'observations')
 write.csv(file = file.path(output_dir, 'CMSFluxTotalpost.csv'), x = global_annual_posterior_flux, row.names = FALSE)
 
 
 
-nc <- nc_open('C:/Users/dorh012/Documents/hector-SA-npar/input/observations/CMSFluxTotalpost/CMSFluxTotalpost_2010_v1.nc4')
 # End 
 
 
