@@ -5,9 +5,6 @@
 # scripts. This script requires several user decisions to be made in section 0. 
 
 # 0. Set Up ---------------------------------------------------------------------------------------------
-# Make sure that the working directory is equal to the project directory
-if( ! 'hector-SA-npar.Rproj' %in% list.files() ){ stop( 'Working dir must be the project location' ) }
-
 # Load libs
 library(dplyr)
 library(tidyr)
@@ -15,14 +12,21 @@ library(purrr)
 library(rgcam)
 library(stringr)
 
-# Directories
-BASE    <- getwd() 
-sub_dir <- 'policy'
+# A vector of sub directories that contains the projects to merge together before processing, this is 
+# useful when the number of GCAM runs has to be split up into multiple batches. 
+sub_dirs <- c('CMSdefault') 
+
+# Specify where to write the output to, if there is only one sub directory being use as input then set the
+# out_dir equal to the sub_dirs. 
+out_dir  <- sub_dirs
 
 # User Decisions - decide what project to process and what paramter mapping file to use. 
-proj_name    <- 'proj_merge_policy.proj'
+proj_name    <- 'proj_merge.proj'
 mapping_name <- 'A.Hector_GCAM_parameters.csv'
 
+# Directories
+BASE     <- '.'                                             # Should be the hector-SA-npar project location
+OUTPUT   <- file.path(BASE, 'output', 'out-2', out_dir)
 
 # Define the filer_name factor order, this vector will be used to orderr the filter_name 
 # factor to help with the plotting process.
@@ -31,13 +35,40 @@ filterName_factor <- c('None', 'NPP', 'atm CO2', 'atm CO2, NPP', 'Tgav', 'NPP, T
 
 # 1. Import Data ---------------------------------------------------------------------------------------
 
-# Import the merged R project that contains all of the GCAM output data. Also import the Hector paramter 
-# mapping file to add information about why a particular hector paramter set combination was used. 
-path      <- list.files(file.path(BASE, 'output', 'out-2', sub_dir), proj_name, full.names = TRUE)
-gcam_proj <- get(load(path))
+# If there is only one place to pull the data from (GCAM runs were done in one batch) the import results, 
+# however if the GCAM runs were done in multiple batches then merge the projects and parameter mapping files.
+if(length(sub_dirs  == 1)){
+  
+  # Import the merged R project that contains all of the GCAM output data. Also import the Hector paramter 
+  # mapping file to add information about why a particular hector paramter set combination was used. 
+  path      <- list.files(file.path(BASE, 'output', 'out-2', sub_dirs), proj_name, full.names = TRUE)
+  gcam_proj <- get(load(path))
+  
+  path             <- list.files( file.path(BASE, 'output', 'out-2', sub_dirs), mapping_name, full.names = TRUE)
+  gcam_run_mapping <- read.csv(path)
+  
+  
+} else {
+  
+  # Merge both of the projects together and save output. 
+  prjList   <- unlist(lapply(sub_dirs, function(x){file.path(BASE, 'output', 'out-2', x, proj_name)}))
+  gcam_proj <- mergeProjects(prjname = file.path(OUTPUT, proj_name), prjlist = prjList, saveProj = TRUE)
+  
+  # Concatenate the parameter mapping files. 
+  suppressWarnings(gcam_run_mapping <- bind_rows(lapply(sub_dirs, function(x){
+    read.csv(file.path(BASE, 'output', 'out-2', x, mapping_name))
+    })))
+  
+  # Save the paramter mapping file. 
+  write.csv(gcam_run_mapping, file = file.path(OUTPUT, mapping_name), row.names = FALSE)
+  
+}
 
-path             <- list.files( file.path(BASE, 'output', 'out-2', sub_dir), mapping_name, full.names = TRUE)
-gcam_run_mapping <- read.csv(path, stringsAsFactors = FALSE)
+
+
+
+
+
 
 
 # 3. Format Query Output  -------------------------------------------------------------------------------------
@@ -54,13 +85,7 @@ modify_depth(gcam_proj, 2, function(input){
     select(-scenario) %>% 
     mutate(policy = gsub('_', '', policy)) %>%
     left_join(gcam_run_mapping, by = "run_name") %>%               # Add the filter_name category by joining the gcam_run_mapping file
-    select(-X) %>% 
-    rename(units = Units) ->                                             # Drop the scenario column                          
-    output
-  
-  #output$filter_name <- factor(output$filter_name, filterName_factor, ordered = TRUE)   # Add factor levels
-
-  output  # Return output
+    rename(units = Units) 
     
   }) -> 
   formatted_gcam_output
@@ -78,7 +103,8 @@ data <- map(query_list, getQuery, projData = formatted_gcam_output)
 # 5. Calculate policy results ----------------------------------------------------------------------------------------
 
 # Remove the reference run from the policy values for each query, only for the queries that contain data 
-# for both the reference and target runs. 
+# for both the reference and target runs. Most of the runs we are going to be looking at will only have 
+# target GCAM results. 
 
 map(data, function(input){
   
@@ -172,20 +198,7 @@ output %>%
   }) -> 
   output
 
-
+# 7. Save Output --------------------------------------------------------------------------------------
 # Save the output 
-saveRDS(output, file = file.path(BASE, 'output', 'out-2', sub_dir, 'C.GCAM_rslts.rds'))
+saveRDS(output, file = file.path(OUTPUT, 'C.GCAM_rslts.rds'))
 
-
-# # 7. Save the data by selection reason -------------------------------------------------------------------------------
-# 
-# selection <- unique(output$`Climate forcing`$keep)
-# 
-# map(selection, function(keep, outputPath = file.path(BASE, 'output', 'out-2'), outputBaseName = 'GCAM'){
-#   
-#   modify(output, function(input){filter(input, keep == keep) }) %>% 
-#     save(file = file.path(outputPath, paste0(outputBaseName, '_', keep, '.rda' )))
-#   
-# })
-# 
-# # End
