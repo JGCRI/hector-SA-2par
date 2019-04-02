@@ -19,7 +19,7 @@ pic_gcam_dir <- '/pic/projects/GCAM/Dorheim/CMS/GCAM5/gcam-parallel'
 
 # Define the exe directory to search - this requires that all of the exe_x be manually moved into the 
 # the named exe_dir. 
-exe_dir <- 'policy1_exe'; setwd(pic_gcam_dir)
+exe_dir <- 'exe_CMSpaper2'; setwd(pic_gcam_dir)
 
 
 # Define the path to the hector sensitivity analysis repository 
@@ -61,7 +61,9 @@ for (prj in proj_list){
 # 
 # Merge the projects into a single proj
 path <- list.files(dirname(proj_list), '.proj', full.names = TRUE)
-prj  <- mergeProjects(paste0('./', sub_dir, '_proj.proj'), path)
+prj  <- mergeProjects(prjname = paste0('./', exe_dir, '_proj.proj'), prjlist = path)
+
+
 
 
 # You will want to make sure that the merged project is moved to the correct hector-SA-npar/out-2 location.  

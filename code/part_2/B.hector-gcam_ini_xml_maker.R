@@ -15,8 +15,8 @@ library(tibble)
 
 
 # User decisions
-sub_name          <- "totalCost" 
-sub_dir           <- 'totalCost'
+sub_name          <- "CMSpaper_carbon1" 
+sub_dir           <- 'CMSpaper_carbon1'
 pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'; setwd( pic_hectorSA_path ) # Where the hecotr-SA-npar lives on pic
 param_path        <- file.path(pic_hectorSA_path, 'output', 'out-2', sub_dir, 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
 
