@@ -9,32 +9,35 @@
 # will be defined here.
 
 # 0. Set Up -------------------------------------------------------------------------------------------
-library(purrr)
-library(dplyr)
-
 # Define directories
 if(!exists('run_all')){
   
   # Base directory 
-  BASE       <- getwd()
+  BASE <- getwd()
   if(!"hector-SA-npar.Rproj" %in% list.files(BASE)){stop('BASE must be the project location')}
   
   # The out-1/sub_directory to pull data from
-  sub_dir    <- 'vary_q10_only'
+  sub_dir    <- 'vary_4_params'
 
 }
+
+
+library(purrr)
+library(dplyr)
+source(file.path(BASE, 'code', 'part_1', 'D.0.Dmetric_preprocessing_functions.R')) # The simga2 function
+
 
 script_name <- 'D.Tgav_Dmetric_preprocessing.R'
 seperator   <- '----------'
 message(script_name)
 message('BASE directory is ', BASE, appendLF = T)
-message('pulling/saving data from out/', sub_dir, appendLF = T)
+message('output/', sub_dir, appendLF = T)
 
-# 1. Import Data --------------------------------------------------------------------------------------
 
+
+# 1. Import Data & Load Functions --------------------------------------------------------------------
 # This script uses "HadCRUT4 time series: ensemble members" avaibale from
 # https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/download.html
-
 
 # Extract the individual enesmble members from the zip files. 
 extract_to <- file.path(BASE, 'input', 'observations', 'HadCRUT.4.6.0.0.annual_ns_avg_realisations')
@@ -50,7 +53,6 @@ concatenated_HadCRUT <- map_dfr(list.files(extract_to, full.names = T), read.tab
 
 # Contents of the files are described at https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/ensemble_series_format.html
 # Use information from the html to name the columns of the concatenated data frame.
-
 names(concatenated_HadCRUT) <- c('year', 'value', 'sigma', 'sigma level of fully uncorrelated', 
                                  'sigma level of partially correlated measurement and sampling uncertainty', 
                                  'sigma level of uncertainty associated with limited global/regional coverage')
@@ -59,15 +61,17 @@ names(concatenated_HadCRUT) <- c('year', 'value', 'sigma', 'sigma level of fully
 # 2. Calculate HadCRUT mean --------------------------------------------------------------------------------------
 
 # Subset the HadCRUT data so that it only contains values from 1950 and onwards. 
-concatenated_HadCRUT_1950 <- filter(concatenated_HadCRUT, year >= 1950, year <= 2017)
-
+concatenated_HadCRUT_1950 <- filter(concatenated_HadCRUT, year >= 1950, year <= 2014)
+#concatenated_HadCRUT_1950 <- filter(concatenated_HadCRUT, year >= 1950, year <= 2005)
 
 # Calcualte the HadCRUT annual ensemble mean valuue and the s2n from the sigma. 
 concatenated_HadCRUT_1950 %>% 
   group_by(year) %>% 
   summarise(obs = mean(value), s2n = mean(sigma) ^ 2) %>% 
-  ungroup -> 
+  ungroup %>% 
+  mutate(sigma2 = sigma2(data = ., sd_coef = 2, use_rolling_sd = TRUE)) -> 
   obs_data
+
 
 
 # 3. Calibrate Hector Tgav ----------------------------------------------------------------------------------------
@@ -76,7 +80,7 @@ concatenated_HadCRUT_1950 %>%
 # reference period, see https://www.metoffice.gov.uk/hadobs/hadcrut4/data/current/ensemble_series_format.html. 
 
 # Import Hector temperature. 
-full_Hector_temp <- read.csv(file.path(BASE, 'out-1', sub_dir, 'C.Tgav_hector_run_cleanup.csv'), stringsAsFactors = FALSE)
+full_Hector_temp <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'C.Tgav_hector_run_cleanup.csv'), stringsAsFactors = FALSE)
 
 
 # Find the average value for eacch run durring the reference year. 
@@ -104,7 +108,7 @@ Hector_calibrated_temp %>%
   left_join(obs_data, by = 'year') -> 
   Tgav_Dn_metric_input_table
 
-output_file <- file.path(BASE, 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv')
+output_file <- file.path(BASE, 'output', 'out-1', sub_dir, 'D.Tgav_Dmetric_input_table.csv')
 write.csv(Tgav_Dn_metric_input_table, output_file, row.names = F)
 
 message(seperator)

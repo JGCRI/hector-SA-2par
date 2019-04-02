@@ -15,9 +15,10 @@ library(tibble)
 
 
 # User decisions
-sub_name          <- "extremes" 
+sub_name          <- "CMSpaper_carbon1" 
+sub_dir           <- 'CMSpaper_carbon1'
 pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'; setwd( pic_hectorSA_path ) # Where the hecotr-SA-npar lives on pic
-param_path        <- file.path(pic_hectorSA_path, 'out-2', 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
+param_path        <- file.path(pic_hectorSA_path, 'output', 'out-2', sub_dir, 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
 
 # The gcam dirs must reflect the gcam parallel structure
 pic_gcam_path     <- '/pic/projects/GCAM/Dorheim/CMS/GCAM5/gcam-parallel'     # Where CMS gcam-parallel lives
@@ -173,7 +174,7 @@ batch_maker <- function(xml_df, batch_path, batch_name){
     valueNode     <- xml_add_child(fileNode, "Value", name = "ini", xml_df$xml_path[ini])
     
   }
-  
+
   write_xml(doc, file = file.path(batch_path, paste0(batch_name, ".xml")))
   
 }
@@ -187,7 +188,7 @@ tibble(full_name = pointer_xmls) %>%
   xml_df
 
 
-batch_maker(xml_df, file.path(pic_gcam_path, "/configuration-sets/"), sub_name)
+batch_maker(xml_df, file.path(pic_gcam_path, "configuration-sets/"), sub_name)
 
 
 # End ---- 

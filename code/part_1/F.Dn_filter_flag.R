@@ -18,23 +18,24 @@ if(!exists('run_all')){
   if(!"hector-SA-npar.Rproj" %in% list.files(BASE)){stop('BASE must be the project location')}
   
   # The out-1/sub_directory to pull data from
-  sub_dir    <- 'vary_q10_only'
+  sub_dir    <- 'AGU'
 }
 
 script_name <- 'F.Dn_filter_flag.R'
 seperator   <- '----------'
 message(script_name)
 message('BASE directory is ', BASE, appendLF = T)
-message('pulling/saving data from out/', sub_dir, appendLF = T)
+message('output/out-1', sub_dir, appendLF = T)
 
 
-OUTPUT_DIR <- file.path(BASE, 'out-1', sub_dir)
+OUTPUT_DIR <- file.path(BASE, 'output','out-1', 'AGU')
 
 
 # 1. Input Data ------------------------------------------------------------------------
 
 # Load the csv containing the csv of Dn metric results. 
-Dn_tibble <- read.csv(file.path(BASE, 'out-1', sub_dir, 'E.all_Dmetric_independent_results.csv' ), stringsAsFactors = FALSE)
+#Dn_tibble <- read.csv(file.path(BASE, 'out-1', sub_dir, 'E.all_Dmetric_independent_results.csv' ), stringsAsFactors = FALSE)
+Dn_tibble <- read.csv(file.path(BASE, 'out-1', sub_dir, 'E.Dn_metric_results.csv'), stringsAsFactors = FALSE)
 
 # Load the filter flag csv, the results from the Dn filtering will go here. 
 filter_flag <- readr::read_csv(file.path(BASE, 'out-1', sub_dir, 'filter_flag.csv' ))
@@ -44,8 +45,8 @@ filter_flag <- readr::read_csv(file.path(BASE, 'out-1', sub_dir, 'filter_flag.cs
 # Start by determining which runw pass through the filters indiviudally.
 Dn_tibble %>% 
   mutate(pass = if_else(Dn <= Dc, TRUE, FALSE)) %>% 
-  select(run_name, variable, pass) %>% 
-  spread(variable, pass) -> 
+  select(run_name, filter_name, pass) %>% 
+  spread(filter_name, pass) -> 
   Dn_passing
 
 # Add a column for the filters that pass through no filters. 
