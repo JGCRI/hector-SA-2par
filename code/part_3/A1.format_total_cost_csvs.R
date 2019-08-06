@@ -8,14 +8,15 @@ library(readxl)
 
 # Directories
 BASE    <- getwd()    # Should be the hector-SA-npar R project location. 
-sub_dir <- 'CMSpaper' # The name of the out-3/sub directory to pull data from
+sub_dir <- 'CMSflux' # The name of the out-3/sub directory to pull data from
 
 # 1. Import Data ---------------------------------------------------------------------------------------------
 
 # Import the total policy cost csv files. 
 list.files(file.path(BASE, 'output', 'out-3', sub_dir), 'gcam_rslts', full.names = TRUE) %>% 
   lapply(read_xlsx) %>% 
-  bind_rows -> 
+  bind_rows %>% 
+  distinct -> 
   total_costs
 
 
@@ -29,8 +30,8 @@ total_costs %>%
   mutate(run_name = substr(start = 1, stop = 13, x = scenario), 
          policy = substr(start = 15, stop = 20, x = scenario)) %>% 
   select(run_name, policy, variable, value, units) %>% 
-  # Convert the units 
-  mutate(value = value * 1.64753738, 
+  # Convert the units (GCAM returns values in millions of 1990 dollars.)
+  mutate(value = 1e6 * value * 1.64753738, 
          units = 'USD$2015') -> 
   policy_costs
 

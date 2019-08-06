@@ -19,11 +19,13 @@ pic_gcam_dir <- '/pic/projects/GCAM/Dorheim/CMS/GCAM5/gcam-parallel'
 
 # Define the exe directory to search - this requires that all of the exe_x be manually moved into the 
 # the named exe_dir. 
-exe_dir <- 'exe_CMSpaper2'; setwd(pic_gcam_dir)
+exe_dir <- 'exe_CMSflux';
+
+setwd(pic_gcam_dir)
 
 
 # Define the path to the hector sensitivity analysis repository 
-pic_hector_SA_npar_dir <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'
+pic_hector_SA_npar_dir <- '/pic/projects/GCAM/Dorheim/Dorheim/CMS/hector-SA-npar'
 
 
 

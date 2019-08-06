@@ -2,8 +2,6 @@
 # This script requires functions defined in E.0.Dmetric_functions. This calculates the 
 # Dn metric scores for single and multiple variables. 
 
-# TODO need to annotate this better and clean it up so that it makes more sense! 
-
 # Note: The if statement in section 0 determines what the BASE & sub_dir 
 # is set to depending on how the script is being sourced. If it is being 
 # sourced from the run_all script then BASE and sub_dir used are going to 
@@ -89,32 +87,7 @@ atmCO2_Dn_input %>%
 atmCO2_Dmetric_results <- join_Dmetric(atmCO2_Dc, atmCO2_Dn_values) 
 
 
-# 3. LandFlux CO2 Only ---------------------------------------------------------------
-# Calcualte the Dn and the Dc metrics to compare Hector land flux with the observations
-# from the global carbon project data.
-
-# # Import the temperature data.
-# LandFlux_Dn_input <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'D.LandFlux_Dmetric_input_table.csv'),
-#                               stringsAsFactors = FALSE )
-# 
-# # Calculate the Dn value for each Hector run
-# split(LandFlux_Dn_input, LandFlux_Dn_input$run_name) %>%
-#   map_dfr( Dn_func ) ->
-#   LandFlux_Dn_values
-# 
-# # Subset the Dn input so that it only includes entries for one Hector run, so that
-# # is only contains one set of observational values.
-# LandFlux_Dn_input %>%
-#   select(year, obs, s2n, sigma2) %>%
-#   distinct %>% 
-#   Dc_func(alpha = 0.05) %>%
-#   mutate(filter_name = 'Land Flux') ->
-#   LandFlux_Dc
-# 
-# LandFlux_Dmetric_results <- join_Dmetric(LandFlux_Dc, LandFlux_Dn_values)
-
-
-# 4. NPP Only ---------------------------------------------------------------------------
+# 3. NPP Only ---------------------------------------------------------------------------
 
 # Import the temperature data. 
 NPP_Dn_input <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'D.NPP_Dmetric_input_table.csv'), 
@@ -137,7 +110,7 @@ NPP_Dn_input %>%
 NPP_Dmetric_results <- join_Dmetric(NPP_Dn_values, NPP_Dc)
 
 
-# Can we do multiple variables at once ----------------------------------
+# 4. Mulitple Variable at Once ----------------------------------
 
 bind_rows(NPP_Dn_input,
           Tgav_Dn_input, 
@@ -160,18 +133,29 @@ atmCO2_NPP_Tgav_Dmetric_results <- join_Dmetric(NPP_Tgav_atmCO2_Dn, NPP_Tgav_atm
 
 
 
-# 5. Save Outputs ------------------------------------------------------------------------
+# 5. CMS Flux ----------------------------------------------------------------------------
+# What are the runs that fall within the CMS min and max value? 
+# Import the temperature data. 
+flux_comp_table <- read.csv(file.path(BASE, 'output', 'out-1', sub_dir, 'D.CMSFlux_comparison_table.csv'), 
+                         stringsAsFactors = FALSE ) 
 
-# write.csv(Tgav_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.Tgav_Dmetric_results'), row.names = FALSE)
-# write.csv(atmCO2_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.atmCO2_Dmetric_results'), row.names = FALSE)
-# write.csv(LandFlux_Dmetric_results, file = file.path(OUTPUT_DIR, 'E.LandFlux_Dmetric_results'), row.names = FALSE)
+# Determine the runs that pass through the min and max observational values. 
+flux_comp_table %>%  
+  filter(model >= obs_min & model <= obs_max) %>% 
+  select(run_name) %>% 
+  distinct() %>% 
+  mutate(filter_name = 'CMS_product') -> 
+  passing_CMS_product
 
+
+# 6. Save Outputs ------------------------------------------------------------------------
 # Save as a large file
 Dmetric_results <- bind_rows(Tgav_Dmetric_results, 
                              atmCO2_Dmetric_results, 
                              NPP_Dmetric_results, 
                              atmCO2_NPP_Tgav_Dmetric_results)
 write.csv(Dmetric_results, file = file.path(OUTPUT_DIR, 'E.Dn_metric_results.csv'), row.names = FALSE)
+write.csv(passing_CMS_product, file = file.path(OUTPUT_DIR, 'E.passing_CMSFlux_results.csv'), row.names = FALSE)
 
 message(seperator)
 

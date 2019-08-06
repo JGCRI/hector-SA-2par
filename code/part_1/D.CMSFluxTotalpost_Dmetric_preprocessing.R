@@ -37,26 +37,55 @@ INPUT_DIR <- file.path(BASE, 'output', 'out-1', sub_dir)
 # 1. Import Data ----------------------------------------------------------------------------------------------------------------------------
 
 # Import the observational data 
-obs_data    <- read.csv(file.path(BASE, 'input', 'observations', 'CMSFluxTotalpost.csv'))
+obs_data    <- read.csv(file.path(BASE, 'input', 'observations', 'CMSFluxTotalpost.csv')) %>% 
+  mutate(value = value / 12) # Because Edil said so
 hector_data <- read.csv(list.files(INPUT_DIR, 'C.atmos_c_hector_run_cleanup.csv', full.names = TRUE)) %>% 
-  filter(year %in% obs_data$time) 
+  filter(year %in% c(min(obs_data$time) - 1, obs_data$time, max(obs_data$time) + 1))
 
 
-ggplot() + 
-  geom_line(data = hector_data, aes(year, value, color = 'Hector Runs', group = run_name), 
-            alpha = 0.5) + 
-  geom_point(data = obs_data,
-             aes(time, value, color = 'obs value'), 
-             size = 3) + 
-  geom_point(data = obs_data,
-             aes(time, uncertainty, color = 'obs uncertainty value'), 
-             size = 3) + 
-  theme_bw() + 
-  labs(x = 'year', 
-       y = 'Pg', 
-       title = 'Comparison of Hector and CMS obs Flux')
 
-  
+# 2. Process Hector Data ---------------------------------------------------------------------------------------------------------------
+# Convert the Hector atmospheric carbon data to a flux value (change in years). 
+split(hector_data, interaction(hector_data$run_name, hector_data$variable, hector_data$units), drop = TRUE) %>%  
+  lapply(function(input){
+    
+    input %>% 
+      arrange(run_name, year) %>%  
+      pull(value) %>% 
+      diff -> 
+      diff
+    
+    input$value <- c(NA, diff) 
+    
+    input
+  }) %>% 
+  bind_rows() %>% 
+  na.omit %>%
+  select(run_name, year, model = value) -> 
+  hector_data
+
+
+
+# 3. Format the Dn output data ---------------------------------------------------------------------------------------------------------------
+
+obs_data$min <- min(obs_data$value)
+obs_data$max <- max(obs_data$value)
+
+hector_data %>%  
+  left_join(obs_data %>%  
+              select(year = time, obs_min = min, obs_max = max), by = 'year') %>% 
+  na.omit -> 
+  output_table
+
+
+output_file <- file.path(BASE, 'output', 'out-1', sub_dir, 'D.CMSFlux_comparison_table.csv')
+write.csv(output_table, output_file, row.names = F)
+
+message(seperator)
+
+
+
+
 
 
 

@@ -1,8 +1,9 @@
-
 # Purpose: This script parses and processes query data from merged rgcam project and saves 
 # results as a flat list as a rda file by by the selection method. The idea is that the 
 # output from this script is ready to plot with limited processing in the visulization 
-# scripts. This script requires several user decisions to be made in section 0. 
+# scripts. This script requires several user decisions to be made in section 0. Because of how large 
+# the land allocation data is it has to be processed by a seperate list otherwise the R project will 
+# exceed the allowed memory limit. 
 
 # 0. Set Up ---------------------------------------------------------------------------------------------
 # Load libs
@@ -14,11 +15,11 @@ library(stringr)
 
 # A vector of sub directories that contains the projects to merge together before processing, this is 
 # useful when the number of GCAM runs has to be split up into multiple batches. 
-sub_dirs <- c('CMSdefault') 
+sub_dirs <- c('CMSpaper') 
 
 # Specify where to write the output to, if there is only one sub directory being use as input then set the
 # out_dir equal to the sub_dirs. 
-out_dir  <- sub_dirs
+out_dir  <- 'CMSflux'
 
 # User Decisions - decide what project to process and what paramter mapping file to use. 
 proj_name    <- 'proj_merge.proj'
@@ -26,7 +27,7 @@ mapping_name <- 'A.Hector_GCAM_parameters.csv'
 
 # Directories
 BASE     <- '.'                                             # Should be the hector-SA-npar project location
-OUTPUT   <- file.path(BASE, 'output', 'out-2', out_dir)
+OUTPUT   <- file.path(BASE, 'output', 'out-2', out_dir); dir.create(OUTPUT)
 
 # Define the filer_name factor order, this vector will be used to orderr the filter_name 
 # factor to help with the plotting process.
@@ -37,7 +38,7 @@ filterName_factor <- c('None', 'NPP', 'atm CO2', 'atm CO2, NPP', 'Tgav', 'NPP, T
 
 # If there is only one place to pull the data from (GCAM runs were done in one batch) the import results, 
 # however if the GCAM runs were done in multiple batches then merge the projects and parameter mapping files.
-if(length(sub_dirs  == 1)){
+if(length(sub_dirs)  == 1){
   
   # Import the merged R project that contains all of the GCAM output data. Also import the Hector paramter 
   # mapping file to add information about why a particular hector paramter set combination was used. 
@@ -65,18 +66,19 @@ if(length(sub_dirs  == 1)){
 }
 
 
+# 3. rgcam project -> list ----------------------------------------------------------------------------
 
+# Exract all of the queries of intrest from the project and save as individual tibbles in a list. 
+queries <- c("CO2 prices", "Climate forcing", "CO2 emissions by region", "Primary Energy Consumption (Direct Equivalent)", "Global mean temperature")
+data        <- lapply(queries, getQuery, projData = gcam_proj)
+names(data) <- queries
 
-
-
-
-
-# 3. Format Query Output  -------------------------------------------------------------------------------------
+# 4. Format Query Output  -------------------------------------------------------------------------------------
 
 # The gcam_proj is curently sctrucured as an rgcam project output, a nested list. 
 # Format the information in the tibble in preperation for the join with the mapping file. 
 
-modify_depth(gcam_proj, 2, function(input){
+modify(data, function(input){
   
   input %>% 
     distinct %>% 
@@ -86,18 +88,10 @@ modify_depth(gcam_proj, 2, function(input){
     mutate(policy = gsub('_', '', policy)) %>%
     left_join(gcam_run_mapping, by = "run_name") %>%               # Add the filter_name category by joining the gcam_run_mapping file
     rename(units = Units) 
-    
-  }) -> 
-  formatted_gcam_output
+  
+}) -> 
+  formatted_data 
 
-
-# 4. rgcam project -> list ----------------------------------------------------------------------------
-
-# Exract all of the queries from and save results as individual tibbles in a list.
-query_list        <- listQueries(formatted_gcam_output)
-names(query_list) <- query_list
-
-data <- map(query_list, getQuery, projData = formatted_gcam_output)
 
 
 # 5. Calculate policy results ----------------------------------------------------------------------------------------
@@ -106,7 +100,7 @@ data <- map(query_list, getQuery, projData = formatted_gcam_output)
 # for both the reference and target runs. Most of the runs we are going to be looking at will only have 
 # target GCAM results. 
 
-map(data, function(input){
+map(formatted_data, function(input){
   
   # Save a copy of the input data tibble names. Latter on this will be used to 
   # select the columns to keep from the wide tibble.
@@ -198,7 +192,66 @@ output %>%
   }) -> 
   output
 
-# 7. Save Output --------------------------------------------------------------------------------------
+
+
+
+
+# # 7. Land Allocation -------------------------------------------------------------------------------------------
+# # Because of how large the land allocation data frame is it must be processed seperately from the other queries.
+# # Get the land allocation query data here and rename the columns so that it is easier data to work with. 
+# getQuery(gcam_proj, "Land Allocation") %>% 
+#   rename(land_allocation = `land-allocation`) %>% 
+#   select(units = Units, region, land_allocation, year, value, scenario) -> 
+#   data
+# 
+# # Because of inconsistencies in the way that the land_allocaiton information is named there is a bit of 
+# # processing that must be done to format the data. 
+# 
+# # Define the namming connvention for the land allocaiton column, this will be used to seperate the 
+# # crop info from the other land use information. 
+# standard_pattern <- '([A-Za-z0-9-]+)_([A-Za-z0-9-]+)_(RFD|IRR)_(hi|lo)'
+# 
+#  # Subset the land allocaiton data so that it only includes information for crops. 
+# data %>%
+#   filter(grepl(pattern = standard_pattern, land_allocation)) %>% 
+#   # If the crop is biomass you will need to rename the crop to tree-biomass so 
+#   # that the seperate by "_" can work. 
+#   mutate(land_allocation = if_else(grepl(pattern = 'biomass_', land_allocation), 
+#                                    gsub(pattern = 'biomass_', replacement = 'biomass-', x = land_allocation), land_allocation)) %>% 
+#   mutate(land_allocation = if_else(grepl(pattern = 'Root_Tuber', land_allocation), 
+#                                    gsub(pattern = 'Root_Tuber', replacement = 'RootTuber', x = land_allocation), land_allocation)) %>%  
+#   # Seperate the land allocation information out into the crop, basin, irrigation, feterlizer codes. 
+#   separate(land_allocation, into = c('crop', 'basin', 'irrigation', 'fertlizer'), sep = '_') -> 
+#   crop_basin_irr_fert1
+# 
+# # Subset the land allocation data so that it only includes the crop_basins that do not have irrigation or fertlizer data. 
+# # Add NA codes to the irrigation and ferzelier columns in preperation for the join with the crop basin irrigation 
+# data %>% 
+#   filter(!grepl(pattern = standard_pattern, land_allocation)) %>% 
+#   separate(land_allocation, into = c('crop', 'basin'), sep = '_') %>%  
+#   mutate(irrigation = NA,
+#          fertlizer = NA) -> 
+#   crop_basin_irr_fert2
+# 
+# # Calculate the crop_basin_irr_fert_global values. 
+# crop_basin_irr_fert1 %>% 
+#   bind_rows(crop_basin_irr_fert2) %>%  
+#   distinct %>% 
+#   group_by(units, crop, year, scenario) %>% 
+#   summarise(value = sum(value)) %>%  
+#   ungroup -> 
+#   global_crop_basin_irr
+# 
+# # Add the mapping information to the global data set of crop, irrigation, fertlizer. 
+# global_crop_basin_irr %>% 
+#   mutate(run_name = gsub('_RF-2p6', '', scenario)) %>%  
+#   full_join(gcam_run_mapping %>% 
+#               select(run_name, filter_name, beta, q10, s, diff), 
+#             by = 'run_name') -> 
+#     output[['global crop irr fert']]
+# 
+
+# 8. Save Output --------------------------------------------------------------------------------------
 # Save the output 
 saveRDS(output, file = file.path(OUTPUT, 'C.GCAM_rslts.rds'))
 

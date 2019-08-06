@@ -84,8 +84,8 @@ process_flux_nc <- function(path){
   annual_uncert <- sum(global_uncert)
   
   # Convert from  kg/s to PgC by muiltplying 31557600 seconds and 1e-12 to convert from kg to Pg
-  rslt_PgC    <- annual_value * 31557600 / 1e12
-  rslt_uncert <- annual_uncert * 31557600 / 1e12
+  rslt_PgC    <- annual_value * 31557600 / 1e12 
+  rslt_uncert <- annual_uncert * 31557600 / 1e12 
   
   data.frame(time = time,
              value = rslt_PgC,
