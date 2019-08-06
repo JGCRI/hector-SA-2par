@@ -2,7 +2,13 @@ read me code/part_3
 
 
 So it turns out that is really hard to automate code to generate the configuration, batch.xml, and other files that are required 
-to find the total cost of a policy run. There are two different ways to do this. 
+to find the total cost of a policy run. There are mulitple ways to do this. Regardless of method used to get the total cost the only way to extract 
+this information from the database is to use the model interface to extract the results. 
+
+
+DURING PART 2
+If we are only interested in the target runs and do not need any reference run information we can set up the configuration file in part 2 so that it creates the total cost when doing the policy run. However this is not advisable if you also need the refernce run. 
+
 
 GCAM-CORE METHOD
 Before you set up GCAM to run the cost cruve you need CO2 price results from a policy target finder run (we did this in part_2)
