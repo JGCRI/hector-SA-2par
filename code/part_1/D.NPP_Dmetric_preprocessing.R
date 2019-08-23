@@ -119,6 +119,8 @@ global_NPP$sigma2 <- sigma2_value
 
 
 
+
+
 # If the save intermediates option is set to be true. 
 if(save_intermediates){
   

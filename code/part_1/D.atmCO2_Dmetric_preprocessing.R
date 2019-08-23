@@ -46,7 +46,6 @@ obs_path        <- file.path(BASE, "input", "observations", "NOAA_co2_mm_mlo.txt
 obs_data        <- read.table(obs_path) 
 names(obs_data) <- c("year", "month" , "decimal_date", "average", "interpolated", "trend", "days")
 
-
 # The data frame does not contain any missing values or NAs so no gap filling is needed. 
 # We want to process only the years with a full 12 months, the only years that are 
 # incomplete are the 1958 and 2018, the first data collection year and the current year.

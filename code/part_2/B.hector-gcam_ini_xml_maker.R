@@ -4,6 +4,9 @@
 # This script is not computaionally slow or anything but must be run on pic or 
 # where ever gcam hector is set up. See section 0. A for user decisions. 
 
+# TODO Enhancement idea add code so that the batch file has the target finder info. 
+# Otherwise the target run componet set must be added to the batch file afterwards.
+
 # 0. Set Up -------------------------------------------------------------------
 
 # Load libs
@@ -15,8 +18,8 @@ library(tibble)
 
 
 # User decisions
-sub_name          <- "CMSpaper_carbon1" 
-sub_dir           <- 'CMSpaper_carbon1'
+sub_name          <- "CMSflux" 
+sub_dir           <- 'CMSflux'
 pic_hectorSA_path <- '/pic/projects/GCAM/Dorheim/CMS/hector-SA-npar'; setwd( pic_hectorSA_path ) # Where the hecotr-SA-npar lives on pic
 param_path        <- file.path(pic_hectorSA_path, 'output', 'out-2', sub_dir, 'A.Hector_GCAM_parameters.csv')  # Define the path to the GCAM Hector parameters to use
 
