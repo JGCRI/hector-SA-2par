@@ -9,6 +9,7 @@ library(dplyr)
 library(tidyr)
 library(tibble)
 library(ggplot2)
+library(ggVennDiagram)
 
 # Define the base name directory, should be the project directory
 BASE_DIR   <- getwd()
@@ -17,7 +18,14 @@ dir.create(OUTPUT_DIR)
 
 # Consistent plotting scheme 
 UNIVERSAL_THEME <- theme_bw(base_size = 14) +   theme(legend.title = element_blank()) 
-COLOR_THEME     <- c('No Filter' = "#999999", 'HadCRUT4' = "#E69F00", 'Temp Filter' = "#56B4E9", 'Comb. Obs. + CMS Flux' = "#009E73", "#F0E442", "default Hector" = "#0072B2", 'Combined Obs. Filter' = "#D55E00", "#CC79A7")
+COLOR_THEME     <- c('No Filter' = "#999999", 
+                     'HadCRUT4' = "#E69F00", 
+                     'Temp Filter' = "#56B4E9", # blue? 
+                     #'Comb. Obs. + CMS Flux' = "#009E73",
+                     "#F0E442",
+                     "default Hector" = "#0072B2", 
+                     'Combined Obs. Filter' = "#D55E00", 
+                     "#CC79A7")
 
 # The height and width to use to save the figures. 
 PRINT_WIDTH  <- 8
@@ -51,10 +59,6 @@ default_gcam     <- readRDS(list.files(gcam_default_dir, 'C.GCAM_rslts.rds', ful
 total_policy_rslts  <- readRDS(file.path(BASE_DIR, 'output', 'out-3', 'CMSpaper', 'total_policy_cost.rds'))
 total_carbon_rslts  <- readRDS(file.path(BASE_DIR, 'output', 'out-3', 'CMSpaper_carbon', 'total_policy_cost.rds'))
 
-# Import the runs that passed the combined + CMS flux 
-passing_cmsflux <- read.csv(file.path(getwd(), 'output', 'out-2', 'CMSflux', "E.passing_CMSFlux_results.csv"))
-
-
 
 ### 2. Create the Dn metric mapping file ------------------------------------------------------
 # Subset the dn metric file so that it only contains values for the runs that have the matching Dn values.
@@ -70,6 +74,10 @@ hist_emiss_dn %>%
   select(run_name, filter_name) %>%  
   distinct ->
   dn_run_mapping
+
+
+
+
 
 ## Stand Alone Hector Plots -----------------------------------------------------------------------------
 ### 3.1  Temp comparison plot ####
@@ -296,8 +304,10 @@ default_gcam %>%
 
 ### 5. CO2 prices ----------------------------------------------------------------------------------------
 CO2_price_plot <- layered_ribbon_spaghetti(input = policy_rslts$`CO2 prices` %>% 
-                           filter(year >= 2010), p = 'RF-2p6', title = expression('CO'[2]~' Price'), ylab =  expression('2015$'/'tCO'[2]), x = 'Year') + 
+                           filter(year >= 2010), p = 'RF-2p6', title = expression('CO'[2]~' Price'), 
+                           ylab =  expression('2015$'/'CO'[2]~' price (tax)'), x = 'Year') + 
   scale_x_continuous(breaks = seq(from = 1640, to = 2100, by = 10))
+  
 
 ggsave(CO2_price_plot, file = file.path(OUTPUT_DIR, '5A.Global_CO2_price.png'), width = PRINT_WIDTH, height = PRINT_HEIGHT)
 
@@ -553,7 +563,7 @@ ggsave(global_temp, file = file.path(OUTPUT_DIR, '8A.Global_temp.png'), width = 
 
 # Save selected summary information
 policy_rslts$`Global mean temperature` %>% 
-  bind_rows(gcam_cmsflux$`Global mean temperature`) %>% 
+#  bind_rows(gcam_cmsflux$`Global mean temperature`) %>% 
   filter(year %in% c(2050, 2100)) %>% 
   group_by(filter_name, year) %>% 
   summarise(min = min(value), max = max(value), mean = mean(value)) %>% 
@@ -574,7 +584,7 @@ ggsave(global_rf, file = file.path(OUTPUT_DIR, '9A.Global_RF.png'), width = PRIN
 
 # Save selected summary information
 policy_rslts$`Climate forcing` %>% 
-  bind_rows(gcam_cmsflux$`Climate forcing`) %>% 
+ # bind_rows(gcam_cmsflux$`Climate forcing`) %>% 
   na.omit %>% 
   filter(year %in% c(2050, 2100)) %>% 
   group_by(filter_name, year) %>% 
@@ -587,7 +597,7 @@ policy_rslts$`Climate forcing` %>%
 
 # Summary of the peak emissions 
 policy_rslts$`Climate forcing` %>% 
-  bind_rows(gcam_cmsflux$`Climate forcing`) %>% 
+ # bind_rows(gcam_cmsflux$`Climate forcing`) %>% 
   na.omit %>% 
   group_by(run_name) %>% 
   filter(value == max(value)) %>% 
@@ -668,3 +678,7 @@ total_policy_classified %>%
 
 ## The End 
   
+
+### 11. Observation Summary Information 
+
+

@@ -13,7 +13,7 @@
 if(!exists('run_all')){
   
   BASE     <- getwd()
-  sub_dir  <- 'hist_emissions'
+  sub_dir  <- 'vary_4_params'
   
   if(!"hector-SA-npar.Rproj" %in% list.files(BASE)){stop('BASE must be the project location')}
   stopifnot(dir.exists(file.path(BASE, 'output', sub_dir)))

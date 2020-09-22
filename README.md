@@ -2,6 +2,9 @@
 
 Hector sensitivity analysis for n combined parameter sets, the objective of this project is to investigate the economic impacts of uncertainty of in the carbon cycle. This read me provides a general overview of the project  repository, for more details about the projects please refer to the wiki. 
 
+The input directory and output files have to be downloaded from https://osf.io/cg9kj/, they are stored on osf instead of github because due to size limitations. 
+
+
 Contents
 * `analysis`: the code for the different analyses (paper and presenations and so on)
 * `code` : project code 
